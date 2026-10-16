@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101412">
+  <title>iPay · Create workspace</title>
+  <link rel="stylesheet" href="/onboard.css">
+</head>
+<body>
+  <main>
+    <a class="brand" href="/">iPay</a>
+    <section class="card" id="create-card">
+      <p class="eyebrow">PLATFORM ADMIN</p>
+      <h1>Create a business treasury</h1>
+      <p>Every business receives separate credentials, a dedicated Circle Agent Wallet, and an isolated audit trail.</p>
+      <form id="workspace-form">
+        <label>Platform admin token<input name="adminToken" type="password" required autocomplete="current-password"></label>
+        <label>Business name<input name="name" required maxlength="100" placeholder="Acme Studio"></label>
+        <label>Workspace slug<input name="slug" required maxlength="64" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="acme-studio"></label>
+        <button type="submit">Create workspace</button>
+      </form>
+    </section>
+    <section class="card hidden" id="success-card">
+      <p class="eyebrow">WORKSPACE CREATED</p>
+      <h1 id="workspace-name"></h1>
+      <p>Save this workspace owner token. It is shown once and grants access to this business treasury.</p>
+      <code id="owner-token"></code>
+      <div class="actions">
+        <button id="provision">Provision Circle wallet</button>
+        <button id="fund" class="secondary" disabled>Request testnet funds</button>
+      </div>
+      <form id="member-form">
+        <label>Team member<input name="name" required maxlength="100" placeholder="Finance approver"></label>
+        <label>Role<select name="role"><option value="finance">Finance</option><option value="reviewer">Reviewer</option></select></label>
+        <button type="submit" class="secondary">Create member credential</button>
+      </form>
+      <code id="member-token" class="hidden"></code>
+      <a id="dashboard" class="dashboard hidden">Open workspace dashboard →</a>
+      <p class="status" id="status"></p>
+    </section>
+  </main>
+  <script type="module" src="/onboard.js"></script>
+</body>
+</html>

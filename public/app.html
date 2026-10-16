@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a0e13">
+  <meta name="description" content="iPay is the policy-controlled treasury for milestone contractor payments.">
+  <title>iPay · Treasury operations</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/proof.css">
+  <link rel="stylesheet" href="/studio.css">
+  <link rel="stylesheet" href="/atelier.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="rail">
+      <a class="brand" href="/" aria-label="iPay home"><span class="brand-mark">i<span>•</span></span><span>ipay</span></a>
+      <div class="rail-section-label">WORKSPACE</div>
+      <div class="workspace-card"><div class="workspace-avatar">S</div><div><strong>Studio Workspace</strong><small>Business treasury</small></div><span class="workspace-chevron">⌄</span></div>
+      <nav class="nav" aria-label="Primary navigation">
+        <button class="nav-link active" data-view="overview"><span class="nav-glyph">◈</span><span>Overview</span></button>
+        <button class="nav-link" data-view="milestones"><span class="nav-glyph">◇</span><span>Milestones</span><span id="nav-count" class="nav-count">0</span></button>
+        <button class="nav-link" data-view="activity"><span class="nav-glyph">⌁</span><span>Audit trail</span></button>
+      </nav>
+      <div class="rail-bottom">
+        <div class="network-status"><span class="status-dot"></span><span>ARC TESTNET</span><span id="network-type">Connecting</span></div>
+        <div class="rail-rule"></div>
+        <div class="rail-policy"><span class="policy-icon">✓</span><div><strong>Policy active</strong><small>LOW pays · MEDIUM reviews · HIGH blocks</small></div></div>
+        <div class="profile"><div class="profile-avatar">SO</div><div><strong>Studio Owner</strong><small>Workspace admin</small></div><span>•••</span></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar"><div class="breadcrumbs"><span>Workspace</span><b>/</b><strong id="breadcrumb">Overview</strong></div><div class="top-actions"><span class="mode-pill" id="mode-pill">● Connecting</span><button id="refresh" class="refresh" title="Refresh data" aria-label="Refresh data">↻</button></div></header>
+      <div class="content">
+        <section class="page-head"><div><div class="eyebrow"><span class="eyebrow-mark"></span>CONTRACTOR TREASURY</div><h1 id="page-title">Your money, moving with purpose.</h1><p id="page-subtitle">A controlled release system for teams that pay on proof.</p></div><button class="primary-button" id="create-button"><span>＋</span>New milestone</button></section>
+        <div class="live-banner"><span class="banner-pulse"></span><div id="demo-notice-text"><strong>Connecting to treasury</strong> — loading the workspace configuration.</div><span class="banner-arrow">↗</span></div>
+
+        <div id="overview-view" class="view">
+          <section class="treasury-hero">
+            <div class="hero-copy"><div class="hero-kicker">TOTAL CONTROLLED CAPITAL</div><div id="total-budget" class="hero-balance">—</div><div class="hero-caption"><span class="green-dot"></span><span id="budget-source">Loading live wallet</span></div></div>
+            <div class="hero-orbit orbit-one"></div><div class="hero-orbit orbit-two"></div><div class="hero-grid"></div>
+            <div class="hero-side"><div class="hero-side-label">AVAILABLE TO ALLOCATE</div><div id="available" class="hero-side-value">—</div><div class="hero-side-note">After active commitments</div><div class="hero-divider"></div><div class="hero-side-label">IDLE IN EARN VAULT</div><div id="vault" class="hero-side-value">—</div><div class="hero-side-note positive"><span>↗</span> <span id="yield-earned">—</span> yield <span id="yield-source">· live</span></div></div>
+          </section>
+
+          <section class="connection-grid">
+            <article class="connection-card"><div class="connection-icon wallet-icon">◉</div><div class="connection-copy"><span class="card-label">SETTLEMENT WALLET</span><strong>Circle wallet</strong><small id="arc-wallet-address">Treasury locked</small></div><div class="connection-value"><strong id="arc-wallet-balance">—</strong><small>USDC · liquid</small></div></article>
+            <article class="connection-card"><div class="connection-icon earn-icon">✳</div><div class="connection-copy"><span class="card-label">YIELD POSITION</span><strong>Earn Kit USDC vault</strong><small id="earn-vault-address">No vault connected</small></div><div class="connection-value"><strong id="earn-vault-balance">—</strong><small id="earn-vault-yield">Position · read only</small><button id="park-button" class="row-action" type="button">Park USDC</button></div></article>
+          </section>
+
+          <section class="dashboard-grid"><div class="panel queue-panel"><div class="panel-head"><div><div class="section-kicker">RELEASE QUEUE</div><h2>Milestones</h2></div><button class="text-button" data-view="milestones">View all <span>↗</span></button></div><div id="milestone-list" class="milestone-list"></div></div><div class="right-stack"><div class="panel policy-panel"><div class="panel-head"><div><div class="section-kicker">RELEASE POLICY</div><h2>Every dollar earns trust</h2></div><span class="policy-live">LIVE</span></div><div class="policy-step"><span>01</span><div><strong>Verify the work</strong><small>Owner evidence is attached to the milestone.</small></div><i>→</i></div><div class="policy-step"><span>02</span><div><strong>Screen the recipient</strong><small>CompliR returns a signed verdict.</small></div><i>→</i></div><div class="policy-step last"><span>03</span><div><strong>Release on Arc</strong><small>LOW pays. Every receipt is recorded.</small></div><i>✓</i></div></div><div class="signal-card"><div class="signal-icon">✦</div><div><strong>Idle capital has a job.</strong><p>Earn Kit keeps available USDC productive until the next verified release.</p></div><span class="signal-line"></span></div></div></section>
+          <section class="panel activity-preview"><div class="panel-head"><div><div class="section-kicker">SYSTEM LOG</div><h2>Recent decisions</h2></div><button class="text-button" data-view="activity">Open audit trail <span>↗</span></button></div><div id="activity-preview-list"></div></section>
+        </div>
+
+        <div id="milestones-view" class="view hidden"><section class="panel full-panel"><div class="panel-head"><div><div class="section-kicker">PROJECT PAYMENTS</div><h2>All milestones</h2></div><div class="filter-group"><button class="filter active" data-filter="all">All</button><button class="filter" data-filter="active">Active</button><button class="filter" data-filter="complete">Completed</button></div></div><div id="all-milestones" class="all-milestones"></div></section></div>
+        <div id="activity-view" class="view hidden"><section class="panel full-panel"><div class="panel-head"><div><div class="section-kicker">DECISION HISTORY</div><h2>Audit trail</h2></div><span class="audit-caption">Signed decisions · Arc receipts · yield snapshots</span></div><div id="all-activity" class="all-activity"></div></section></div>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="auth-dialog" class="dialog auth-dialog"><form id="auth-form"><div class="dialog-head"><div><div class="section-kicker">SECURE WORKSPACE</div><h2>Unlock your treasury</h2></div></div><p class="dialog-intro">Enter the workspace owner token to access the live Circle wallet and authorize milestone releases. It stays in this browser session only.</p><label>Owner token<input name="ownerToken" required autocomplete="current-password" spellcheck="false" placeholder="Paste your workspace token"></label><div class="dialog-actions"><button class="primary-button" type="submit">Unlock treasury</button></div></form></dialog>
+  <dialog id="create-dialog" class="dialog"><form id="create-form" method="dialog"><div class="dialog-head"><div><div class="section-kicker">NEW PAYMENT MILESTONE</div><h2>Create a milestone</h2></div><button type="button" class="dialog-close" data-close aria-label="Close">×</button></div><p class="dialog-intro">Set the work and payment amount. Funds release only after verification and a LOW risk result.</p><label>Milestone title<input name="title" required maxlength="100" placeholder="e.g. Website design handoff"></label><label>Contractor name<input name="contractor" required maxlength="100" placeholder="e.g. Alex Rivera"></label><label>Contractor wallet address<input name="address" required pattern="0x[a-fA-F0-9]{40}" placeholder="0x..." spellcheck="false"></label><label>Amount in USDC<input name="amount" required type="number" min="0.01" max="1000000" step="0.01" placeholder="0.00"></label><label>Description <span class="optional">optional</span><textarea name="description" maxlength="500" rows="3" placeholder="What needs to be delivered?"></textarea></label><div class="dialog-actions"><button type="button" class="secondary-button" data-close>Cancel</button><button class="primary-button" type="submit">Create milestone</button></div></form></dialog>
+  <dialog id="verify-dialog" class="dialog"><form id="verify-form" method="dialog"><div class="dialog-head"><div><div class="section-kicker">OWNER APPROVAL</div><h2>Verify completed work</h2></div><button type="button" class="dialog-close" data-close aria-label="Close">×</button></div><p class="dialog-intro" id="verify-description"></p><label>Verification evidence<textarea name="evidence" required minlength="8" maxlength="1000" rows="4" placeholder="Describe what was delivered and how you checked it."></textarea></label><div class="dialog-actions"><button type="button" class="secondary-button" data-close>Cancel</button><button class="primary-button" id="verify-submit" type="submit">Verify &amp; release</button></div></form></dialog>
+  <dialog id="proof-dialog" class="dialog proof-dialog"><div class="dialog-head"><div><div class="section-kicker">SIGNED DECISION</div><h2>CompliR attestation</h2></div><button type="button" class="dialog-close" data-close aria-label="Close">×</button></div><p class="dialog-intro">The signed response is stored with this decision in the audit file.</p><pre id="proof-content"></pre><div class="dialog-actions"><button type="button" class="secondary-button" data-close>Close</button></div></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
+
+
