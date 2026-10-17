@@ -23,19 +23,19 @@
     <section class="card" id="create-card">
       <p class="eyebrow">STEP 1 · WORKSPACE CREATION</p>
       <h1>Create a Business Treasury</h1>
-      <p>Every business workspace receives isolated credentials, a dedicated Circle Agent Wallet on Arc Testnet, and an unshared audit ledger.</p>
+      <p>Every business workspace receives isolated credentials, a dedicated Circle Treasury Vault on Arc, and an unshared audit ledger.</p>
 
       <form id="workspace-form">
         <label>
-          Platform Admin Token
-          <input name="adminToken" type="password" required autocomplete="current-password" placeholder="Enter platform admin secret">
+          Master Security Key
+          <input name="adminToken" type="password" required autocomplete="current-password" placeholder="Enter platform security key">
         </label>
         <label>
           Business Name
           <input name="name" required maxlength="100" placeholder="e.g. Acme Design Studio">
         </label>
         <label>
-          Workspace Slug (URL identifier)
+          Workspace Handle (URL identifier)
           <input name="slug" required maxlength="64" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="e.g. acme-studio">
         </label>
         <button type="submit">Create Workspace <span>-></span></button>
@@ -45,26 +45,26 @@
     <section class="card hidden" id="success-card">
       <p class="eyebrow">STEP 2 · TREASURY ACTIVATION</p>
       <h1 id="workspace-name">Workspace Ready</h1>
-      <p>Save this workspace owner token immediately. It is shown once and gives full administrative control over this treasury.</p>
+      <p>Save this workspace security key immediately. It is shown once and provides administrative access to this treasury.</p>
 
       <div class="token-box-wrapper">
         <code id="owner-token"></code>
         <button type="button" class="copy-token-btn" id="copy-owner-btn">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          <span>Copy Owner Token</span>
+          <span>Copy Security Key</span>
         </button>
       </div>
 
       <div class="actions">
-        <button id="provision">Provision Circle Wallet</button>
-        <button id="fund" class="secondary" disabled>Request Testnet Funds</button>
+        <button id="provision">Activate Circle Vault</button>
+        <button id="fund" class="secondary" disabled>Allocate Treasury Reserves</button>
       </div>
 
       <p class="status" id="status"></p>
 
       <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--okx-border);">
         <p class="eyebrow" style="color: var(--okx-text-secondary);">OPTIONAL · TEAM ROLES</p>
-        <p>Issue scoped credentials for finance approvers or milestone reviewers.</p>
+        <p>Issue dedicated keys for finance approvers or milestone reviewers.</p>
 
         <form id="member-form">
           <label>
@@ -75,10 +75,10 @@
             Role
             <select name="role">
               <option value="finance">Finance (Can create milestones &amp; deposit yield)</option>
-              <option value="reviewer">Reviewer (Can review verification evidence)</option>
+              <option value="reviewer">Reviewer (Can review deliverable evidence)</option>
             </select>
           </label>
-          <button type="submit" class="secondary">Create Role Credential</button>
+          <button type="submit" class="secondary">Issue Team Access Key</button>
         </form>
 
         <div class="token-box-wrapper" style="margin-top: 14px;">

@@ -56,7 +56,7 @@
       <div class="rail-bottom">
         <div class="network-status">
           <span class="status-dot"></span>
-          <span>ARC TESTNET</span>
+          <span>ARC NETWORK</span>
           <span id="network-type">Connecting</span>
         </div>
         <div class="rail-policy">
@@ -65,7 +65,7 @@
           </span>
           <div>
             <strong>CompliR Policy</strong>
-            <small>LOW pays · MEDIUM reviews · HIGH blocks</small>
+            <small>Low clears · Medium reviews · High blocks</small>
           </div>
         </div>
         <div class="profile">
@@ -142,8 +142,8 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><circle cx="18" cy="12" r="2"/></svg>
               </div>
               <div class="connection-copy">
-                <span class="card-label">SETTLEMENT WALLET</span>
-                <strong>Circle Wallet (Arc)</strong>
+                <span class="card-label">SETTLEMENT VAULT</span>
+                <strong>Circle Treasury Vault</strong>
                 <small id="arc-wallet-address">Treasury locked</small>
               </div>
               <div class="connection-value">
@@ -158,13 +158,13 @@
               </div>
               <div class="connection-copy">
                 <span class="card-label">YIELD POSITION</span>
-                <strong>Earn Kit USDC Vault</strong>
+                <strong>Earn Yield Vault</strong>
                 <small id="earn-vault-address">No vault connected</small>
               </div>
               <div class="connection-value">
                 <strong id="earn-vault-balance">—</strong>
                 <small id="earn-vault-yield">Position · read only</small>
-                <button id="park-button" class="row-action" type="button" style="margin-top: 6px;">Park USDC</button>
+                <button id="park-button" class="row-action" type="button" style="margin-top: 6px;">Deposit USDC</button>
               </div>
             </article>
           </section>
@@ -233,7 +233,7 @@
           <section class="panel activity-preview">
             <div class="panel-head">
               <div>
-                <div class="section-kicker">SYSTEM LOG</div>
+                <div class="section-kicker">ACTIVITY LOG</div>
                 <h2>Recent Decisions &amp; Receipts</h2>
               </div>
               <button class="text-button" data-view="activity">Open audit trail -></button>
@@ -268,7 +268,7 @@
                 <div class="section-kicker">DECISION HISTORY</div>
                 <h2>Audit Trail &amp; Verifications</h2>
               </div>
-              <span class="audit-caption">Signed decisions · Arc receipts · Yield snapshots</span>
+              <span class="audit-caption">Compliance clearances · Settlement receipts · Yield history</span>
             </div>
             <div id="all-activity" class="all-activity"></div>
           </section>
@@ -286,10 +286,10 @@
           <h2>Unlock Treasury</h2>
         </div>
       </div>
-      <p class="dialog-intro">Enter your workspace owner token to access the live Circle wallet and authorize milestone releases. This credential stays securely in this browser session only.</p>
+      <p class="dialog-intro">Enter your workspace security key to access the live treasury vault and authorize milestone releases. This key remains securely in this browser session only.</p>
       <label>
-        Workspace Owner Token
-        <input name="ownerToken" required autocomplete="current-password" spellcheck="false" placeholder="Paste your 32+ character workspace token">
+        Workspace Security Key
+        <input name="ownerToken" required autocomplete="current-password" spellcheck="false" placeholder="Paste your workspace security key">
       </label>
       <div class="dialog-actions">
         <button class="primary-button" type="submit">Unlock Treasury <span>-></span></button>
@@ -308,7 +308,7 @@
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
-      <p class="dialog-intro">Set deliverable and payment amount. Funds release only after milestone verification and an automated LOW risk result from CompliR.</p>
+      <p class="dialog-intro">Set deliverable and payment amount. Funds release only after milestone verification and automated compliance clearance from CompliR.</p>
       <label>
         Milestone Title
         <input name="title" required maxlength="100" placeholder="e.g. Website Design &amp; Smart Contract Review">
@@ -340,8 +340,8 @@
     <form id="verify-form" method="dialog">
       <div class="dialog-head">
         <div>
-          <div class="section-kicker">OWNER APPROVAL</div>
-          <h2>Verify Completed Work</h2>
+          <div class="section-kicker">APPROVAL &amp; SETTLEMENT</div>
+          <h2>Review &amp; Approve Deliverables</h2>
         </div>
         <button type="button" class="dialog-close" data-close aria-label="Close">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -349,12 +349,12 @@
       </div>
       <p class="dialog-intro" id="verify-description"></p>
       <label>
-        Verification Evidence
-        <textarea name="evidence" required minlength="8" maxlength="1000" rows="4" placeholder="Detail the deliverables checked, links, git commits, or tests run."></textarea>
+        Approval Notes &amp; Verification
+        <textarea name="evidence" required minlength="8" maxlength="1000" rows="4" placeholder="Detail the deliverables checked, review confirmation, or link to completed project files."></textarea>
       </label>
       <div class="dialog-actions">
         <button type="button" class="secondary-button" data-close>Cancel</button>
-        <button class="primary-button" id="verify-submit" type="submit">Verify &amp; Release</button>
+        <button class="primary-button" id="verify-submit" type="submit">Approve &amp; Release Payout</button>
       </div>
     </form>
   </dialog>
@@ -362,14 +362,14 @@
   <dialog id="proof-dialog" class="dialog proof-dialog">
     <div class="dialog-head" style="padding: 20px 24px 0;">
       <div>
-        <div class="section-kicker">SIGNED DECISION</div>
-        <h2>CompliR Attestation Payload</h2>
+        <div class="section-kicker">AUDIT RECORD</div>
+        <h2>Compliance Clearance Record</h2>
       </div>
       <button type="button" class="dialog-close" data-close aria-label="Close">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <pre id="proof-content"></pre>
+    <div id="proof-content" style="padding: 16px 24px 20px; font-size: 13px; line-height: 1.6;"></div>
     <div class="dialog-actions" style="padding: 0 24px 20px;">
       <button type="button" class="secondary-button" data-close>Close</button>
     </div>

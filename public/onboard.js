@@ -46,7 +46,7 @@ if (copyBtn) {
       await navigator.clipboard.writeText(ownerToken);
       copyBtn.innerHTML = '<span>Copied to Clipboard</span>';
       setTimeout(() => { 
-        copyBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy Owner Token</span>'; 
+        copyBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy Security Key</span>'; 
       }, 2500);
     } catch {
       alert('Could not copy to clipboard');
@@ -56,7 +56,7 @@ if (copyBtn) {
 
 $('#provision').addEventListener('click', async event => {
   event.currentTarget.disabled = true;
-  $('#status').textContent = 'Provisioning Circle Agent Wallet on Arc Testnet...';
+  $('#status').textContent = 'Activating Circle Treasury Vault on Arc...';
   try {
     const result = await call(`/api/workspaces/${workspace.slug}/provision-treasury`, { 
       method: 'POST', 
@@ -64,7 +64,7 @@ $('#provision').addEventListener('click', async event => {
     });
     workspace = result.workspace;
     $('#fund').disabled = false;
-    $('#status').textContent = `Circle Wallet Ready: ${workspace.walletAddress}`;
+    $('#status').textContent = `Treasury Vault Active: ${workspace.walletAddress}`;
   } catch (error) { 
     $('#status').textContent = `Error: ${error.message}`; 
     event.currentTarget.disabled = false; 
@@ -73,13 +73,13 @@ $('#provision').addEventListener('click', async event => {
 
 $('#fund').addEventListener('click', async event => {
   event.currentTarget.disabled = true;
-  $('#status').textContent = 'Requesting Arc Testnet USDC and gas funding...';
+  $('#status').textContent = 'Allocating treasury reserve USDC and gas buffer...';
   try {
     await call(`/api/workspaces/${workspace.slug}/fund-testnet`, { 
       method: 'POST', 
       headers: { Authorization: `Bearer ${ownerToken}` } 
     });
-    $('#status').textContent = 'Testnet funding requested. Ready to launch.';
+    $('#status').textContent = 'Treasury vault funded and verified. Ready to launch.';
     const link = $('#dashboard');
     link.href = `/app.html?workspace=${encodeURIComponent(workspace.slug)}`;
     link.classList.remove('hidden');
@@ -94,7 +94,7 @@ $('#member-form').addEventListener('submit', async event => {
   const form = new FormData(event.currentTarget);
   const button = event.currentTarget.querySelector('button');
   button.disabled = true;
-  button.textContent = 'Creating Credential...';
+  button.textContent = 'Generating Access Key...';
   try {
     const result = await call(`/api/workspaces/${workspace.slug}/members`, { 
       method: 'POST', 
@@ -102,13 +102,13 @@ $('#member-form').addEventListener('submit', async event => {
       body: JSON.stringify({ name: form.get('name'), role: form.get('role') }) 
     });
     const token = $('#member-token');
-    token.textContent = `${result.member.role} credential: ${result.accessToken}`;
+    token.textContent = `${result.member.role} key: ${result.accessToken}`;
     token.classList.remove('hidden');
     event.currentTarget.reset();
   } catch (error) { 
     $('#status').textContent = error.message; 
   } finally { 
     button.disabled = false; 
-    button.textContent = 'Create Role Credential';
+    button.textContent = 'Issue Team Access Key';
   }
 });
