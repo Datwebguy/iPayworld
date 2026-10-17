@@ -15,39 +15,76 @@ $('#workspace-form').addEventListener('submit', async event => {
   const form = new FormData(event.currentTarget);
   const button = event.currentTarget.querySelector('button');
   button.disabled = true;
+  button.textContent = 'Creating Workspace…';
   try {
-    const result = await call('/api/workspaces', { method: 'POST', headers: { Authorization: `Bearer ${form.get('adminToken')}` }, body: JSON.stringify({ name: form.get('name'), slug: form.get('slug') }) });
+    const result = await call('/api/workspaces', { 
+      method: 'POST', 
+      headers: { Authorization: `Bearer ${form.get('adminToken')}` }, 
+      body: JSON.stringify({ name: form.get('name'), slug: form.get('slug') }) 
+    });
     workspace = result.workspace;
     ownerToken = result.ownerToken;
+    sessionStorage.setItem(`ipay-owner-token:${workspace.slug}`, ownerToken);
+
     $('#workspace-name').textContent = workspace.name;
     $('#owner-token').textContent = ownerToken;
     $('#create-card').classList.add('hidden');
     $('#success-card').classList.remove('hidden');
-  } catch (error) { alert(error.message); }
-  finally { button.disabled = false; }
+  } catch (error) { 
+    alert(error.message); 
+  } finally { 
+    button.disabled = false; 
+    button.textContent = 'Create Workspace →';
+  }
 });
+
+const copyBtn = $('#copy-owner-btn');
+if (copyBtn) {
+  copyBtn.addEventListener('click', async () => {
+    if (!ownerToken) return;
+    try {
+      await navigator.clipboard.writeText(ownerToken);
+      copyBtn.textContent = '✓ Copied!';
+      setTimeout(() => { copyBtn.textContent = '📋 Copy Owner Token'; }, 2500);
+    } catch {
+      alert('Could not copy to clipboard');
+    }
+  });
+}
 
 $('#provision').addEventListener('click', async event => {
   event.currentTarget.disabled = true;
-  $('#status').textContent = 'Creating Circle Agent Wallet…';
+  $('#status').textContent = 'Creating Circle Agent Wallet on Arc Testnet…';
   try {
-    const result = await call(`/api/workspaces/${workspace.slug}/provision-treasury`, { method: 'POST', headers: { Authorization: `Bearer ${ownerToken}` } });
+    const result = await call(`/api/workspaces/${workspace.slug}/provision-treasury`, { 
+      method: 'POST', 
+      headers: { Authorization: `Bearer ${ownerToken}` } 
+    });
     workspace = result.workspace;
     $('#fund').disabled = false;
-    $('#status').textContent = `Wallet ready: ${workspace.walletAddress}`;
-  } catch (error) { $('#status').textContent = error.message; event.currentTarget.disabled = false; }
+    $('#status').textContent = `✓ Circle Wallet Ready: ${workspace.walletAddress}`;
+  } catch (error) { 
+    $('#status').textContent = `Error: ${error.message}`; 
+    event.currentTarget.disabled = false; 
+  }
 });
 
 $('#fund').addEventListener('click', async event => {
   event.currentTarget.disabled = true;
-  $('#status').textContent = 'Requesting Arc Testnet USDC and gas…';
+  $('#status').textContent = 'Requesting Arc Testnet USDC and gas funding…';
   try {
-    await call(`/api/workspaces/${workspace.slug}/fund-testnet`, { method: 'POST', headers: { Authorization: `Bearer ${ownerToken}` } });
-    $('#status').textContent = 'Funding requested. The balance will update shortly.';
+    await call(`/api/workspaces/${workspace.slug}/fund-testnet`, { 
+      method: 'POST', 
+      headers: { Authorization: `Bearer ${ownerToken}` } 
+    });
+    $('#status').textContent = '✓ Testnet funding requested. Ready to launch!';
     const link = $('#dashboard');
     link.href = `/app.html?workspace=${encodeURIComponent(workspace.slug)}`;
     link.classList.remove('hidden');
-  } catch (error) { $('#status').textContent = error.message; event.currentTarget.disabled = false; }
+  } catch (error) { 
+    $('#status').textContent = `Error: ${error.message}`; 
+    event.currentTarget.disabled = false; 
+  }
 });
 
 $('#member-form').addEventListener('submit', async event => {
@@ -55,12 +92,21 @@ $('#member-form').addEventListener('submit', async event => {
   const form = new FormData(event.currentTarget);
   const button = event.currentTarget.querySelector('button');
   button.disabled = true;
+  button.textContent = 'Creating Credential…';
   try {
-    const result = await call(`/api/workspaces/${workspace.slug}/members`, { method: 'POST', headers: { Authorization: `Bearer ${ownerToken}` }, body: JSON.stringify({ name: form.get('name'), role: form.get('role') }) });
+    const result = await call(`/api/workspaces/${workspace.slug}/members`, { 
+      method: 'POST', 
+      headers: { Authorization: `Bearer ${ownerToken}` }, 
+      body: JSON.stringify({ name: form.get('name'), role: form.get('role') }) 
+    });
     const token = $('#member-token');
     token.textContent = `${result.member.role} credential: ${result.accessToken}`;
     token.classList.remove('hidden');
     event.currentTarget.reset();
-  } catch (error) { $('#status').textContent = error.message; }
-  finally { button.disabled = false; }
+  } catch (error) { 
+    $('#status').textContent = error.message; 
+  } finally { 
+    button.disabled = false; 
+    button.textContent = 'Create Role Credential';
+  }
 });

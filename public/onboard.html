@@ -3,43 +3,90 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101412">
-  <title>iPay · Create workspace</title>
+  <meta name="theme-color" content="#07090e">
+  <title>iPay · Create Workspace Treasury</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/onboard.css">
 </head>
 <body>
+  <header class="onboard-nav">
+    <a class="brand" href="/" aria-label="iPay Home">
+      <div class="brand-symbol">i</div>
+      <span>iPay</span>
+    </a>
+    <a href="/app.html" class="nav-link">Open Treasury ↗</a>
+  </header>
+
   <main>
-    <a class="brand" href="/">iPay</a>
     <section class="card" id="create-card">
-      <p class="eyebrow">PLATFORM ADMIN</p>
-      <h1>Create a business treasury</h1>
-      <p>Every business receives separate credentials, a dedicated Circle Agent Wallet, and an isolated audit trail.</p>
+      <p class="eyebrow">STEP 1 · WORKSPACE CREATION</p>
+      <h1>Create a Business Treasury</h1>
+      <p>Every business workspace receives isolated credentials, a dedicated Circle Agent Wallet on Arc Testnet, and an unshared audit ledger.</p>
+
       <form id="workspace-form">
-        <label>Platform admin token<input name="adminToken" type="password" required autocomplete="current-password"></label>
-        <label>Business name<input name="name" required maxlength="100" placeholder="Acme Studio"></label>
-        <label>Workspace slug<input name="slug" required maxlength="64" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="acme-studio"></label>
-        <button type="submit">Create workspace</button>
+        <label>
+          Platform Admin Token
+          <input name="adminToken" type="password" required autocomplete="current-password" placeholder="Enter platform admin secret">
+        </label>
+        <label>
+          Business Name
+          <input name="name" required maxlength="100" placeholder="e.g. Acme Design Studio">
+        </label>
+        <label>
+          Workspace Slug (URL identifier)
+          <input name="slug" required maxlength="64" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="e.g. acme-studio">
+        </label>
+        <button type="submit">Create Workspace <span>→</span></button>
       </form>
     </section>
+
     <section class="card hidden" id="success-card">
-      <p class="eyebrow">WORKSPACE CREATED</p>
-      <h1 id="workspace-name"></h1>
-      <p>Save this workspace owner token. It is shown once and grants access to this business treasury.</p>
-      <code id="owner-token"></code>
-      <div class="actions">
-        <button id="provision">Provision Circle wallet</button>
-        <button id="fund" class="secondary" disabled>Request testnet funds</button>
+      <p class="eyebrow">STEP 2 · TREASURY ACTIVATION</p>
+      <h1 id="workspace-name">Workspace Ready</h1>
+      <p>Save this workspace owner token immediately. It is shown once and gives full administrative control over this treasury.</p>
+
+      <div class="token-box-wrapper">
+        <code id="owner-token"></code>
+        <button type="button" class="copy-token-btn" id="copy-owner-btn">📋 Copy Owner Token</button>
       </div>
-      <form id="member-form">
-        <label>Team member<input name="name" required maxlength="100" placeholder="Finance approver"></label>
-        <label>Role<select name="role"><option value="finance">Finance</option><option value="reviewer">Reviewer</option></select></label>
-        <button type="submit" class="secondary">Create member credential</button>
-      </form>
-      <code id="member-token" class="hidden"></code>
-      <a id="dashboard" class="dashboard hidden">Open workspace dashboard →</a>
+
+      <div class="actions">
+        <button id="provision">Provision Circle Wallet</button>
+        <button id="fund" class="secondary" disabled>Request Testnet Funds</button>
+      </div>
+
       <p class="status" id="status"></p>
+
+      <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border-subtle);">
+        <p class="eyebrow" style="color: var(--indigo-light);">OPTIONAL · TEAM ROLES</p>
+        <p>Issue scoped credentials for finance approvers or milestone reviewers.</p>
+
+        <form id="member-form">
+          <label>
+            Team Member Name
+            <input name="name" required maxlength="100" placeholder="e.g. Sarah Connor (Finance)">
+          </label>
+          <label>
+            Role
+            <select name="role">
+              <option value="finance">Finance (Can create milestones &amp; deposit yield)</option>
+              <option value="reviewer">Reviewer (Can review verification evidence)</option>
+            </select>
+          </label>
+          <button type="submit" class="secondary">Create Role Credential</button>
+        </form>
+
+        <div class="token-box-wrapper" style="margin-top: 14px;">
+          <code id="member-token" class="hidden"></code>
+        </div>
+      </div>
+
+      <a id="dashboard" class="dashboard hidden">Open Workspace Dashboard <span>→</span></a>
     </section>
   </main>
+
   <script type="module" src="/onboard.js"></script>
 </body>
 </html>

@@ -1,24 +1,361 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#eef0e8"><meta name="description" content="iPay turns contractor budgets into verified, risk-aware releases on Arc.">
-  <title>iPay — pay when the work is real</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07090e">
+  <meta name="description" content="iPay — Proof-gated contractor treasury on Arc. Dedicated Circle Agent Wallets, automatic Earn Kit yield, and pre-flight CompliR risk checks.">
+  <title>iPay — Proof-Gated Contractor Treasury on Arc</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/landing.css">
 </head>
 <body>
-  <nav class="landing-nav"><a href="/" class="landing-logo"><span class="logo-mark">i</span><span>ipay</span></a><div class="nav-links"><a href="#how">How it works</a><a href="#why">Why iPay</a><a href="#proof">Proof layer</a></div><a class="nav-cta" href="/app.html">Open treasury <span>↗</span></a></nav>
-  <main>
-    <section class="landing-hero"><div class="hero-left"><div class="signal"><span></span> ARC SETTLEMENT · LIVE TESTNET</div><h1>Pay for<br><em>proof.</em></h1><p class="hero-lede">iPay keeps your contractor budget ready, productive, and accountable. Money moves when the work is verified and the recipient clears a live risk check.</p><div class="hero-actions"><a class="hero-button" href="/app.html">Open the treasury <span>→</span></a><a class="text-link" href="#how">See the release loop <span>↓</span></a></div><div class="hero-meta"><span>USDC native</span><i></i><span>Arc settled</span><i></i><span>Signed audit trail</span></div></div><div class="hero-right"><canvas id="shader-canvas" aria-hidden="true"></canvas><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><div class="receipt-card"><div class="receipt-top"><span class="receipt-label">RELEASE RECEIPT</span><span class="receipt-live"><b></b> LIVE</span></div><div class="receipt-amount">1,250<span>.00</span> <small>USDC</small></div><div class="receipt-rule"></div><div class="receipt-row"><span>Milestone</span><strong>Product handoff</strong></div><div class="receipt-row"><span>Recipient</span><strong>0x6747…60ca</strong></div><div class="receipt-row"><span>CompliR</span><strong class="low">LOW · CLEAN</strong></div><div class="receipt-footer"><span>ARC</span><span>TX HASH VERIFIED</span></div></div><div class="float-note note-one"><span class="note-dot lime"></span><div><strong>Idle capital</strong><small>earns while you wait</small></div></div><div class="float-note note-two"><span class="note-dot blue"></span><div><strong>Policy enforced</strong><small>before every release</small></div></div></div></section>
-    <section class="ticker"><span>BUILT FOR TEAMS THAT PAY ON PROOF</span><span>Circle Agent Wallets</span><span>Earn Kit</span><span>CompliR</span><span>Arc</span></section>
-    <section id="why" class="statement"><div class="section-tag">01 / THE PROBLEM</div><div><h2>Budgets should not<br><em>sit still</em> or move blind.</h2><p>Contractor payments are usually a choice between idle cash and fragile trust. iPay makes the budget programmable: reserve it, earn on the waiting portion, and release only against evidence.</p></div></section>
-    <section id="how" class="loop-section"><div class="section-tag">02 / THE RELEASE LOOP</div><div class="loop-grid"><article><span class="step-num">01</span><h3>Fund once</h3><p>Hold the project budget in a Circle Agent Wallet on Arc.</p><span class="step-line"></span></article><article><span class="step-num">02</span><h3>Keep it working</h3><p>Idle USDC sits in the live Earn Kit vault until it has a job.</p><span class="step-line"></span></article><article><span class="step-num">03</span><h3>Pay on proof</h3><p>Verify the milestone, screen the recipient, and settle the exact amount.</p><span class="step-line"></span></article></div></section>
-    <section id="proof" class="proof-section"><div class="proof-copy"><div class="section-tag">03 / THE PROOF LAYER</div><h2>Every decision leaves<br>a receipt.</h2><p>CompliR returns a signed verdict before any outbound transfer. LOW pays. MEDIUM pauses. HIGH blocks. The verdict, evidence, yield snapshot, and Arc transaction live together in the audit trail.</p><a class="text-link" href="/app.html">Explore the live workspace <span>↗</span></a></div><div class="proof-stack"><div class="proof-line"><span class="proof-icon">✓</span><div><strong>Milestone verified</strong><small>Owner evidence attached</small></div><time>09:41:02</time></div><div class="proof-line active"><span class="proof-icon">◈</span><div><strong>Risk verdict · LOW</strong><small>Signed by CompliR</small></div><time>09:41:03</time></div><div class="proof-line"><span class="proof-icon">↗</span><div><strong>USDC released on Arc</strong><small>Receipt confirmed</small></div><time>09:41:04</time></div></div></section>
-    <section class="final-cta"><div><div class="section-tag">READY WHEN YOU ARE</div><h2>Make the next payment<br>the most accountable one.</h2></div><a class="hero-button" href="/app.html">Enter iPay <span>↗</span></a></section>
-  </main><footer><a href="/" class="landing-logo"><span class="logo-mark">i</span><span>ipay</span></a><span>Contractor treasury with a paper trail.</span><span>Arc · USDC · 2026</span></footer>
-<script src="/landing.js"></script>
-</body></html>
+  <!-- Ambient Atmosphere -->
+  <div class="ambient-glow">
+    <div class="glow-orb-1"></div>
+    <div class="glow-orb-2"></div>
+    <div class="glow-grid"></div>
+  </div>
 
+  <canvas id="bg-canvas"></canvas>
 
+  <div class="page-container">
+    <!-- Navigation -->
+    <header class="landing-nav">
+      <a href="/" class="landing-logo">
+        <div class="logo-symbol">i</div>
+        <span>iPay</span>
+        <span class="logo-badge">ARC TESTNET</span>
+      </a>
+
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#proof">Proof Layer</a>
+        <a href="#specs">Specifications</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="/onboard.html" class="btn btn-ghost">Create Workspace</a>
+        <a href="/app.html" class="btn btn-primary">Open Treasury <span>↗</span></a>
+      </div>
+    </header>
+
+    <main>
+      <!-- Hero Section -->
+      <section class="hero-section">
+        <div class="hero-content">
+          <div class="status-beacon">
+            <span class="pulse-dot"></span>
+            <span>ARC SETTLEMENT · LIVE TESTNET</span>
+          </div>
+
+          <h1 class="hero-title">
+            Pay for <span class="gradient-text">verified proof</span>, not promises.
+          </h1>
+
+          <p class="hero-subtitle">
+            The programmable contractor treasury for Web3 teams. Isolate business reserves in dedicated Circle Agent Wallets, generate automatic yield on idle USDC with Earn Kit, and release funds only after owner evidence and signed CompliR risk attestations.
+          </p>
+
+          <div class="hero-cta-group">
+            <a href="/app.html" class="btn btn-primary">Open Treasury Dashboard <span>→</span></a>
+            <a href="/onboard.html" class="btn btn-ghost">Create Business Workspace <span>↗</span></a>
+          </div>
+
+          <div class="hero-features-strip">
+            <div class="hero-tag">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>USDC Native</span>
+            </div>
+            <div class="hero-tag">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Earn Kit Yield</span>
+            </div>
+            <div class="hero-tag">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>CompliR Risk Gate</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <!-- Interactive Treasury Showcase Card -->
+          <div class="interactive-treasury-card">
+            <div class="card-header-row">
+              <div class="card-title-tag">TREASURY OVERVIEW</div>
+              <div class="live-pill">
+                <span class="pulse-dot" style="width: 5px; height: 5px;"></span>
+                <span>CHAIN ID 5042002</span>
+              </div>
+            </div>
+
+            <div class="balance-showcase">
+              <div class="balance-caption">Total Controlled Capital</div>
+              <div class="balance-amount">$12,500.00 <span>USDC</span></div>
+              <div class="balance-yield-badge">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                <span>+4.8% APY · $35.65 Earned in Vault</span>
+              </div>
+            </div>
+
+            <!-- Interactive Milestone & Risk Simulator -->
+            <div class="milestone-simulator">
+              <div class="sim-header">
+                <span class="sim-label">Live Release Simulation</span>
+                <span class="sim-amount">1,250.00 USDC</span>
+              </div>
+
+              <div class="sim-flow-steps">
+                <div class="sim-step active">
+                  <div class="step-icon">1</div>
+                  <div class="sim-step-text">
+                    <strong>Milestone Verified</strong>
+                    <span>Owner Evidence Valid</span>
+                  </div>
+                </div>
+
+                <div class="sim-step active" id="sim-step-risk">
+                  <div class="step-icon">2</div>
+                  <div class="sim-step-text">
+                    <strong>CompliR Screening</strong>
+                    <span>LOW · Attestation Verified</span>
+                  </div>
+                </div>
+
+                <div class="sim-step active" id="sim-step-settle">
+                  <div class="step-icon">3</div>
+                  <div class="sim-step-text">
+                    <strong>Arc Settlement</strong>
+                    <span>Settled on Arc · Tx #0x8f4b…91e2</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Interactive Risk Controller -->
+              <div class="risk-interactive-controls">
+                <div class="risk-controls-title">
+                  <span>Interactive Test: Switch CompliR Verdict</span>
+                  <span style="color: var(--accent-indigo);">Try Clicking ↓</span>
+                </div>
+                <div class="risk-btn-group">
+                  <button class="risk-toggle-btn active" data-verdict="LOW">LOW</button>
+                  <button class="risk-toggle-btn" data-verdict="MEDIUM">MEDIUM</button>
+                  <button class="risk-toggle-btn" data-verdict="HIGH">HIGH</button>
+                </div>
+                <div id="verdict-outcome" class="verdict-outcome-banner low">
+                  ✓ LOW Risk: CompliR EIP-712 Attestation verified. 1,250 USDC released on Arc.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Trust Strip -->
+      <section class="trust-strip">
+        <div class="trust-inner">
+          <div class="trust-item"><span>Protocol:</span> <strong>Arc Testnet</strong></div>
+          <div class="trust-item"><span>Custody:</span> <strong>Circle Agent Stack</strong></div>
+          <div class="trust-item"><span>Yield:</span> <strong>Earn Kit Vaults</strong></div>
+          <div class="trust-item"><span>Attestations:</span> <strong>CompliR Signed Proofs</strong></div>
+        </div>
+      </section>
+
+      <!-- Features Section -->
+      <section id="features" class="section">
+        <div class="section-head">
+          <span class="section-eyebrow">Architecture &amp; Capabilities</span>
+          <h2 class="section-title">Built for financial precision and zero trust leakage.</h2>
+          <p class="section-desc">
+            Contractor payments shouldn't rely on blind faith or static idle reserves. iPay automates custody, yield generation, risk gates, and cryptographic auditability in a single system.
+          </p>
+        </div>
+
+        <div class="grid-cards">
+          <div class="feature-card">
+            <div class="feature-icon-box">🛡</div>
+            <h3>Dedicated Circle Agent Wallets</h3>
+            <p>Every business workspace provisions its own isolated developer-controlled wallet on Arc. No pooled balances, no shared keys, and zero cross-tenant contamination.</p>
+            <div class="feature-badge">
+              <span>Circle Agent Stack API</span>
+              <span>→</span>
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-box">⚡</div>
+            <h3>Automated Idle Yield</h3>
+            <p>Unallocated contractor budget doesn't sit idle. Approved USDC automatically works inside Earn Kit vaults, with precise on-demand liquidity withdrawals when milestones clear.</p>
+            <div class="feature-badge">
+              <span>Earn Kit USDC Vault</span>
+              <span>→</span>
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-box">⚖</div>
+            <h3>CompliR Risk Screening</h3>
+            <p>Before any USDC transfer executes, CompliR issues an EIP-712 cryptographically signed attestation verifying contractor wallet compliance. LOW pays, MEDIUM reviews, HIGH blocks.</p>
+            <div class="feature-badge">
+              <span>Signed EIP-712 Verdicts</span>
+              <span>→</span>
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-box">📜</div>
+            <h3>Cryptographic Audit Trail</h3>
+            <p>Every payment decision records milestone deliverable evidence, signed risk verdicts, Arc transaction hashes, and yield snapshots into an immutable ledger with CSV exports.</p>
+            <div class="feature-badge">
+              <span>PostgreSQL &amp; On-Chain Receipts</span>
+              <span>→</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- How It Works Flow -->
+      <section id="how-it-works" class="section flow-section">
+        <div class="section-head">
+          <span class="section-eyebrow">The Release Pipeline</span>
+          <h2 class="section-title">How iPay executes payment on proof.</h2>
+          <p class="section-desc">
+            A continuous loop from budget deposit to contractor settlement with zero manual escrow friction.
+          </p>
+        </div>
+
+        <div class="flow-grid">
+          <div class="flow-step-card">
+            <span class="flow-step-num">STEP 01</span>
+            <h3>Fund Once</h3>
+            <p>Deposit project budget into your business's dedicated Circle Agent Wallet on Arc Testnet with isolated owner credentials.</p>
+          </div>
+
+          <div class="flow-step-card">
+            <span class="flow-step-num">STEP 02</span>
+            <h3>Keep It Earning</h3>
+            <p>Idle USDC rests inside the Earn Kit vault, generating continuous yield while contractors work on milestones.</p>
+          </div>
+
+          <div class="flow-step-card">
+            <span class="flow-step-num">STEP 03</span>
+            <h3>Verify Deliverable</h3>
+            <p>Review work, attach completion evidence, and trigger the pre-flight cryptographic CompliR screening pipeline.</p>
+          </div>
+
+          <div class="flow-step-card">
+            <span class="flow-step-num">STEP 04</span>
+            <h3>Instant Settlement</h3>
+            <p>iPay pulls only the exact required amount from the Earn vault and settles natively in USDC on Arc with an immutable receipt.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Proof Layer Section -->
+      <section id="proof" class="section">
+        <div class="proof-section">
+          <div class="proof-left">
+            <span class="section-eyebrow">Cryptographic Integrity</span>
+            <h2 class="section-title">Every transaction is backed by signed evidence.</h2>
+            <p class="section-desc">
+              No blind transfers. Prior to authorizing the Arc USDC transaction, the backend requests and cryptographically verifies an EIP-712 signed verdict from CompliR.
+            </p>
+            <div style="display: flex; gap: 14px; margin-top: 10px;">
+              <a href="/app.html" class="btn btn-primary">Try Live Verification ↗</a>
+              <a href="https://github.com/Datwebguy/iPayworld" target="_blank" rel="noopener" class="btn btn-ghost">View Repository</a>
+            </div>
+          </div>
+
+          <div class="proof-terminal">
+            <div class="terminal-topbar">
+              <div class="terminal-dots">
+                <span class="terminal-dot dot-red"></span>
+                <span class="terminal-dot dot-amber"></span>
+                <span class="terminal-dot dot-green"></span>
+              </div>
+              <span class="terminal-title">complir-signed-attestation.json</span>
+            </div>
+            <pre class="terminal-body"><code>{
+  <span class="json-key">"decisionId"</span>: <span class="json-str">"dec_arc_789124a"</span>,
+  <span class="json-key">"verdict"</span>: <span class="json-str">"LOW"</span>,
+  <span class="json-key">"targetAddress"</span>: <span class="json-str">"0x67471d8d542111f15481e599e5ff89529efe60ca"</span>,
+  <span class="json-key">"attestation"</span>: {
+    <span class="json-key">"signer"</span>: <span class="json-str">"0xCompliRAuthorityOracle..."</span>,
+    <span class="json-key">"signature"</span>: <span class="json-str">"0x3f5c9a18d...verified"</span>,
+    <span class="json-key">"expiresAt"</span>: <span class="json-num">1792194800</span>,
+    <span class="json-key">"sanctionsClear"</span>: <span class="json-bool">true</span>,
+    <span class="json-key">"counterpartyRisk"</span>: <span class="json-str">"NONE"</span>
+  },
+  <span class="json-key">"settlementChain"</span>: <span class="json-str">"Arc Testnet (5042002)"</span>,
+  <span class="json-key">"status"</span>: <span class="json-str">"APPROVED_FOR_RELEASE"</span>
+}</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Protocol Specifications -->
+      <section id="specs" class="section">
+        <div class="section-head">
+          <span class="section-eyebrow">Specifications &amp; Parameters</span>
+          <h2 class="section-title">Production readiness checklist.</h2>
+        </div>
+
+        <div class="grid-cards">
+          <div class="feature-card">
+            <div class="card-title-tag">NETWORK</div>
+            <h3>Arc Testnet</h3>
+            <p>Chain ID 5042002. High-throughput, sub-second block finality with native EVM compatibility and deterministic gas.</p>
+          </div>
+          <div class="feature-card">
+            <div class="card-title-tag">SETTLEMENT ASSET</div>
+            <h3>Native USDC</h3>
+            <p>USDC stablecoin standard. Guaranteed parity and programmatic developer-controlled settlement via Circle SDK.</p>
+          </div>
+          <div class="feature-card">
+            <div class="card-title-tag">YIELD ENGINE</div>
+            <h3>Earn Kit Protocol</h3>
+            <p>Automated deposit/withdrawal liquidity buffer keeping project treasury working until the exact moment of payment release.</p>
+          </div>
+          <div class="feature-card">
+            <div class="card-title-tag">PERSISTENCE</div>
+            <h3>PostgreSQL &amp; Ledger</h3>
+            <p>Enterprise multi-tenant data store recording workspaces, role-based tokens, milestones, and audit snapshots.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Final Call to Action -->
+      <section class="cta-section">
+        <div class="cta-content">
+          <h2>Upgrade your treasury to proof-gated releases today.</h2>
+          <p>Launch your business workspace in seconds, connect your Circle Agent Wallet, and start settling on Arc.</p>
+        </div>
+        <div class="cta-buttons">
+          <a href="/app.html" class="btn btn-primary" style="padding: 14px 28px; font-size: 15px;">Launch Treasury Dashboard <span>→</span></a>
+          <a href="/onboard.html" class="btn btn-ghost" style="padding: 14px 24px; font-size: 15px;">Create Workspace</a>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="landing-footer">
+      <div class="footer-left">
+        <div class="logo-symbol" style="width: 24px; height: 24px; font-size: 14px;">i</div>
+        <span>iPay Protocol · Arc Testnet Settlement</span>
+      </div>
+      <div class="footer-links">
+        <a href="/app.html">Treasury</a>
+        <a href="/onboard.html">Onboarding</a>
+        <a href="https://docs.arc.io" target="_blank" rel="noopener">Arc Docs</a>
+        <a href="https://developers.circle.com" target="_blank" rel="noopener">Circle</a>
+        <a href="https://github.com/Datwebguy/iPayworld" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/landing.js"></script>
+</body>
+</html>

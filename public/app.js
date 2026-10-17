@@ -79,14 +79,14 @@ function actionHtml(m) {
   return '';
 }
 function milestoneHtml(m, detailed = false) {
-  return `<div class="milestone-row"><div class="milestone-icon ${escapeHtml(m.status)}">${icon(m.status)}</div><div class="milestone-detail"><strong>${escapeHtml(m.title)}</strong><small>${escapeHtml(m.contractor)} · ${escapeHtml(shortAddress(m.address))}</small>${detailed ? `<div class="milestone-meta">${escapeHtml(m.description || 'No description')}${m.evidence ? ` · Evidence: ${escapeHtml(m.evidence)}` : ''}${m.risk ? ` · Risk: ${escapeHtml(m.risk.verdict)} (${escapeHtml(m.risk.source)})` : ''}</div>` : ''}</div><div class="milestone-right"><strong>${money(m.amount)} <span style="color:#a0adba;font-size:9px">USDC</span></strong><span class="status ${escapeHtml(m.status)}">${statusText(m.status)}</span></div><div class="row-actions">${actionHtml(m)}</div></div>`;
+  return `<div class="milestone-row"><div class="milestone-icon ${escapeHtml(m.status)}">${icon(m.status)}</div><div class="milestone-detail"><strong>${escapeHtml(m.title)}</strong><small>${escapeHtml(m.contractor)} · <span style="cursor:pointer;text-decoration:underline dotted" data-copy="${escapeHtml(m.address)}" title="Click to copy address">${escapeHtml(shortAddress(m.address))}</span></small>${detailed ? `<div class="milestone-meta">${escapeHtml(m.description || 'No description')}${m.evidence ? ` · Evidence: ${escapeHtml(m.evidence)}` : ''}${m.risk ? ` · Risk: ${escapeHtml(m.risk.verdict)} (${escapeHtml(m.risk.source)})` : ''}</div>` : ''}</div><div class="milestone-right"><strong>${money(m.amount)} <span style="color:#81909a;font-size:10px">USDC</span></strong><span class="status ${escapeHtml(m.status)}">${statusText(m.status)}</span></div><div class="row-actions">${actionHtml(m)}</div></div>`;
 }
 function activityHtml(a, detailed = false) {
   const glyph = ({ payment: '↗', risk_check: '◇', milestone_verified: '✓', milestone_created: '＋', release_failed: '!', budget_funded: '◈' })[a.type] || '·';
   let extra = '';
   if (detailed) {
-    if (a.txHash) extra += `<div class="audit-extra">${a.simulated ? 'Simulated tx' : 'Arc tx'}: ${escapeHtml(a.txHash)}</div>`;
-    if (a.withdrawTxHash) extra += `<div class="audit-extra">Vault withdrawal tx: ${escapeHtml(a.withdrawTxHash)}</div>`;
+    if (a.txHash) extra += `<div class="audit-extra">${a.simulated ? 'Simulated tx' : 'Arc tx'}: <span style="cursor:pointer;text-decoration:underline dotted" data-copy="${escapeHtml(a.txHash)}" title="Click to copy">${escapeHtml(a.txHash)}</span></div>`;
+    if (a.withdrawTxHash) extra += `<div class="audit-extra">Vault withdrawal tx: <span style="cursor:pointer;text-decoration:underline dotted" data-copy="${escapeHtml(a.withdrawTxHash)}" title="Click to copy">${escapeHtml(a.withdrawTxHash)}</span></div>`;
     if (a.risk) extra += `<div class="audit-extra">Risk: ${escapeHtml(a.risk.verdict)} · ${escapeHtml(a.risk.reason)} · ${a.risk.signatureVerified ? 'signature verified' : 'no verified signature'}${a.risk.decisionId ? ` · Decision ${escapeHtml(a.risk.decisionId)}` : ''}</div>${a.risk.signedProof ? `<button class="proof-button" data-proof-id="${escapeHtml(a.id)}">Inspect signed proof ↗</button>` : ''}`;
     if (a.evidence) extra += `<div class="audit-extra">Evidence: ${escapeHtml(a.evidence)}</div>`;
     if (a.yieldSnapshot !== undefined) extra += `<div class="audit-extra">Yield snapshot: ${a.yieldSnapshot === null ? 'unavailable' : money(a.yieldSnapshot)}${a.redeemed !== undefined ? ` · vault withdrawn: ${money(a.redeemed)}` : ''}</div>`;
@@ -127,6 +127,20 @@ function render() {
 function setView(next) { view = next; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
 document.addEventListener('click', async event => {
+  const copyTarget = event.target.closest('[data-copy]');
+  if (copyTarget) {
+    const text = copyTarget.dataset.copy;
+    if (text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        toast(`Copied ${text.length > 20 ? text.slice(0, 10) + '…' : text} to clipboard!`);
+      } catch {
+        toast('Could not copy to clipboard', true);
+      }
+      return;
+    }
+  }
+
   const button = event.target.closest('button');
   if (!button) return;
   if (button.dataset.view) return setView(button.dataset.view);
@@ -172,7 +186,22 @@ $('#create-button').addEventListener('click', () => {
   if (data?.mode === 'live' && !ownerToken) return $('#auth-dialog').showModal();
   $('#create-dialog').showModal();
 });
-$('#refresh').addEventListener('click', () => refresh().then(() => toast('Dashboard refreshed.')).catch(error => toast(error.message, true)));
+$('#refresh').addEventListener('click', async () => {
+  const btn = $('#refresh');
+  btn.style.transform = 'rotate(360deg)';
+  btn.style.transition = 'transform 0.4s ease';
+  try {
+    await refresh();
+    toast('Dashboard refreshed.');
+  } catch (error) {
+    toast(error.message, true);
+  } finally {
+    setTimeout(() => {
+      btn.style.transform = '';
+      btn.style.transition = '';
+    }, 450);
+  }
+});
 $('#park-button').addEventListener('click', async () => {
   if (data?.mode !== 'live') return toast('Earn vault deposits require live mode.', true);
   if (!ownerToken) return $('#auth-dialog').showModal();
