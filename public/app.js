@@ -174,7 +174,7 @@ function icon(status) {
 }
 function actionHtml(m) {
   if (['in_progress', 'awaiting_verification'].includes(m.status)) return `<button class="row-action" data-action="verify" data-id="${m.id}">Review &amp; Approve</button>`;
-  if (m.status === 'verified') return `<button class="row-action release" data-action="release" data-id="${m.id}">Release Payout -></button>`;
+  if (m.status === 'verified') return `<button class="row-action release" data-action="release" data-id="${m.id}">Release Payout</button>`;
   if (data.mode === 'live' && m.status === 'needs_reconciliation') return `<button class="row-action" data-action="reconcile" data-id="${m.id}">Reconcile Settlement</button>`;
   return '';
 }
@@ -194,7 +194,7 @@ function activityHtml(a, detailed = false) {
   if (detailed) {
     if (a.txHash) extra += `<div class="audit-extra">Settlement reference: <span style="cursor:pointer;text-decoration:underline dotted" data-copy="${escapeHtml(a.txHash)}" title="Click to copy">${escapeHtml(a.txHash)}</span></div>`;
     if (a.withdrawTxHash) extra += `<div class="audit-extra">Vault withdrawal reference: <span style="cursor:pointer;text-decoration:underline dotted" data-copy="${escapeHtml(a.withdrawTxHash)}" title="Click to copy">${escapeHtml(a.withdrawTxHash)}</span></div>`;
-    if (a.risk) extra += `<div class="audit-extra">Compliance: ${escapeHtml(a.risk.verdict)} · ${escapeHtml(a.risk.reason)} · ${a.risk.signatureVerified ? 'Verified' : 'Pending'}${a.risk.decisionId ? ` · Ref ${escapeHtml(a.risk.decisionId)}` : ''}</div>${a.risk.signedProof ? `<button class="proof-button" data-proof-id="${escapeHtml(a.id)}">View Compliance Clearance -></button>` : ''}`;
+    if (a.risk) extra += `<div class="audit-extra">Compliance: ${escapeHtml(a.risk.verdict)} · ${escapeHtml(a.risk.reason)} · ${a.risk.signatureVerified ? 'Verified' : 'Pending'}${a.risk.decisionId ? ` · Ref ${escapeHtml(a.risk.decisionId)}` : ''}</div>${a.risk.signedProof ? `<button class="proof-button" data-proof-id="${escapeHtml(a.id)}">View Clearance Certificate</button>` : ''}`;
     if (a.evidence) extra += `<div class="audit-extra">Approval Notes: ${escapeHtml(a.evidence)}</div>`;
     if (a.yieldSnapshot !== undefined) extra += `<div class="audit-extra">Yield accrual: ${a.yieldSnapshot === null ? 'unavailable' : money(a.yieldSnapshot)}${a.redeemed !== undefined ? ` · vault withdrawn: ${money(a.redeemed)}` : ''}</div>`;
   }
@@ -208,7 +208,7 @@ function emptyMilestonesHtml() {
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
       </div>
       <h3>No Active Milestones</h3>
-      <p>Allocate capital from your Circle Treasury Vault to contractor deliverables. Payouts execute automatically upon milestone approval and compliance clearance.</p>
+      <p>No active contractor milestones in queue. Allocate capital to begin deliverables.</p>
       <button class="primary-button create-milestone-trigger" type="button">
         <span>+</span>
         <span>Create First Milestone</span>
@@ -224,7 +224,7 @@ function emptyActivityHtml() {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       </div>
       <h3>Audit Ledger Synchronized</h3>
-      <p>Deliverable approvals, compliance clearance certificates, and Arc settlement receipts will be immutably recorded here.</p>
+      <p>Audit ledger synchronized with Arc settlement network.</p>
     </div>
   `;
 }
@@ -245,14 +245,14 @@ function render() {
   }
   $('#budget-source').textContent = data.mode === 'live' ? 'Verified Circle vault & Earn reserves' : 'Arc Treasury Reserves';
   $('#verify-submit').textContent = 'Approve & Release Payout';
-  $('#demo-notice-text').innerHTML = data.mode === 'live' ? '<strong>Active Treasury Enclave</strong> — Milestone releases require deliverable verification and automated compliance clearance before executing on Arc.' : '<strong>Secured Treasury Mode</strong> — Protected policy controls and real-time compliance screening active across all milestone allocations.';
+  $('#demo-notice-text').innerHTML = data.mode === 'live' ? '<strong>Active Treasury Enclave</strong> · Real-time Arc settlement protocol active' : '<strong>Protected Treasury Vault</strong> · Policy controls and compliance screening active';
   $('#network-type').textContent = 'Arc Network';
   $('#create-button').disabled = false;
   $('#nav-count').textContent = (data.milestones || []).filter(m => !['paid', 'blocked'].includes(m.status)).length;
   $('#total-budget').innerHTML = `${money(total)} <small>USDC</small>`;
   $('#available').innerHTML = `${money(data.available ?? (total - committed))} <small>USDC</small>`;
   $('#vault').innerHTML = `${money(vault)} <small>USDC</small>`;
-  $('#yield-earned').textContent = data.wallet?.yieldEarned === null ? 'Unavailable' : money(data.wallet?.yieldEarned || 0);
+  $('#yield-earned').textContent = data.wallet?.yieldEarned === null ? '0.00 USDC' : money(data.wallet?.yieldEarned || 0);
   $('#yield-source').textContent = '· accrued';
 
   // Capital Allocation Bar & Legend calculations
@@ -291,7 +291,11 @@ function render() {
   $('#activity-preview-list').innerHTML = audit.length ? audit.slice(0, 4).map(a => activityHtml(a)).join('') : emptyActivityHtml();
   $('#all-activity').innerHTML = audit.length ? audit.map(a => activityHtml(a, true)).join('') : emptyActivityHtml();
 
-  const labels = { overview: ['Overview', 'Your money, moving with purpose.', 'A controlled release system for teams that pay on proof.'], milestones: ['Milestones', 'Make progress. Release payment.', 'Define the deliverable, verify the work, and track every release.'], activity: ['Audit trail', 'Every payment has a story.', 'Follow deliverable approvals, compliance clearances, and settlement receipts.'] };
+  const labels = {
+    overview: ['Overview', 'Treasury Overview', 'Capital allocation and live reserve telemetry.'],
+    milestones: ['Milestones', 'Payment Milestones', 'Contractor deliverables and scheduled releases.'],
+    activity: ['Audit Trail', 'Audit Trail', 'Settlement receipts and compliance verifications.']
+  };
   const [label, title, subtitle] = labels[view];
   $('#breadcrumb').textContent = label;
   $('#page-title').textContent = title;
@@ -505,13 +509,13 @@ async function boot() {
     if (config.mode === 'live') {
       $('#mode-pill').textContent = '● Active Treasury';
       $('#network-type').textContent = 'Arc Network';
-      $('#demo-notice-text').innerHTML = '<strong>Active Arc Treasury</strong> — Balances, milestones, and audit records are live. Authorization is required for payment releases.';
+      $('#demo-notice-text').innerHTML = '<strong>Active Arc Treasury</strong> · Balances and milestones synchronized';
       ownerToken = sessionStorage.getItem(workspaceSlug ? `ipay-owner-token:${workspaceSlug}` : 'ipay-owner-token') || '';
     }
   } catch {
     $('#mode-pill').textContent = '● Active Treasury';
     $('#network-type').textContent = 'Arc Network';
-    $('#demo-notice-text').innerHTML = '<strong>Active Arc Treasury</strong> — Live onchain balances synchronized from Arc settlement network.';
+    $('#demo-notice-text').innerHTML = '<strong>Active Arc Treasury</strong> · Live onchain reserves synchronized';
   }
   if (workspaceSlug && !ownerToken) {
     $('#auth-dialog').showModal();

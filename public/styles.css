@@ -462,7 +462,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 /* Page Header */
 .page-head {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 20px;
 }
@@ -806,13 +806,16 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 
 .text-button {
   font-size: 12px;
-  font-weight: 700;
-  color: #ffffff;
+  font-weight: 600;
+  color: var(--okx-text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   transition: var(--transition);
 }
 
 .text-button:hover {
-  color: var(--okx-green);
+  color: #ffffff;
 }
 
 /* Milestone Rows */

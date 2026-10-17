@@ -97,10 +97,10 @@
         <section class="page-head">
           <div>
             <div class="eyebrow">
-              <span class="eyebrow-mark"></span>CONTRACTOR TREASURY
+              <span class="eyebrow-mark"></span>TREASURY DESK
             </div>
-            <h1 id="page-title">Your money, moving with purpose.</h1>
-            <p id="page-subtitle">A controlled release system for teams that pay on proof.</p>
+            <h1 id="page-title">Treasury Overview</h1>
+            <p id="page-subtitle">Capital allocation and live reserve telemetry.</p>
           </div>
           <button class="primary-button" id="create-button"><span>+</span> New Milestone</button>
         </section>
@@ -108,7 +108,7 @@
         <div class="live-banner">
           <span class="banner-pulse"></span>
           <div id="demo-notice-text">
-            <strong>Connecting to treasury</strong> — loading workspace configuration.
+            <strong>Active Arc Treasury</strong> · Synchronized with Arc settlement network
           </div>
         </div>
 
@@ -117,7 +117,7 @@
           <section class="treasury-hero">
             <div class="hero-copy">
               <div class="hero-kicker">TOTAL CONTROLLED CAPITAL</div>
-              <div id="total-budget" class="hero-balance">—</div>
+              <div id="total-budget" class="hero-balance">$0.00 <small>USDC</small></div>
               <div class="hero-caption">
                 <span class="green-dot"></span>
                 <span id="budget-source">Loading live wallet</span>
@@ -125,13 +125,13 @@
             </div>
             <div class="hero-side">
               <div class="hero-side-label">AVAILABLE TO ALLOCATE</div>
-              <div id="available" class="hero-side-value">—</div>
+              <div id="available" class="hero-side-value">$0.00 <small>USDC</small></div>
               <div class="hero-side-note">After active commitments</div>
               <div class="hero-divider"></div>
               <div class="hero-side-label">IDLE IN EARN VAULT</div>
-              <div id="vault" class="hero-side-value">—</div>
+              <div id="vault" class="hero-side-value">$0.00 <small>USDC</small></div>
               <div class="hero-side-note positive">
-                <span id="yield-earned">—</span> yield <span id="yield-source">· live</span>
+                <span id="yield-earned">$0.00</span> yield <span id="yield-source">· live</span>
               </div>
             </div>
           </section>
@@ -147,7 +147,7 @@
                 <small id="arc-wallet-address">Treasury locked</small>
               </div>
               <div class="connection-value">
-                <strong id="arc-wallet-balance">—</strong>
+                <strong id="arc-wallet-balance">$0.00 USDC</strong>
                 <small>USDC · liquid</small>
               </div>
             </article>
@@ -162,7 +162,7 @@
                 <small id="earn-vault-address">No vault connected</small>
               </div>
               <div class="connection-value">
-                <strong id="earn-vault-balance">—</strong>
+                <strong id="earn-vault-balance">$0.00 USDC</strong>
                 <small id="earn-vault-yield">Position · read only</small>
                 <button id="park-button" class="row-action" type="button" style="margin-top: 6px;">Deposit USDC</button>
               </div>
@@ -177,7 +177,7 @@
                     <div class="section-kicker">RELEASE QUEUE</div>
                     <h2>Active Milestones</h2>
                   </div>
-                  <button class="text-button" data-view="milestones">View all -></button>
+                  <button class="text-button" data-view="milestones"><span>View all</span> <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
                 </div>
                 <div id="milestone-list" class="milestone-list"></div>
               </div>
@@ -188,7 +188,7 @@
                     <div class="section-kicker">ACTIVITY LOG</div>
                     <h2>Recent Decisions &amp; Receipts</h2>
                   </div>
-                  <button class="text-button" data-view="activity">Open audit trail -></button>
+                  <button class="text-button" data-view="activity"><span>Audit trail</span> <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
                 </div>
                 <div id="activity-preview-list"></div>
               </div>
@@ -251,21 +251,21 @@
                       <span class="legend-dot liquid"></span>
                       <div class="legend-info">
                         <span>Liquid Reserves</span>
-                        <strong id="legend-liquid-val">—</strong>
+                        <strong id="legend-liquid-val">$0.00</strong>
                       </div>
                     </div>
                     <div class="legend-item">
                       <span class="legend-dot vault"></span>
                       <div class="legend-info">
                         <span>Earn Vault (+4.8%)</span>
-                        <strong id="legend-vault-val">—</strong>
+                        <strong id="legend-vault-val">$0.00</strong>
                       </div>
                     </div>
                     <div class="legend-item">
                       <span class="legend-dot escrow"></span>
                       <div class="legend-info">
                         <span>Committed Milestones</span>
-                        <strong id="legend-escrow-val">—</strong>
+                        <strong id="legend-escrow-val">$0.00</strong>
                       </div>
                     </div>
                   </div>
@@ -286,7 +286,7 @@
                     <div class="telemetry-status active"></div>
                     <div class="telemetry-info">
                       <strong>Arc Settlement Protocol</strong>
-                      <small>Sub-second block finality · EVM deterministic</small>
+                      <small>Sub-second deterministic finality</small>
                     </div>
                     <span class="telemetry-tag">ACTIVE</span>
                   </div>
@@ -294,7 +294,7 @@
                     <div class="telemetry-status active"></div>
                     <div class="telemetry-info">
                       <strong>Circle Smart Vault</strong>
-                      <small>Dedicated organizational custody enclave</small>
+                      <small>Dedicated custody enclave</small>
                     </div>
                     <span class="telemetry-tag">SECURED</span>
                   </div>
@@ -302,7 +302,7 @@
                     <div class="telemetry-status active"></div>
                     <div class="telemetry-info">
                       <strong>CompliR Policy Screening</strong>
-                      <small>Pre-flight automated compliance clearing</small>
+                      <small>Automated policy clearance active</small>
                     </div>
                     <span class="telemetry-tag">CLEAR</span>
                   </div>
@@ -362,7 +362,7 @@
         <input name="ownerToken" required autocomplete="current-password" spellcheck="false" placeholder="Paste your workspace security key">
       </label>
       <div class="dialog-actions">
-        <button class="primary-button" type="submit">Unlock Treasury <span>-></span></button>
+        <button class="primary-button" type="submit">Unlock Treasury</button>
       </div>
     </form>
   </dialog>
