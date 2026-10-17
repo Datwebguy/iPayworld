@@ -10,7 +10,7 @@
   const states = {
     LOW: {
       class: 'low',
-      bannerText: '✓ LOW Risk: CompliR EIP-712 Attestation verified. 1,250 USDC released on Arc.',
+      bannerText: '[APPROVED] LOW Risk: CompliR EIP-712 Attestation verified. 1,250 USDC released on Arc.',
       step3Text: 'LOW · Attestation Verified',
       step3Color: '#00d182',
       step4Text: 'Settled on Arc · Tx #0x8f4b…91e2',
@@ -19,7 +19,7 @@
     },
     MEDIUM: {
       class: 'medium',
-      bannerText: '⚠ MEDIUM Risk: Review triggered. Payout held in treasury escrow for owner sign-off.',
+      bannerText: '[REVIEW] MEDIUM Risk: Review triggered. Payout held in treasury escrow for owner sign-off.',
       step3Text: 'MEDIUM · Review Required',
       step3Color: '#f59e0b',
       step4Text: 'Escrow paused · Awaiting sign-off',
@@ -28,7 +28,7 @@
     },
     HIGH: {
       class: 'high',
-      bannerText: '✕ HIGH Risk: Sanctions / anomaly detected. Transfer blocked automatically.',
+      bannerText: '[BLOCKED] HIGH Risk: Sanctions / anomaly detected. Transfer blocked automatically.',
       step3Text: 'HIGH · Transfer Blocked',
       step3Color: '#f6465d',
       step4Text: 'Release Aborted · Funds Safe in Vault',

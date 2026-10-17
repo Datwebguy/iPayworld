@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#07090e">
+  <meta name="theme-color" content="#000000">
   <title>iPay · Create Workspace Treasury</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/onboard.css">
 </head>
 <body>
@@ -16,7 +16,7 @@
       <div class="brand-symbol">i</div>
       <span>iPay</span>
     </a>
-    <a href="/app.html" class="nav-link">Open Treasury ↗</a>
+    <a href="/app.html" class="nav-link">Open Treasury -></a>
   </header>
 
   <main>
@@ -38,7 +38,7 @@
           Workspace Slug (URL identifier)
           <input name="slug" required maxlength="64" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="e.g. acme-studio">
         </label>
-        <button type="submit">Create Workspace <span>→</span></button>
+        <button type="submit">Create Workspace <span>-></span></button>
       </form>
     </section>
 
@@ -49,7 +49,10 @@
 
       <div class="token-box-wrapper">
         <code id="owner-token"></code>
-        <button type="button" class="copy-token-btn" id="copy-owner-btn">📋 Copy Owner Token</button>
+        <button type="button" class="copy-token-btn" id="copy-owner-btn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <span>Copy Owner Token</span>
+        </button>
       </div>
 
       <div class="actions">
@@ -59,8 +62,8 @@
 
       <p class="status" id="status"></p>
 
-      <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border-subtle);">
-        <p class="eyebrow" style="color: var(--indigo-light);">OPTIONAL · TEAM ROLES</p>
+      <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--okx-border);">
+        <p class="eyebrow" style="color: var(--okx-text-secondary);">OPTIONAL · TEAM ROLES</p>
         <p>Issue scoped credentials for finance approvers or milestone reviewers.</p>
 
         <form id="member-form">
@@ -83,7 +86,7 @@
         </div>
       </div>
 
-      <a id="dashboard" class="dashboard hidden">Open Workspace Dashboard <span>→</span></a>
+      <a id="dashboard" class="dashboard hidden">Open Workspace Dashboard <span>-></span></a>
     </section>
   </main>
 

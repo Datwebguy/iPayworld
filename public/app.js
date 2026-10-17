@@ -71,23 +71,35 @@ async function loadArcWallet() {
 function statusText(status) {
   return ({ in_progress: 'In progress', awaiting_verification: 'Awaiting approval', verified: 'Verified', checking: 'Checking risk', withdrawing: 'Withdrawing', sending: 'Sending', confirming: 'Confirming', needs_reconciliation: 'Needs reconciliation', review: 'Needs review', blocked: 'Blocked', paid: 'Paid' })[status] || status;
 }
-function icon(status) { return ({ paid: '✓', verified: '✓', blocked: '×', review: '!', checking: '⋯' })[status] || '◈'; }
+function icon(status) {
+  if (status === 'paid' || status === 'verified') return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+  if (status === 'blocked') return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+  if (status === 'review') return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+  return '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>';
+}
 function actionHtml(m) {
-  if (['in_progress', 'awaiting_verification'].includes(m.status)) return `<button class="row-action" data-action="verify" data-id="${m.id}">Verify work</button>`;
-  if (m.status === 'verified') return `<button class="row-action release" data-action="release" data-id="${m.id}">Run release ↗</button>`;
-  if (data.mode === 'live' && m.status === 'needs_reconciliation') return `<button class="row-action" data-action="reconcile" data-id="${m.id}">Reconcile tx</button>`;
+  if (['in_progress', 'awaiting_verification'].includes(m.status)) return `<button class="row-action" data-action="verify" data-id="${m.id}">Verify Work</button>`;
+  if (m.status === 'verified') return `<button class="row-action release" data-action="release" data-id="${m.id}">Release Payout -></button>`;
+  if (data.mode === 'live' && m.status === 'needs_reconciliation') return `<button class="row-action" data-action="reconcile" data-id="${m.id}">Reconcile Tx</button>`;
   return '';
 }
 function milestoneHtml(m, detailed = false) {
   return `<div class="milestone-row"><div class="milestone-icon ${escapeHtml(m.status)}">${icon(m.status)}</div><div class="milestone-detail"><strong>${escapeHtml(m.title)}</strong><small>${escapeHtml(m.contractor)} · <span style="cursor:pointer;text-decoration:underline dotted" data-copy="${escapeHtml(m.address)}" title="Click to copy address">${escapeHtml(shortAddress(m.address))}</span></small>${detailed ? `<div class="milestone-meta">${escapeHtml(m.description || 'No description')}${m.evidence ? ` · Evidence: ${escapeHtml(m.evidence)}` : ''}${m.risk ? ` · Risk: ${escapeHtml(m.risk.verdict)} (${escapeHtml(m.risk.source)})` : ''}</div>` : ''}</div><div class="milestone-right"><strong>${money(m.amount)} <span style="color:#81909a;font-size:10px">USDC</span></strong><span class="status ${escapeHtml(m.status)}">${statusText(m.status)}</span></div><div class="row-actions">${actionHtml(m)}</div></div>`;
 }
 function activityHtml(a, detailed = false) {
-  const glyph = ({ payment: '↗', risk_check: '◇', milestone_verified: '✓', milestone_created: '＋', release_failed: '!', budget_funded: '◈' })[a.type] || '·';
+  const glyph = {
+    payment: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>',
+    risk_check: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+    milestone_verified: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>',
+    milestone_created: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+    release_failed: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+    budget_funded: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>'
+  }[a.type] || '<svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>';
   let extra = '';
   if (detailed) {
     if (a.txHash) extra += `<div class="audit-extra">${a.simulated ? 'Simulated tx' : 'Arc tx'}: <span style="cursor:pointer;text-decoration:underline dotted" data-copy="${escapeHtml(a.txHash)}" title="Click to copy">${escapeHtml(a.txHash)}</span></div>`;
     if (a.withdrawTxHash) extra += `<div class="audit-extra">Vault withdrawal tx: <span style="cursor:pointer;text-decoration:underline dotted" data-copy="${escapeHtml(a.withdrawTxHash)}" title="Click to copy">${escapeHtml(a.withdrawTxHash)}</span></div>`;
-    if (a.risk) extra += `<div class="audit-extra">Risk: ${escapeHtml(a.risk.verdict)} · ${escapeHtml(a.risk.reason)} · ${a.risk.signatureVerified ? 'signature verified' : 'no verified signature'}${a.risk.decisionId ? ` · Decision ${escapeHtml(a.risk.decisionId)}` : ''}</div>${a.risk.signedProof ? `<button class="proof-button" data-proof-id="${escapeHtml(a.id)}">Inspect signed proof ↗</button>` : ''}`;
+    if (a.risk) extra += `<div class="audit-extra">Risk: ${escapeHtml(a.risk.verdict)} · ${escapeHtml(a.risk.reason)} · ${a.risk.signatureVerified ? 'signature verified' : 'no verified signature'}${a.risk.decisionId ? ` · Decision ${escapeHtml(a.risk.decisionId)}` : ''}</div>${a.risk.signedProof ? `<button class="proof-button" data-proof-id="${escapeHtml(a.id)}">Inspect Signed Proof -></button>` : ''}`;
     if (a.evidence) extra += `<div class="audit-extra">Evidence: ${escapeHtml(a.evidence)}</div>`;
     if (a.yieldSnapshot !== undefined) extra += `<div class="audit-extra">Yield snapshot: ${a.yieldSnapshot === null ? 'unavailable' : money(a.yieldSnapshot)}${a.redeemed !== undefined ? ` · vault withdrawn: ${money(a.redeemed)}` : ''}</div>`;
   }

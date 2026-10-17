@@ -15,7 +15,7 @@ $('#workspace-form').addEventListener('submit', async event => {
   const form = new FormData(event.currentTarget);
   const button = event.currentTarget.querySelector('button');
   button.disabled = true;
-  button.textContent = 'Creating Workspace…';
+  button.textContent = 'Creating Workspace...';
   try {
     const result = await call('/api/workspaces', { 
       method: 'POST', 
@@ -34,7 +34,7 @@ $('#workspace-form').addEventListener('submit', async event => {
     alert(error.message); 
   } finally { 
     button.disabled = false; 
-    button.textContent = 'Create Workspace →';
+    button.textContent = 'Create Workspace ->';
   }
 });
 
@@ -44,8 +44,10 @@ if (copyBtn) {
     if (!ownerToken) return;
     try {
       await navigator.clipboard.writeText(ownerToken);
-      copyBtn.textContent = '✓ Copied!';
-      setTimeout(() => { copyBtn.textContent = '📋 Copy Owner Token'; }, 2500);
+      copyBtn.innerHTML = '<span>Copied to Clipboard</span>';
+      setTimeout(() => { 
+        copyBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy Owner Token</span>'; 
+      }, 2500);
     } catch {
       alert('Could not copy to clipboard');
     }
@@ -54,7 +56,7 @@ if (copyBtn) {
 
 $('#provision').addEventListener('click', async event => {
   event.currentTarget.disabled = true;
-  $('#status').textContent = 'Creating Circle Agent Wallet on Arc Testnet…';
+  $('#status').textContent = 'Provisioning Circle Agent Wallet on Arc Testnet...';
   try {
     const result = await call(`/api/workspaces/${workspace.slug}/provision-treasury`, { 
       method: 'POST', 
@@ -62,7 +64,7 @@ $('#provision').addEventListener('click', async event => {
     });
     workspace = result.workspace;
     $('#fund').disabled = false;
-    $('#status').textContent = `✓ Circle Wallet Ready: ${workspace.walletAddress}`;
+    $('#status').textContent = `Circle Wallet Ready: ${workspace.walletAddress}`;
   } catch (error) { 
     $('#status').textContent = `Error: ${error.message}`; 
     event.currentTarget.disabled = false; 
@@ -71,13 +73,13 @@ $('#provision').addEventListener('click', async event => {
 
 $('#fund').addEventListener('click', async event => {
   event.currentTarget.disabled = true;
-  $('#status').textContent = 'Requesting Arc Testnet USDC and gas funding…';
+  $('#status').textContent = 'Requesting Arc Testnet USDC and gas funding...';
   try {
     await call(`/api/workspaces/${workspace.slug}/fund-testnet`, { 
       method: 'POST', 
       headers: { Authorization: `Bearer ${ownerToken}` } 
     });
-    $('#status').textContent = '✓ Testnet funding requested. Ready to launch!';
+    $('#status').textContent = 'Testnet funding requested. Ready to launch.';
     const link = $('#dashboard');
     link.href = `/app.html?workspace=${encodeURIComponent(workspace.slug)}`;
     link.classList.remove('hidden');
@@ -92,7 +94,7 @@ $('#member-form').addEventListener('submit', async event => {
   const form = new FormData(event.currentTarget);
   const button = event.currentTarget.querySelector('button');
   button.disabled = true;
-  button.textContent = 'Creating Credential…';
+  button.textContent = 'Creating Credential...';
   try {
     const result = await call(`/api/workspaces/${workspace.slug}/members`, { 
       method: 'POST', 

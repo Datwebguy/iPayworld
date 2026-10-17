@@ -3,19 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#07090e">
+  <meta name="theme-color" content="#000000">
   <meta name="description" content="iPay is the policy-controlled treasury for milestone contractor payments on Arc.">
   <title>iPay · Treasury Operations</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
   <div class="shell">
     <aside class="rail">
       <a class="brand" href="/" aria-label="iPay home">
-        <span class="brand-mark">i<span>•</span></span>
+        <span class="brand-mark">i</span>
         <span>iPay</span>
       </a>
 
@@ -26,21 +26,29 @@
           <strong>Studio Workspace</strong>
           <small>Business treasury</small>
         </div>
-        <span class="workspace-chevron">⌄</span>
+        <span class="workspace-chevron">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </span>
       </div>
 
       <nav class="nav" aria-label="Primary navigation">
         <button class="nav-link active" data-view="overview">
-          <span class="nav-glyph">◈</span>
+          <span class="nav-glyph">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          </span>
           <span>Overview</span>
         </button>
         <button class="nav-link" data-view="milestones">
-          <span class="nav-glyph">◇</span>
+          <span class="nav-glyph">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 12 12 22 22 12"/></svg>
+          </span>
           <span>Milestones</span>
           <span id="nav-count" class="nav-count">0</span>
         </button>
         <button class="nav-link" data-view="activity">
-          <span class="nav-glyph">⌁</span>
+          <span class="nav-glyph">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </span>
           <span>Audit trail</span>
         </button>
       </nav>
@@ -52,7 +60,9 @@
           <span id="network-type">Connecting</span>
         </div>
         <div class="rail-policy">
-          <span class="policy-icon">✓</span>
+          <span class="policy-icon">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
           <div>
             <strong>CompliR Policy</strong>
             <small>LOW pays · MEDIUM reviews · HIGH blocks</small>
@@ -64,7 +74,6 @@
             <strong>Studio Owner</strong>
             <small>Workspace admin</small>
           </div>
-          <span>•••</span>
         </div>
       </div>
     </aside>
@@ -77,8 +86,10 @@
           <strong id="breadcrumb">Overview</strong>
         </div>
         <div class="top-actions">
-          <span class="mode-pill" id="mode-pill">● Connecting</span>
-          <button id="refresh" class="refresh" title="Refresh data" aria-label="Refresh data">↻</button>
+          <span class="mode-pill" id="mode-pill">Connecting</span>
+          <button id="refresh" class="refresh" title="Refresh data" aria-label="Refresh data">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          </button>
         </div>
       </header>
 
@@ -91,7 +102,7 @@
             <h1 id="page-title">Your money, moving with purpose.</h1>
             <p id="page-subtitle">A controlled release system for teams that pay on proof.</p>
           </div>
-          <button class="primary-button" id="create-button"><span>＋</span> New milestone</button>
+          <button class="primary-button" id="create-button"><span>+</span> New Milestone</button>
         </section>
 
         <div class="live-banner">
@@ -99,7 +110,6 @@
           <div id="demo-notice-text">
             <strong>Connecting to treasury</strong> — loading workspace configuration.
           </div>
-          <span class="banner-arrow">↗</span>
         </div>
 
         <!-- Overview Tab -->
@@ -113,9 +123,6 @@
                 <span id="budget-source">Loading live wallet</span>
               </div>
             </div>
-            <div class="hero-orbit orbit-one"></div>
-            <div class="hero-orbit orbit-two"></div>
-            <div class="hero-grid"></div>
             <div class="hero-side">
               <div class="hero-side-label">AVAILABLE TO ALLOCATE</div>
               <div id="available" class="hero-side-value">—</div>
@@ -124,14 +131,16 @@
               <div class="hero-side-label">IDLE IN EARN VAULT</div>
               <div id="vault" class="hero-side-value">—</div>
               <div class="hero-side-note positive">
-                <span>↗</span> <span id="yield-earned">—</span> yield <span id="yield-source">· live</span>
+                <span id="yield-earned">—</span> yield <span id="yield-source">· live</span>
               </div>
             </div>
           </section>
 
           <section class="connection-grid">
             <article class="connection-card">
-              <div class="connection-icon wallet-icon">◉</div>
+              <div class="connection-icon wallet-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><circle cx="18" cy="12" r="2"/></svg>
+              </div>
               <div class="connection-copy">
                 <span class="card-label">SETTLEMENT WALLET</span>
                 <strong>Circle Wallet (Arc)</strong>
@@ -144,7 +153,9 @@
             </article>
 
             <article class="connection-card">
-              <div class="connection-icon earn-icon">✳</div>
+              <div class="connection-icon earn-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
               <div class="connection-copy">
                 <span class="card-label">YIELD POSITION</span>
                 <strong>Earn Kit USDC Vault</strong>
@@ -165,7 +176,7 @@
                   <div class="section-kicker">RELEASE QUEUE</div>
                   <h2>Active Milestones</h2>
                 </div>
-                <button class="text-button" data-view="milestones">View all <span>↗</span></button>
+                <button class="text-button" data-view="milestones">View all -></button>
               </div>
               <div id="milestone-list" class="milestone-list"></div>
             </div>
@@ -185,7 +196,7 @@
                     <strong>Verify the work</strong>
                     <small>Owner evidence is attached to the milestone.</small>
                   </div>
-                  <i>→</i>
+                  <i>-></i>
                 </div>
                 <div class="policy-step">
                   <span>02</span>
@@ -193,7 +204,7 @@
                     <strong>Screen the recipient</strong>
                     <small>CompliR returns a signed verdict.</small>
                   </div>
-                  <i>→</i>
+                  <i>-></i>
                 </div>
                 <div class="policy-step last">
                   <span>03</span>
@@ -201,12 +212,16 @@
                     <strong>Release on Arc</strong>
                     <small>LOW pays. Every receipt is recorded.</small>
                   </div>
-                  <i>✓</i>
+                  <i>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  </i>
                 </div>
               </div>
 
               <div class="signal-card">
-                <div class="signal-icon">✦</div>
+                <div class="signal-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                </div>
                 <div>
                   <strong>Idle capital has a job.</strong>
                   <p>Earn Kit keeps available USDC productive until the next verified release on Arc.</p>
@@ -221,7 +236,7 @@
                 <div class="section-kicker">SYSTEM LOG</div>
                 <h2>Recent Decisions &amp; Receipts</h2>
               </div>
-              <button class="text-button" data-view="activity">Open audit trail <span>↗</span></button>
+              <button class="text-button" data-view="activity">Open audit trail -></button>
             </div>
             <div id="activity-preview-list"></div>
           </section>
@@ -262,7 +277,7 @@
     </main>
   </div>
 
-  <!-- Modals -->
+  <!-- Modals (Strictly Vector Icons) -->
   <dialog id="auth-dialog" class="dialog auth-dialog">
     <form id="auth-form">
       <div class="dialog-head">
@@ -277,7 +292,7 @@
         <input name="ownerToken" required autocomplete="current-password" spellcheck="false" placeholder="Paste your 32+ character workspace token">
       </label>
       <div class="dialog-actions">
-        <button class="primary-button" type="submit">Unlock Treasury <span>→</span></button>
+        <button class="primary-button" type="submit">Unlock Treasury <span>-></span></button>
       </div>
     </form>
   </dialog>
@@ -289,7 +304,9 @@
           <div class="section-kicker">NEW PAYMENT MILESTONE</div>
           <h2>Create Milestone</h2>
         </div>
-        <button type="button" class="dialog-close" data-close aria-label="Close">×</button>
+        <button type="button" class="dialog-close" data-close aria-label="Close">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
       <p class="dialog-intro">Set deliverable and payment amount. Funds release only after milestone verification and an automated LOW risk result from CompliR.</p>
       <label>
@@ -326,7 +343,9 @@
           <div class="section-kicker">OWNER APPROVAL</div>
           <h2>Verify Completed Work</h2>
         </div>
-        <button type="button" class="dialog-close" data-close aria-label="Close">×</button>
+        <button type="button" class="dialog-close" data-close aria-label="Close">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
       <p class="dialog-intro" id="verify-description"></p>
       <label>
@@ -341,15 +360,17 @@
   </dialog>
 
   <dialog id="proof-dialog" class="dialog proof-dialog">
-    <div class="dialog-head" style="padding: 24px 28px 0;">
+    <div class="dialog-head" style="padding: 20px 24px 0;">
       <div>
         <div class="section-kicker">SIGNED DECISION</div>
         <h2>CompliR Attestation Payload</h2>
       </div>
-      <button type="button" class="dialog-close" data-close aria-label="Close">×</button>
+      <button type="button" class="dialog-close" data-close aria-label="Close">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
     <pre id="proof-content"></pre>
-    <div class="dialog-actions" style="padding: 0 28px 24px;">
+    <div class="dialog-actions" style="padding: 0 24px 20px;">
       <button type="button" class="secondary-button" data-close>Close</button>
     </div>
   </dialog>

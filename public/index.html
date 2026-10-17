@@ -30,7 +30,7 @@
 
       <div class="nav-actions">
         <a href="/onboard.html" class="btn btn-ghost">Create Workspace</a>
-        <a href="/app.html" class="btn btn-primary">Open Treasury <span>↗</span></a>
+        <a href="/app.html" class="btn btn-primary">Open Treasury <span>-></span></a>
       </div>
     </header>
 
@@ -52,21 +52,21 @@
           </p>
 
           <div class="hero-cta-group">
-            <a href="/app.html" class="btn btn-primary">Open Treasury Dashboard <span>→</span></a>
-            <a href="/onboard.html" class="btn btn-ghost">Create Business Workspace <span>↗</span></a>
+            <a href="/app.html" class="btn btn-primary">Open Treasury Dashboard <span>-></span></a>
+            <a href="/onboard.html" class="btn btn-ghost">Create Business Workspace</a>
           </div>
 
           <div class="hero-features-strip">
             <div class="hero-tag">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
               <span>USDC Native</span>
             </div>
             <div class="hero-tag">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
               <span>Earn Kit Yield</span>
             </div>
             <div class="hero-tag">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
               <span>CompliR Risk Gate</span>
             </div>
           </div>
@@ -87,7 +87,7 @@
               <div class="balance-caption">Total Controlled Capital</div>
               <div class="balance-amount">$12,500.00 <span>USDC</span></div>
               <div class="balance-yield-badge">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
                 <span>+4.8% APY · $35.65 Earned in Vault</span>
               </div>
             </div>
@@ -129,7 +129,7 @@
               <div class="risk-interactive-controls">
                 <div class="risk-controls-title">
                   <span>Interactive Test: Switch CompliR Verdict</span>
-                  <span style="color: var(--okx-green);">Try Clicking ↓</span>
+                  <span style="color: var(--okx-green);">Select Mode ↓</span>
                 </div>
                 <div class="risk-btn-group">
                   <button class="risk-toggle-btn active" data-verdict="LOW">LOW</button>
@@ -137,7 +137,7 @@
                   <button class="risk-toggle-btn" data-verdict="HIGH">HIGH</button>
                 </div>
                 <div id="verdict-outcome" class="verdict-outcome-banner low">
-                  ✓ LOW Risk: CompliR EIP-712 Attestation verified. 1,250 USDC released on Arc.
+                  [APPROVED] LOW Risk: CompliR EIP-712 Attestation verified. 1,250 USDC released on Arc.
                 </div>
               </div>
             </div>
@@ -145,17 +145,32 @@
         </div>
       </section>
 
-      <!-- Trust Strip -->
-      <section class="trust-strip">
-        <div class="trust-inner">
-          <div class="trust-item"><span>Protocol:</span> <strong>Arc Testnet</strong></div>
-          <div class="trust-item"><span>Custody:</span> <strong>Circle Agent Stack</strong></div>
-          <div class="trust-item"><span>Yield:</span> <strong>Earn Kit Vaults</strong></div>
-          <div class="trust-item"><span>Attestations:</span> <strong>CompliR Signed Proofs</strong></div>
+      <!-- ==========================================================================
+           INFINITE TEXT SCROLLING FLOW (OKX Style Ticker Marquee)
+           ========================================================================== -->
+      <section class="marquee-container" aria-label="Live Protocol Metrics">
+        <div class="marquee-track">
+          <span class="marquee-item"><span class="beacon"></span> <span>ARC TESTNET SETTLEMENT</span> <strong>CHAIN ID: 5042002</strong></span>
+          <span class="marquee-item"><span class="beacon"></span> <span>CUSTODY:</span> <strong>CIRCLE AGENT STACK</strong></span>
+          <span class="marquee-item"><span class="beacon"></span> <span>YIELD ENGINE:</span> <strong>EARN KIT VAULTS</strong></span>
+          <span class="marquee-item"><span class="beacon"></span> <span>RISK SCREENING:</span> <strong>COMPLIR EIP-712 SIGNATURES</strong></span>
+          <span class="marquee-item"><span class="beacon"></span> <span>SETTLEMENT ASSET:</span> <strong>NATIVE USDC</strong></span>
+          <span class="marquee-item"><span class="beacon"></span> <span>LATENCY:</span> <strong>SUB-SECOND FINALITY</strong></span>
+          <span class="marquee-item"><span class="beacon"></span> <span>SECURITY:</span> <strong>100% PROOF-GATED RELEASES</strong></span>
+          <span class="marquee-item"><span class="beacon"></span> <span>DATABASE:</span> <strong>POSTGRESQL AUDIT LEDGER</strong></span>
+          <!-- Duplicate for continuous seamless loop -->
+          <span class="marquee-item"><span class="beacon"></span> <span>ARC TESTNET SETTLEMENT</span> <strong>CHAIN ID: 5042002</strong></span>
+          <span class="marquee-item"><span class="beacon"></span> <span>CUSTODY:</span> <strong>CIRCLE AGENT STACK</strong></span>
+          <span class="marquee-item"><span class="beacon"></span> <span>YIELD ENGINE:</span> <strong>EARN KIT VAULTS</strong></span>
+          <span class="marquee-item"><span class="beacon"></span> <span>RISK SCREENING:</span> <strong>COMPLIR EIP-712 SIGNATURES</strong></span>
+          <span class="marquee-item"><span class="beacon"></span> <span>SETTLEMENT ASSET:</span> <strong>NATIVE USDC</strong></span>
+          <span class="marquee-item"><span class="beacon"></span> <span>LATENCY:</span> <strong>SUB-SECOND FINALITY</strong></span>
+          <span class="marquee-item"><span class="beacon"></span> <span>SECURITY:</span> <strong>100% PROOF-GATED RELEASES</strong></span>
+          <span class="marquee-item"><span class="beacon"></span> <span>DATABASE:</span> <strong>POSTGRESQL AUDIT LEDGER</strong></span>
         </div>
       </section>
 
-      <!-- Features Section -->
+      <!-- Features Section (Strictly Vector Icons, Zero Emojis) -->
       <section id="features" class="section">
         <div class="section-head">
           <span class="section-eyebrow">Architecture &amp; Capabilities</span>
@@ -167,42 +182,50 @@
 
         <div class="grid-cards">
           <div class="feature-card">
-            <div class="feature-icon-box">🛡</div>
+            <div class="feature-icon-box">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
             <h3>Dedicated Circle Agent Wallets</h3>
             <p>Every business workspace provisions its own isolated developer-controlled wallet on Arc. No pooled balances, no shared keys, and zero cross-tenant contamination.</p>
             <div class="feature-badge">
               <span>Circle Agent Stack API</span>
-              <span>→</span>
+              <span>-></span>
             </div>
           </div>
 
           <div class="feature-card">
-            <div class="feature-icon-box">⚡</div>
+            <div class="feature-icon-box">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
             <h3>Automated Idle Yield</h3>
             <p>Unallocated contractor budget doesn't sit idle. Approved USDC automatically works inside Earn Kit vaults, with precise on-demand liquidity withdrawals when milestones clear.</p>
             <div class="feature-badge">
               <span>Earn Kit USDC Vault</span>
-              <span>→</span>
+              <span>-></span>
             </div>
           </div>
 
           <div class="feature-card">
-            <div class="feature-icon-box">⚖</div>
+            <div class="feature-icon-box">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
             <h3>CompliR Risk Screening</h3>
             <p>Before any USDC transfer executes, CompliR issues an EIP-712 cryptographically signed attestation verifying contractor wallet compliance. LOW pays, MEDIUM reviews, HIGH blocks.</p>
             <div class="feature-badge">
               <span>Signed EIP-712 Verdicts</span>
-              <span>→</span>
+              <span>-></span>
             </div>
           </div>
 
           <div class="feature-card">
-            <div class="feature-icon-box">📜</div>
+            <div class="feature-icon-box">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            </div>
             <h3>Cryptographic Audit Trail</h3>
             <p>Every payment decision records milestone deliverable evidence, signed risk verdicts, Arc transaction hashes, and yield snapshots into an immutable ledger with CSV exports.</p>
             <div class="feature-badge">
               <span>PostgreSQL &amp; On-Chain Receipts</span>
-              <span>→</span>
+              <span>-></span>
             </div>
           </div>
         </div>
@@ -255,7 +278,7 @@
               No blind transfers. Prior to authorizing the Arc USDC transaction, the backend requests and cryptographically verifies an EIP-712 signed verdict from CompliR.
             </p>
             <div style="display: flex; gap: 14px; margin-top: 10px;">
-              <a href="/app.html" class="btn btn-primary">Try Live Verification ↗</a>
+              <a href="/app.html" class="btn btn-primary">Try Live Verification -></a>
               <a href="https://github.com/Datwebguy/iPayworld" target="_blank" rel="noopener" class="btn btn-ghost">View Repository</a>
             </div>
           </div>
@@ -325,7 +348,7 @@
           <p>Launch your business workspace in seconds, connect your Circle Agent Wallet, and start settling on Arc.</p>
         </div>
         <div class="cta-buttons">
-          <a href="/app.html" class="btn btn-primary" style="padding: 13px 26px;">Launch Treasury Dashboard <span>→</span></a>
+          <a href="/app.html" class="btn btn-primary" style="padding: 13px 26px;">Launch Treasury Dashboard <span>-></span></a>
           <a href="/onboard.html" class="btn btn-ghost" style="padding: 13px 22px;">Create Workspace</a>
         </div>
       </section>
