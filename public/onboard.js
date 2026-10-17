@@ -47,8 +47,8 @@ function go(next) {
     li.classList.toggle('current', n === step);
     if (n === step) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
   });
-  $('#progress').style.width = `${(step / 5) * 100}%`;
-  $('#progress-text').textContent = `Step ${step} of 5`;
+  $('#progress').style.width = `${(step / 4) * 100}%`;
+  $('#progress-text').textContent = `Step ${step} of 4`;
   if (workspace) $('#dashboard').href = `/app?workspace=${encodeURIComponent(workspace.slug)}`;
   persist();
   const focusable = $(`.pane[data-pane="${step}"] input, .pane[data-pane="${step}"] button`);
@@ -72,19 +72,19 @@ form.addEventListener('submit', async event => {
   }
   const done = busy($('button[type=submit]', form), 'Creating…');
   try {
-    const result = await call('/api/workspaces', {
+    const result = await call('/api/signup', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${form.adminToken.value}` },
       body: JSON.stringify({ name: form.name.value, slug: form.slug.value })
     });
     workspace = result.workspace;
     ownerToken = result.ownerToken;
     $('#ws-name').textContent = workspace.name;
     $('#owner-token').textContent = ownerToken;
-    form.adminToken.value = '';
+    try { localStorage.setItem('ipay-last-workspace', workspace.slug); } catch {}
+    $('#wallet-status').textContent = workspace.walletAddress ? 'Ready' : 'Created when you add money';
     go(2);
   } catch (error) {
-    showError(form, /owner token/i.test(error.message) ? 'That invite code was not accepted.' : error.message);
+    showError(form, /already in use/i.test(error.message) ? 'That handle is taken. Try another one.' : error.message);
   } finally { done(); }
 });
 
@@ -108,53 +108,44 @@ $('#download-key').addEventListener('click', () => {
 });
 $('#to-3').addEventListener('click', () => go(3));
 
-/* Step 3: wallet */
-$('#provision').addEventListener('click', async event => {
-  const pane = $('.pane[data-pane="3"]');
-  const task = $('#task-wallet');
-  showError(pane, '');
-  task.className = 'task running';
+// Signup creates the account; if Circle was slow then, create it now before funding.
+async function ensureAccount() {
+  if (workspace.walletAddress) return;
   $('#wallet-status').textContent = 'Creating your account…';
-  const done = busy(event.currentTarget, 'Creating…');
-  try {
-    const result = await call(`/api/workspaces/${workspace.slug}/provision-treasury`, { method: 'POST', headers: { Authorization: `Bearer ${ownerToken}` } });
-    workspace = result.workspace;
-    task.className = 'task done';
-    $('#wallet-status').textContent = 'Ready';
-    setTimeout(() => go(4), 600);
-  } catch (error) {
-    task.className = 'task failed';
-    $('#wallet-status').textContent = 'Not created';
-    showError(pane, error.message);
-  } finally { done(); }
-});
+  const result = await call(`/api/workspaces/${workspace.slug}/provision-treasury`, { method: 'POST', headers: { Authorization: `Bearer ${ownerToken}` } });
+  workspace = result.workspace;
+  persist();
+  $('#wallet-status').textContent = 'Ready';
+}
 
-/* Step 4: fund */
+/* Step 3: add money */
 $('#copy-address').addEventListener('click', async event => {
-  try { await navigator.clipboard.writeText(workspace.walletAddress); event.currentTarget.textContent = 'Copied'; }
-  catch { event.currentTarget.textContent = 'Copy failed'; }
+  const button = event.currentTarget;
+  try { await ensureAccount(); await navigator.clipboard.writeText(workspace.walletAddress); button.textContent = 'Copied'; }
+  catch { button.textContent = 'Copy failed'; }
 });
 $('#fund').addEventListener('click', async event => {
-  const pane = $('.pane[data-pane="4"]');
+  const pane = $('.pane[data-pane="3"]');
   const task = $('#task-fund');
   showError(pane, '');
   task.className = 'task running';
   const done = busy(event.currentTarget, 'Requesting…');
   try {
+    await ensureAccount();
     await call(`/api/workspaces/${workspace.slug}/fund-testnet`, { method: 'POST', headers: { Authorization: `Bearer ${ownerToken}` } });
     task.className = 'task done';
     const note = $('#fund-status');
     note.hidden = false;
     note.textContent = 'Requested. Test dollars usually arrive within a minute.';
-    setTimeout(() => go(5), 900);
+    setTimeout(() => go(4), 900);
   } catch (error) {
     task.className = 'task failed';
     showError(pane, `${error.message} You can skip this and add money later.`);
   } finally { done(); }
 });
-$('#skip-fund').addEventListener('click', () => go(5));
+$('#skip-fund').addEventListener('click', () => go(4));
 
-/* Step 5: team keys */
+/* Step 4: team keys */
 $('#member-form').addEventListener('submit', async event => {
   event.preventDefault();
   const memberForm = event.currentTarget;
@@ -189,7 +180,7 @@ $('#member-form').addEventListener('submit', async event => {
       workspace = saved.workspace;
       ownerToken = sessionStorage.getItem(`ipay-owner-token:${workspace.slug}`) || '';
       if (ownerToken) {
-        if (workspace.walletAddress) { $('#wallet-status').textContent = 'Ready'; $('#task-wallet').className = 'task done'; }
+        if (!workspace.walletAddress) $('#wallet-status').textContent = 'Not created yet';
         return go(saved.step);
       }
     }

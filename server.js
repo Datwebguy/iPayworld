@@ -322,7 +322,66 @@ async function processLiveRelease(m) {
   }
 }
 
+// Public signup guard: a few workspaces per visitor per hour and a daily ceiling for the server.
+const signupLog = new Map();
+let signupDay = { date: '', count: 0 };
+const SIGNUP_PER_HOUR = Number(process.env.IPAY_SIGNUPS_PER_HOUR || 5);
+const SIGNUP_PER_DAY = Number(process.env.IPAY_SIGNUPS_PER_DAY || 500);
+function clientIp(req) {
+  return String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket.remoteAddress || 'unknown';
+}
+function allowSignup(req) {
+  const today = new Date().toISOString().slice(0, 10);
+  if (signupDay.date !== today) signupDay = { date: today, count: 0 };
+  if (signupDay.count >= SIGNUP_PER_DAY) failure(429, 'iPay has reached today\'s signup limit. Try again tomorrow.');
+  const ip = clientIp(req);
+  const hourAgo = Date.now() - 3_600_000;
+  const recent = (signupLog.get(ip) || []).filter(at => at > hourAgo);
+  if (recent.length >= SIGNUP_PER_HOUR) failure(429, 'Too many new workspaces from this connection. Try again in an hour.');
+  recent.push(Date.now());
+  signupLog.set(ip, recent);
+  signupDay.count += 1;
+}
+
+async function provisionTreasury(workspace) {
+  if (workspace.walletAddress) return workspaceRegistry.list().find(item => item.slug === workspace.slug);
+  const circle = initiateDeveloperControlledWalletsClient({ apiKey: process.env.CIRCLE_API_KEY, entitySecret: process.env.CIRCLE_ENTITY_SECRET });
+  const walletSetResponse = await circle.createWalletSet({ name: `iPay · ${workspace.name}` });
+  const walletSet = walletSetResponse.data?.walletSet;
+  if (!walletSet?.id) throw new Error('Circle did not return a wallet set');
+  const walletResponse = await circle.createWallets({ walletSetId: walletSet.id, blockchains: [clients.config.chain === 'Arc' ? 'ARC' : 'ARC-TESTNET'], count: 1, accountType: 'EOA' });
+  const wallet = walletResponse.data?.wallets?.[0];
+  if (!wallet?.id || !wallet?.address) throw new Error('Circle did not return a wallet address');
+  return workspaceRegistry.setTreasury(workspace.slug, {
+    status: 'wallet_ready',
+    walletSetId: walletSet.id,
+    walletId: wallet.id,
+    walletAddress: wallet.address,
+    vaultAddress: clients.config.vaultAddress,
+    blockchain: wallet.blockchain || (clients.config.chain === 'Arc' ? 'ARC' : 'ARC-TESTNET'),
+  });
+}
+
 async function api(req, res, path) {
+  if (path === '/api/signup') {
+    if (req.method !== 'POST') failure(405, 'Method not allowed');
+    const input = await body(req);
+    allowSignup(req);
+    let created;
+    try { created = await workspaceRegistry.create({ name: input.name, slug: input.slug }); }
+    catch (error) {
+      // A rejected name or taken handle should not use up the visitor's quota.
+      signupLog.get(clientIp(req))?.pop();
+      signupDay.count -= 1;
+      failure(400, error.message);
+    }
+    // Create the workspace's own Circle wallet straight away; setup can retry if Circle is slow.
+    if (mode === 'live') {
+      try { created.workspace = await provisionTreasury(workspaceRegistry.bySlug(created.workspace.slug)); }
+      catch (error) { console.warn('Signup provisioning deferred:', error.message); created.provisionError = error.message; }
+    }
+    return respond(res, 201, created);
+  }
   if (path === '/api/workspaces') {
     requireOwner(req);
     if (req.method === 'GET') return respond(res, 200, { workspaces: workspaceRegistry.list() });
@@ -449,23 +508,8 @@ async function api(req, res, path) {
     if (req.method !== 'POST') failure(405, 'Method not allowed');
     if (mode !== 'live') failure(409, 'Treasury provisioning is only available in live mode');
     const workspace = requireWorkspaceRole(req, provisionMatch[1], ['owner']);
-    if (workspace.walletAddress) return respond(res, 200, { workspace, created: false });
-    const circle = initiateDeveloperControlledWalletsClient({ apiKey: process.env.CIRCLE_API_KEY, entitySecret: process.env.CIRCLE_ENTITY_SECRET });
-    const walletSetResponse = await circle.createWalletSet({ name: `iPay · ${workspace.name}` });
-    const walletSet = walletSetResponse.data?.walletSet;
-    if (!walletSet?.id) throw new Error('Circle did not return a wallet set');
-    const walletResponse = await circle.createWallets({ walletSetId: walletSet.id, blockchains: [clients.config.chain === 'Arc' ? 'ARC' : 'ARC-TESTNET'], count: 1, accountType: 'EOA' });
-    const wallet = walletResponse.data?.wallets?.[0];
-    if (!wallet?.id || !wallet?.address) throw new Error('Circle did not return a wallet address');
-    const updated = await workspaceRegistry.setTreasury(workspace.slug, {
-      status: 'wallet_ready',
-      walletSetId: walletSet.id,
-      walletId: wallet.id,
-      walletAddress: wallet.address,
-      vaultAddress: clients.config.vaultAddress,
-      blockchain: wallet.blockchain || (clients.config.chain === 'Arc' ? 'ARC' : 'ARC-TESTNET'),
-    });
-    return respond(res, 201, { workspace: updated, created: true });
+    const created = !workspace.walletAddress;
+    return respond(res, created ? 201 : 200, { workspace: await provisionTreasury(workspace), created });
   }
   const treasuryMatch = path.match(/^\/api\/workspaces\/([a-z0-9-]+)\/(treasury|fund-testnet)$/);
   if (treasuryMatch) {
@@ -477,7 +521,7 @@ async function api(req, res, path) {
     if (action === 'treasury') {
       if (req.method !== 'GET') failure(405, 'Method not allowed');
       const wallet = await readArcWallet({ address: workspace.walletAddress, rpcUrl: clients.config.rpcUrl });
-      return respond(res, 200, { workspace: workspaceRegistry.bySlug(slug), wallet });
+      return respond(res, 200, { workspace: workspaceRegistry.list().find(item => item.slug === slug), wallet });
     }
     if (req.method !== 'POST') failure(405, 'Method not allowed');
     if (clients.config.chain !== 'Arc_Testnet') failure(409, 'Testnet funding is unavailable on Arc mainnet');

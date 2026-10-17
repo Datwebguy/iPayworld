@@ -19,30 +19,29 @@
       <svg class="emblem" viewBox="0 0 32 32" aria-hidden="true"><polygon class="e-ink" points="6.5,5.5 22.5,5.5 26.5,9.5 10.5,9.5"/><polygon class="e-acc" points="26.5,6.5 26.5,22.5 22.5,26.5 22.5,10.5"/><polygon class="e-ink" points="25.5,26.5 9.5,26.5 5.5,22.5 21.5,22.5"/><polygon class="e-acc" points="5.5,25.5 5.5,9.5 9.5,5.5 9.5,21.5"/><polygon class="e-ink" points="16,11.5 20.5,16 16,20.5 11.5,16"/><circle class="e-acc" cx="16" cy="16" r="1.6"/></svg>
       <span>iPay</span>
     </a>
-    <a href="/app" class="btn btn-ghost btn-sm">Open treasury</a>
+    <a href="/app" class="btn btn-ghost btn-sm">Sign in</a>
   </header>
 
   <div class="ob">
     <aside class="ob-rail">
       <p class="ob-kicker mono">Workspace setup</p>
-      <h1 class="ob-title">Five steps to your first release.</h1>
+      <h1 class="ob-title">Ready to pay in about a minute.</h1>
       <ol class="steps" id="steps">
-        <li data-step="1"><span class="n mono">1</span><span><strong>Name it</strong><small>Business name and URL handle</small></span></li>
-        <li data-step="2"><span class="n mono">2</span><span><strong>Save the owner key</strong><small>Shown once, keep it safe</small></span></li>
-        <li data-step="3"><span class="n mono">3</span><span><strong>Create your account</strong><small>Your own payments account</small></span></li>
-        <li data-step="4"><span class="n mono">4</span><span><strong>Fund it</strong><small>Add money to pay with</small></span></li>
-        <li data-step="5"><span class="n mono">5</span><span><strong>Open the treasury</strong><small>Invite your team if you like</small></span></li>
+        <li data-step="1"><span class="n mono">1</span><span><strong>Name your business</strong><small>Your payments account is created for you</small></span></li>
+        <li data-step="2"><span class="n mono">2</span><span><strong>Save your key</strong><small>Shown once, keep it safe</small></span></li>
+        <li data-step="3"><span class="n mono">3</span><span><strong>Add money</strong><small>Free test dollars, one click</small></span></li>
+        <li data-step="4"><span class="n mono">4</span><span><strong>Start paying</strong><small>Invite your team if you like</small></span></li>
       </ol>
       <div class="ob-progress" aria-hidden="true"><span id="progress"></span></div>
-      <p class="ob-progress-text mono" id="progress-text">Step 1 of 5</p>
+      <p class="ob-progress-text mono" id="progress-text">Step 1 of 4</p>
     </aside>
 
     <main class="ob-panel">
       <!-- 1 -->
       <section class="pane" data-pane="1">
         <p class="pane-step mono">Step 1</p>
-        <h2>Name your workspace</h2>
-        <p class="pane-lede">Each workspace gets its own wallet, its own milestones and its own audit trail. Nothing is shared with other workspaces.</p>
+        <h2>Name your business</h2>
+        <p class="pane-lede">Free, no card, no email. You get a private workspace with its own payments account, milestones and history.</p>
         <form id="workspace-form" class="pane-form" novalidate>
           <label class="field">Business name
             <input class="input" name="name" required maxlength="100" placeholder="Acme Design Studio" autocomplete="organization">
@@ -51,13 +50,9 @@
             <span class="input-prefix"><span class="mono">ipay /</span><input class="input mono" name="slug" required maxlength="64" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="acme-studio" spellcheck="false" autocomplete="off"></span>
             <span class="hint">You'll use this to sign in. Filled in from the name.</span>
           </label>
-          <label class="field">Invite code
-            <input class="input mono" name="adminToken" type="password" required autocomplete="current-password" placeholder="From whoever invited you to iPay">
-            <span class="hint">iPay is invite only while in testing.</span>
-          </label>
           <p class="form-error" data-error hidden></p>
           <div class="pane-actions">
-            <button class="btn btn-ink btn-lg" type="submit">Create workspace</button>
+            <button class="btn btn-ink btn-lg" type="submit">Create my workspace</button>
           </div>
         </form>
       </section>
@@ -83,29 +78,15 @@
         </div>
       </section>
 
+
       <!-- 3 -->
       <section class="pane" data-pane="3" hidden>
         <p class="pane-step mono">Step 3</p>
-        <h2>Create your payments account</h2>
-        <p class="pane-lede">This is the account your budget goes into and contractor payments come out of. It belongs to this workspace only.</p>
-        <div class="task" id="task-wallet">
-          <span class="task-dot"></span>
-          <div><strong>Payments account</strong><small id="wallet-status">Not created yet</small></div>
-        </div>
-        <p class="form-error" data-error hidden></p>
-        <div class="pane-actions">
-          <button class="btn btn-ink btn-lg" id="provision">Create account</button>
-        </div>
-      </section>
-
-      <!-- 4 -->
-      <section class="pane" data-pane="4" hidden>
-        <p class="pane-step mono">Step 4</p>
         <h2>Add money to pay with</h2>
-        <p class="pane-lede">While iPay is in testing you can get free test dollars to try a real payment. You can also send USDC to your account address yourself.</p>
+        <p class="pane-lede">iPay runs on the Arc test network right now, so you can get free test dollars and make real payments with them. You can also send USDC to your account yourself.</p>
         <div class="task" id="task-fund">
           <span class="task-dot"></span>
-          <div><strong>Account address</strong><small>Send USDC here to add funds</small></div>
+          <div><strong>Payments account</strong><small id="wallet-status">Ready</small></div>
           <button type="button" class="btn btn-sm" id="copy-address">Copy address</button>
         </div>
         <p class="form-error" data-error hidden></p>
@@ -116,9 +97,9 @@
         </div>
       </section>
 
-      <!-- 5 -->
-      <section class="pane" data-pane="5" hidden>
-        <p class="pane-step mono">Step 5</p>
+      <!-- 4 -->
+      <section class="pane" data-pane="4" hidden>
+        <p class="pane-step mono">Step 4</p>
         <h2>Ready.</h2>
         <p class="pane-lede">Your workspace is set up. Test dollars can take a minute to show in your balance.</p>
         <div class="pane-actions">
