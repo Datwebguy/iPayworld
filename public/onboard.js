@@ -49,7 +49,7 @@ function go(next) {
   });
   $('#progress').style.width = `${(step / 5) * 100}%`;
   $('#progress-text').textContent = `Step ${step} of 5`;
-  if (workspace) $('#dashboard').href = `/app.html?workspace=${encodeURIComponent(workspace.slug)}`;
+  if (workspace) $('#dashboard').href = `/app?workspace=${encodeURIComponent(workspace.slug)}`;
   persist();
   const focusable = $(`.pane[data-pane="${step}"] input, .pane[data-pane="${step}"] button`);
   if (focusable && step > 1) focusable.focus({ preventScroll: true });
@@ -84,7 +84,7 @@ form.addEventListener('submit', async event => {
     form.adminToken.value = '';
     go(2);
   } catch (error) {
-    showError(form, /owner token/i.test(error.message) ? 'That admin key was not accepted.' : error.message);
+    showError(form, /owner token/i.test(error.message) ? 'That invite code was not accepted.' : error.message);
   } finally { done(); }
 });
 
@@ -114,14 +114,13 @@ $('#provision').addEventListener('click', async event => {
   const task = $('#task-wallet');
   showError(pane, '');
   task.className = 'task running';
-  $('#wallet-status').textContent = 'Asking Circle for a wallet on Arc…';
+  $('#wallet-status').textContent = 'Creating your account…';
   const done = busy(event.currentTarget, 'Creating…');
   try {
     const result = await call(`/api/workspaces/${workspace.slug}/provision-treasury`, { method: 'POST', headers: { Authorization: `Bearer ${ownerToken}` } });
     workspace = result.workspace;
     task.className = 'task done';
-    $('#wallet-status').textContent = workspace.walletAddress;
-    $('#wallet-address').textContent = workspace.walletAddress;
+    $('#wallet-status').textContent = 'Ready';
     setTimeout(() => go(4), 600);
   } catch (error) {
     task.className = 'task failed';
@@ -146,11 +145,11 @@ $('#fund').addEventListener('click', async event => {
     task.className = 'task done';
     const note = $('#fund-status');
     note.hidden = false;
-    note.textContent = 'Faucet request sent. The USDC usually lands within a minute.';
+    note.textContent = 'Requested. Test dollars usually arrive within a minute.';
     setTimeout(() => go(5), 900);
   } catch (error) {
     task.className = 'task failed';
-    showError(pane, `${error.message} You can skip this and send USDC to the address yourself.`);
+    showError(pane, `${error.message} You can skip this and add money later.`);
   } finally { done(); }
 });
 $('#skip-fund').addEventListener('click', () => go(5));
@@ -190,7 +189,7 @@ $('#member-form').addEventListener('submit', async event => {
       workspace = saved.workspace;
       ownerToken = sessionStorage.getItem(`ipay-owner-token:${workspace.slug}`) || '';
       if (ownerToken) {
-        if (workspace.walletAddress) { $('#wallet-status').textContent = workspace.walletAddress; $('#wallet-address').textContent = workspace.walletAddress; $('#task-wallet').className = 'task done'; }
+        if (workspace.walletAddress) { $('#wallet-status').textContent = 'Ready'; $('#task-wallet').className = 'task done'; }
         return go(saved.step);
       }
     }

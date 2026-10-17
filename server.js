@@ -506,6 +506,8 @@ async function api(req, res, path) {
     return respond(res, 200, { deposit, wallet: { liquidUsdc: after.liquidUsdc, vaultUsdc: after.vaultUsdc, yieldEarned: after.yieldEarned } });
   }
   if (req.method === 'GET' && path === '/api/config') return respond(res, 200, { mode, chain: clients?.config.chain || null });
+  // The server's own treasury belongs to the operator; users only ever see their workspace.
+  if (req.method === 'GET' && ['/api/state', '/api/arc-wallet', '/api/earn-position'].includes(path)) requireOwner(req);
   if (req.method === 'GET' && path === '/api/state') {
     if (mode === 'live') {
       try {

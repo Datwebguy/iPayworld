@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f3f1ea" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#0f100e" media="(prefers-color-scheme: dark)">
-  <meta name="description" content="iPay holds a project budget in USDC on Arc, keeps the idle part in an Earn vault, screens every contractor with CompliR, and pays only when the work is approved.">
-  <title>iPay · Milestone payments on Arc</title>
+  <meta name="description" content="iPay holds your project budget, earns interest on the part you are not using, checks every contractor, and pays only when you approve the work.">
+  <title>iPay · Pay contractors when the work is done</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
@@ -25,13 +25,13 @@
       <nav class="nav-links" id="nav-links" aria-label="Sections">
         <a href="#how">How it works</a>
         <a href="#policy">Policy</a>
-        <a href="#stack">Stack</a>
-        <a href="/onboard.html" class="nav-mobile-only">Set up a workspace</a>
-        <a href="/app.html" class="nav-mobile-only">Open treasury</a>
+        <a href="#stack">Built on</a>
+        <a href="/onboard" class="nav-mobile-only">Set up a workspace</a>
+        <a href="/app" class="nav-mobile-only">Sign in</a>
       </nav>
       <div class="nav-actions">
-        <a href="/onboard.html" class="btn btn-ghost btn-sm">Set up</a>
-        <a href="/app.html" class="btn btn-ink btn-sm">Open treasury</a>
+        <a href="/onboard" class="btn btn-ghost btn-sm">Set up</a>
+        <a href="/app" class="btn btn-ink btn-sm">Sign in</a>
       </div>
       <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Menu">
         <span></span><span></span>
@@ -43,19 +43,19 @@
     <!-- Hero -->
     <section class="hero">
       <div class="hero-copy">
-        <p class="kicker reveal"><span class="dot live"></span> USDC on Arc · screened by CompliR</p>
+        <p class="kicker reveal"><span class="dot live"></span> Milestone payments for small teams</p>
         <h1 class="hero-title reveal" style="--d:.06s">Pay contractors when the work is done. <em>Not before.</em></h1>
         <p class="hero-lede reveal" style="--d:.12s">
-          iPay holds your project budget, keeps the idle part earning in an Earn vault, and releases each milestone only after you approve the work and the contractor's wallet clears a risk check.
+          iPay holds your project budget, earns interest on the part you are not using yet, and pays each milestone only after you approve the work and the contractor passes a risk check.
         </p>
         <div class="hero-cta reveal" style="--d:.18s">
-          <a href="/onboard.html" class="btn btn-ink btn-lg">Set up a workspace <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-          <a href="/app.html" class="btn btn-lg">Open the treasury</a>
+          <a href="/onboard" class="btn btn-ink btn-lg">Set up a workspace <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a href="/app" class="btn btn-lg">Sign in</a>
         </div>
         <dl class="hero-facts reveal" style="--d:.24s">
-          <div><dt>Settles in</dt><dd>USDC on Arc</dd></div>
-          <div><dt>Idle budget</dt><dd>Earn Kit vault</dd></div>
-          <div><dt>Treasury balance</dt><dd class="mono" id="hero-balance">reading Arc…</dd></div>
+          <div><dt>Paid in</dt><dd>Digital dollars</dd></div>
+          <div><dt>Unused budget</dt><dd>Earns interest</dd></div>
+          <div><dt>Every payment</dt><dd>Risk checked first</dd></div>
         </dl>
       </div>
 
@@ -67,22 +67,22 @@
               <p class="slip-ref mono">Release 0041</p>
               <h2 class="slip-title">Checkout redesign, phase 2</h2>
             </div>
-            <p class="slip-amount mono">1,250.00<span>USDC</span></p>
+            <p class="slip-amount mono">$1,250.00</p>
           </header>
           <dl class="slip-meta">
-            <div><dt>To</dt><dd class="mono">Maya Okafor · 0x6747…e60c</dd></div>
+            <div><dt>To</dt><dd class="mono">Maya Okafor</dd></div>
             <div><dt>From</dt><dd class="mono">Studio treasury</dd></div>
           </dl>
           <ol class="slip-steps">
             <li data-step="0"><span class="tick" aria-hidden="true"></span><span class="s-label">Owner approved the work</span><span class="s-val mono">notes logged</span></li>
-            <li data-step="1"><span class="tick" aria-hidden="true"></span><span class="s-label">CompliR screened the wallet</span><span class="s-val mono" id="slip-verdict">LOW</span></li>
-            <li data-step="2"><span class="tick" aria-hidden="true"></span><span class="s-label">Drawn from Earn vault</span><span class="s-val mono" id="slip-draw">410.00</span></li>
-            <li data-step="3"><span class="tick" aria-hidden="true"></span><span class="s-label">Sent on Arc</span><span class="s-val mono" id="slip-tx">0x9f2c…41ab</span></li>
+            <li data-step="1"><span class="tick" aria-hidden="true"></span><span class="s-label">Contractor risk check</span><span class="s-val mono" id="slip-verdict">LOW</span></li>
+            <li data-step="2"><span class="tick" aria-hidden="true"></span><span class="s-label">Moved from savings</span><span class="s-val mono" id="slip-draw">$410.00</span></li>
+            <li data-step="3"><span class="tick" aria-hidden="true"></span><span class="s-label">Paid to contractor</span><span class="s-val mono" id="slip-tx">receipt saved</span></li>
           </ol>
           <div class="stamp" id="slip-stamp" aria-live="polite">Released</div>
           <footer class="slip-foot">
-            <span class="slip-foot-label">Try a verdict</span>
-            <div class="seg" role="radiogroup" aria-label="CompliR verdict">
+            <span class="slip-foot-label">Try a risk result</span>
+            <div class="seg" role="radiogroup" aria-label="Risk result">
               <button role="radio" aria-checked="true" data-verdict="LOW">Low</button>
               <button role="radio" aria-checked="false" data-verdict="MEDIUM">Medium</button>
               <button role="radio" aria-checked="false" data-verdict="HIGH">High</button>
@@ -97,13 +97,12 @@
     <section class="tape" aria-label="Release rules">
       <div class="tape-track" id="tape-track">
         <div class="tape-group">
-          <span><b>Low risk</b> pays out on its own</span>
+          <span><b>Low risk</b> is paid automatically</span>
           <span><b>Medium risk</b> waits for you</span>
           <span><b>High risk</b> is blocked and logged</span>
-          <span>Idle USDC earns until the moment it's needed</span>
-          <span>Every decision keeps its signed verdict</span>
-          <span>One wallet per workspace, never pooled</span>
-          <span class="tape-live">Arc Testnet block <b class="mono" id="tape-block">…</b></span>
+          <span>Unused budget earns interest until it's needed</span>
+          <span>Every payment keeps its receipt and reasons</span>
+          <span>Your money is never mixed with anyone else's</span>
         </div>
       </div>
     </section>
@@ -120,14 +119,14 @@
         <li class="how-step" data-i="01">
           <span class="how-num mono">01</span>
           <h3>Fund the workspace</h3>
-          <p>Each workspace gets its own Circle developer-controlled wallet on Arc. You send the project budget there in USDC. No shared balances between clients.</p>
-          <div class="how-detail mono"><span>wallet</span> 0xb3cc…ba17 <span>balance</span> USDC</div>
+          <p>Your workspace gets its own payments account. You add the project budget to it. Nobody else's money is ever mixed with yours.</p>
+          <div class="how-detail mono"><span>account</span> yours alone</div>
         </li>
         <li class="how-step" data-i="02">
           <span class="how-num mono">02</span>
           <h3>Park what you don't need yet</h3>
-          <p>The part of the budget that isn't due soon goes into an Earn Kit USDC vault. It stays there while the work happens and is withdrawn only for the exact amount a release needs.</p>
-          <div class="how-detail mono"><span>vault</span> Earn Kit · USDC <span>withdraw</span> on release</div>
+          <p>The part of the budget that isn't due soon moves into savings and earns interest while the work happens. When a payment needs it, iPay moves back exactly the amount required.</p>
+          <div class="how-detail mono"><span>savings</span> earning <span>moves back</span> when needed</div>
         </li>
         <li class="how-step" data-i="03">
           <span class="how-num mono">03</span>
@@ -137,9 +136,9 @@
         </li>
         <li class="how-step" data-i="04">
           <span class="how-num mono">04</span>
-          <h3>Screen, then pay</h3>
-          <p>iPay asks CompliR about the contractor's wallet and checks the signed answer. A low verdict pays out on Arc straight away. Anything else stops and tells you why.</p>
-          <div class="how-detail mono"><span>verdict</span> LOW <span>tx</span> confirmed on Arc</div>
+          <h3>Check, then pay</h3>
+          <p>iPay runs a risk check on the contractor before any money moves. Low risk is paid straight away. Anything else stops and tells you why.</p>
+          <div class="how-detail mono"><span>risk</span> low <span>payment</span> confirmed</div>
         </li>
       </ol>
     </section>
@@ -148,15 +147,15 @@
     <section class="policy" id="policy">
       <div class="section-head">
         <p class="eyebrow reveal">The policy</p>
-        <h2 class="section-title reveal">Three verdicts. Each one does exactly one thing.</h2>
+        <h2 class="section-title reveal">Three risk results. Each one does exactly one thing.</h2>
       </div>
       <div class="ledger reveal">
         <div class="ledger-row head">
-          <span>Verdict</span><span>What happens</span><span>What you do</span>
+          <span>Risk</span><span>What happens</span><span>What you do</span>
         </div>
         <div class="ledger-row">
           <span class="v v-low">Low</span>
-          <span>USDC is drawn from the vault if needed and sent to the contractor on Arc. The receipt is checked against the verdict's validity window.</span>
+          <span>The contractor is paid right away, using savings if needed. iPay confirms the payment arrived and keeps the receipt.</span>
           <span class="muted">Nothing.</span>
         </div>
         <div class="ledger-row">
@@ -166,18 +165,18 @@
         </div>
         <div class="ledger-row">
           <span class="v v-high">High</span>
-          <span>The release is blocked and the reason codes are written to the audit trail.</span>
+          <span>The payment is blocked and the reason is saved to your history.</span>
           <span class="muted">Find another way to pay, or don't.</span>
         </div>
       </div>
       <div class="records reveal">
-        <p class="records-title">Every release record keeps</p>
+        <p class="records-title">Every payment record keeps</p>
         <ul>
           <li>the milestone, amount and recipient</li>
           <li>your approval notes</li>
-          <li>the CompliR verdict, reasons and signature</li>
-          <li>the vault withdrawal and payment transactions</li>
-          <li>the yield earned at the moment of release</li>
+          <li>the risk result and the reasons for it</li>
+          <li>the payment receipt</li>
+          <li>the interest earned up to that point</li>
         </ul>
       </div>
     </section>
@@ -191,19 +190,19 @@
       <div class="stack-grid">
         <article class="stack-item reveal">
           <p class="stack-name">Arc</p>
-          <p>Settlement chain. USDC is the native gas token, so a payment needs nothing else in the wallet.</p>
+          <p>The payment network. Payments settle in seconds, in digital dollars.</p>
         </article>
         <article class="stack-item reveal" style="--d:.06s">
-          <p class="stack-name">Circle Wallets</p>
-          <p>One developer-controlled wallet per workspace, created when you set the workspace up.</p>
+          <p class="stack-name">Circle</p>
+          <p>Holds each workspace's money in its own account, created when you sign up.</p>
         </article>
         <article class="stack-item reveal" style="--d:.12s">
-          <p class="stack-name">Earn Kit</p>
-          <p>Holds idle USDC in a vault and returns it on withdrawal, with yield tracked per position.</p>
+          <p class="stack-name">Circle Earn</p>
+          <p>Earns interest on the budget you are not using yet.</p>
         </article>
         <article class="stack-item reveal" style="--d:.18s">
           <p class="stack-name">CompliR</p>
-          <p>Screens the recipient and returns a signed EIP-712 verdict that iPay verifies before sending.</p>
+          <p>Checks every contractor before they are paid, and signs the result so it can't be altered.</p>
         </article>
       </div>
     </section>
@@ -212,8 +211,8 @@
     <section class="closer">
       <h2 class="closer-title reveal">Put the next milestone<br>through it.</h2>
       <div class="closer-cta reveal" style="--d:.08s">
-        <a href="/onboard.html" class="btn btn-accent btn-lg">Set up a workspace <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-        <a href="/app.html" class="btn btn-lg">Open the treasury</a>
+        <a href="/onboard" class="btn btn-accent btn-lg">Set up a workspace <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a href="/app" class="btn btn-lg">Sign in</a>
       </div>
     </section>
   </main>
@@ -225,13 +224,13 @@
           <svg class="emblem" viewBox="0 0 32 32" aria-hidden="true"><polygon class="e-ink" points="6.5,5.5 22.5,5.5 26.5,9.5 10.5,9.5"/><polygon class="e-acc" points="26.5,6.5 26.5,22.5 22.5,26.5 22.5,10.5"/><polygon class="e-ink" points="25.5,26.5 9.5,26.5 5.5,22.5 21.5,22.5"/><polygon class="e-acc" points="5.5,25.5 5.5,9.5 9.5,5.5 9.5,21.5"/><polygon class="e-ink" points="16,11.5 20.5,16 16,20.5 11.5,16"/><circle class="e-acc" cx="16" cy="16" r="1.6"/></svg>
           <span>iPay</span>
         </a>
-        <p>Milestone payments for small teams and freelancers who pay contractors in USDC.</p>
+        <p>Milestone payments for small teams who pay contractors.</p>
       </div>
       <nav class="floor-cols" aria-label="Footer">
         <div>
           <p class="floor-head">Product</p>
-          <a href="/app.html">Treasury</a>
-          <a href="/onboard.html">Set up a workspace</a>
+          <a href="/app">Treasury</a>
+          <a href="/onboard">Set up a workspace</a>
           <a href="#policy">Release policy</a>
         </div>
         <div>
@@ -248,8 +247,8 @@
     </div>
     <p class="floor-mark serif" aria-hidden="true">iPay</p>
     <div class="floor-bottom">
-      <span class="chip" id="net-chip"><span class="dot" id="net-dot"></span><span id="net-text">Checking Arc Testnet</span></span>
-      <span class="muted">Testnet build. Not financial advice, not a bank.</span>
+      <span class="chip" id="net-chip"><span class="dot" id="net-dot"></span><span id="net-text">Checking status</span></span>
+      <span class="muted">Test version. iPay is not a bank.</span>
     </div>
   </footer>
 

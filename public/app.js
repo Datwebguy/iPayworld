@@ -1,13 +1,14 @@
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
-const workspaceSlug = new URLSearchParams(location.search).get('workspace');
+const params = new URLSearchParams(location.search);
+const workspaceSlug = params.get('workspace');
+// The server's own single treasury, for the operator only. Every user works inside a workspace.
+const operatorMode = !workspaceSlug && params.has('operator');
 const TOKEN_KEY = workspaceSlug ? `ipay-owner-token:${workspaceSlug}` : 'ipay-owner-token';
+const LAST_KEY = 'ipay-last-workspace';
 const ARC_RPC = 'https://rpc.testnet.arc.io';
 const EXPLORER = 'https://testnet.arcscan.app';
-const USDC = '0x3600000000000000000000000000000000000000';
-const DEMO_WALLET = '0xb3ccbf94b1965844e062bd9ad22df72b9a45ba17';
-const DEMO_VAULT = '0xaabbef1d3971c710276ed41ec791bbe14cdb8e88';
 const VIEWS = { overview: 'Overview', milestones: 'Milestones', activity: 'Audit trail' };
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -16,6 +17,7 @@ try { localStorage.removeItem('ipay_enclave_state'); } catch {}
 
 const usd = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const money = value => usd.format(Number(value) || 0);
+const dollars = value => `$${money(value)}`;
 const round2 = value => Math.round(value * 100) / 100;
 const short = value => value ? `${value.slice(0, 6)}…${value.slice(-4)}` : '–';
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -96,13 +98,6 @@ async function rpc(method, params = []) {
   return json.result;
 }
 
-async function readUsdc(address) {
-  try {
-    const raw = await rpc('eth_call', [{ to: USDC, data: `0x70a08231${address.slice(2).toLowerCase().padStart(64, '0')}` }, 'latest']);
-    return Number(BigInt(raw)) / 1e6;
-  } catch { return null; }
-}
-
 /* ---------- Feedback ---------- */
 function toast(message, error = false) {
   const el = $('#toast');
@@ -139,12 +134,6 @@ async function refresh() {
     if (error.status === 401 || error.status === 403) throw error;
     offline = true;
     offlineReason = error.message;
-    if (!data && !workspaceSlug) {
-      // Read-only fallback: the demo wallet's real balance, straight from Arc.
-      const liquid = await readUsdc(DEMO_WALLET);
-      data = normalise({ wallet: { address: DEMO_WALLET, vaultAddress: DEMO_VAULT, liquid: liquid ?? 0, vault: 0 }, milestones: [], audit: [] });
-      data.chainOnly = true;
-    }
   } finally {
     setSpinning(false);
   }
@@ -155,17 +144,18 @@ async function refresh() {
 const STATUS = {
   in_progress: ['Waiting on delivery', ''],
   awaiting_verification: ['Waiting for approval', ''],
-  verified: ['Approved, not sent', 'warn'],
-  checking: ['Screening', 'busy'],
-  withdrawing: ['Withdrawing from vault', 'busy'],
-  sending: ['Sending', 'busy'],
-  confirming: ['Confirming on Arc', 'busy'],
-  needs_reconciliation: ['Needs reconciliation', 'warn'],
+  verified: ['Approved, not paid yet', 'warn'],
+  checking: ['Checking contractor', 'busy'],
+  withdrawing: ['Moving from savings', 'busy'],
+  sending: ['Paying', 'busy'],
+  confirming: ['Confirming payment', 'busy'],
+  needs_reconciliation: ['Payment unconfirmed', 'warn'],
   review: ['Held for review', 'warn'],
   blocked: ['Blocked', 'bad'],
   paid: ['Paid', 'ok']
 };
-const STAGES = ['Created', 'Approved', 'Screened', 'Paid'];
+const STAGES = ['Created', 'Approved', 'Checked', 'Paid'];
+const RISK = { LOW: 'Low risk', MEDIUM: 'Medium risk', HIGH: 'High risk', UNAVAILABLE: 'Check unavailable' };
 function stages(m) {
   switch (m.status) {
     case 'in_progress':
@@ -185,19 +175,19 @@ function stages(m) {
 
 function actionsFor(m) {
   const out = [];
-  if (m.risk) out.push(`<button class="mini" data-proof="m:${esc(m.id)}">Verdict</button>`);
-  if (['in_progress', 'awaiting_verification'].includes(m.status)) out.push(`<button class="btn btn-ink btn-sm" data-action="verify" data-id="${esc(m.id)}">Approve</button>`);
-  if (m.status === 'verified') out.push(`<button class="btn btn-accent btn-sm" data-action="release" data-id="${esc(m.id)}">Release</button>`);
-  if (m.status === 'needs_reconciliation' && serverMode === 'live') out.push(`<button class="btn btn-sm" data-action="reconcile" data-id="${esc(m.id)}">Reconcile</button>`);
-  if (m.status === 'paid' && m.txHash && serverMode === 'live') out.push(`<a class="mini" href="${EXPLORER}/tx/${esc(m.txHash)}" target="_blank" rel="noopener">View tx</a>`);
+  if (m.risk) out.push(`<button class="mini" data-proof="m:${esc(m.id)}">Risk check</button>`);
+  if (['in_progress', 'awaiting_verification'].includes(m.status)) out.push(`<button class="btn btn-ink btn-sm" data-action="verify" data-id="${esc(m.id)}">Approve work</button>`);
+  if (m.status === 'verified') out.push(`<button class="btn btn-accent btn-sm" data-action="release" data-id="${esc(m.id)}">Pay now</button>`);
+  if (m.status === 'needs_reconciliation' && serverMode === 'live') out.push(`<button class="btn btn-sm" data-action="reconcile" data-id="${esc(m.id)}">Confirm payment</button>`);
+  if (m.status === 'paid' && m.txHash && serverMode === 'live') out.push(`<a class="mini" href="${EXPLORER}/tx/${esc(m.txHash)}" target="_blank" rel="noopener">Receipt ↗</a>`);
   return out.join('');
 }
 
 function noteFor(m, detailed) {
   const parts = [];
-  if (m.status === 'review' || m.status === 'blocked') parts.push(`<b>CompliR</b>${esc(m.risk?.reason || m.risk?.verdict || '')}`);
-  else if (m.risk?.verdict === 'UNAVAILABLE') parts.push(`<b>Screening failed</b>${esc(m.risk.reason)}`);
-  if (m.releaseError) parts.push(`<b>Stopped</b>${esc(m.releaseError)}`);
+  if (m.status === 'review' || m.status === 'blocked') parts.push(`<b>${RISK[m.risk?.verdict] || 'Risk check'}</b>${esc(m.risk?.rationale || m.risk?.reason || '')}`);
+  else if (m.risk?.verdict === 'UNAVAILABLE') parts.push(`<b>Risk check failed</b>The checking service did not answer. Try paying again in a minute.`);
+  if (m.releaseError) parts.push(`<b>Payment stopped</b>${esc(m.releaseError)}`);
   if (detailed && m.description) parts.push(`<b>Notes</b>${esc(m.description)}`);
   if (detailed && m.evidence) parts.push(`<b>Approved because</b>${esc(m.evidence)}`);
   return parts.length ? `<p class="m-note">${parts.join('<br>')}</p>` : '';
@@ -209,9 +199,9 @@ function milestoneHtml(m, i, detailed = false) {
   return `<article class="m-row" style="--i:${i}">
     <div>
       <p class="m-title">${esc(m.title)}</p>
-      <p class="m-sub"><span>${esc(m.contractor)}</span><button class="addr-btn" data-copy="${esc(m.address)}" title="Copy address">${esc(short(m.address))}</button>${m.createdAt ? `<span>· ${esc(when(m.createdAt))}</span>` : ''}</p>
+      <p class="m-sub"><span>${esc(m.contractor)}</span>${m.createdAt ? `<span>· ${esc(when(m.createdAt))}</span>` : ''}<button class="addr-btn" data-copy="${esc(m.address)}">copy address</button></p>
     </div>
-    <p class="m-amt mono">${money(m.amount)}<span>USDC</span></p>
+    <p class="m-amt mono">${dollars(m.amount)}</p>
     ${noteFor(m, detailed)}
     <div class="m-bottom">
       <div class="track" aria-label="Progress: ${esc(label)}">${track}</div>
@@ -248,45 +238,69 @@ function activityLook(a) {
 }
 function txLink(hash, simulated) {
   if (!hash) return '';
-  return simulated ? `${esc(short(hash))} (simulated)` : `<a href="${EXPLORER}/tx/${esc(hash)}" target="_blank" rel="noopener">${esc(short(hash))}</a>`;
+  return simulated ? 'Simulated' : `<a href="${EXPLORER}/tx/${esc(hash)}" target="_blank" rel="noopener">View receipt ↗</a>`;
+}
+
+// Plain-language title and detail, built from our own records rather than the server's internal strings.
+function describe(a) {
+  const m = data?.milestones.find(item => item.id === a.milestoneId);
+  const who = m?.contractor || '';
+  const what = m?.title || '';
+  const amt = m ? dollars(m.amount) : '';
+  const verdict = a.risk?.verdict;
+  const deposited = a.detail?.match(/[\d.]+/)?.[0];
+  switch (a.type) {
+    case 'milestone_created': return ['Milestone created', [what, amt].filter(Boolean).join(' · ')];
+    case 'milestone_verified': return ['Work approved', [what, who].filter(Boolean).join(' · ')];
+    case 'risk_check': return [`Contractor check: ${(RISK[verdict] || 'done').toLowerCase()}`, verdict === 'LOW' ? `${who || 'Contractor'} cleared for payment` : verdict === 'MEDIUM' ? `Payment to ${who || 'the contractor'} held for your review` : `Payment to ${who || 'the contractor'} blocked`];
+    case 'risk_unavailable': return ['Contractor check unavailable', 'Try paying again in a minute'];
+    case 'payment': return ['Payment sent', [amt, who && `to ${who}`].filter(Boolean).join(' ')];
+    case 'payment_reconciled': return ['Payment confirmed', [amt, who && `to ${who}`].filter(Boolean).join(' ')];
+    case 'vault_deposit': return ['Moved to savings', deposited ? dollars(deposited) : ''];
+    case 'vault_withdrawal': return ['Moved from savings', what ? `For ${what}` : ''];
+    case 'release_failed': return ['Payment not sent', 'Not enough money in the account'];
+    case 'release_uncertain': return ['Payment unconfirmed', 'Confirm it from the milestone'];
+    default: return [a.title, ''];
+  }
 }
 function activityHtml(a, i, detailed = false) {
   const [icon, tone] = activityLook(a);
+  const [title, detail] = describe(a);
   let extra = '';
   if (detailed) {
     const rows = [];
-    if (a.txHash) rows.push(['Transaction', txLink(a.txHash, a.simulated)]);
-    if (a.withdrawTxHash) rows.push(['Vault withdrawal', txLink(a.withdrawTxHash, a.simulated)]);
-    if (a.risk) rows.push(['Verdict', `${esc(a.risk.verdict)} · ${a.risk.signatureVerified ? 'signature checked' : a.risk.source === 'simulated' ? 'simulated' : 'unsigned'} <button class="mini" data-proof="a:${esc(a.id)}">Details</button>`]);
+    if (a.txHash) rows.push(['Payment', txLink(a.txHash, a.simulated)]);
+    if (a.withdrawTxHash) rows.push(['From savings', txLink(a.withdrawTxHash, a.simulated)]);
+    if (a.risk) rows.push(['Risk check', `${esc(RISK[a.risk.verdict] || a.risk.verdict)} <button class="mini" data-proof="a:${esc(a.id)}">Details</button>`]);
     if (a.evidence) rows.push(['Approval notes', esc(a.evidence)]);
-    if (a.yieldSnapshot !== undefined) rows.push(['Yield at release', a.yieldSnapshot === null ? 'not reported' : `${money(a.yieldSnapshot)} USDC`]);
-    if (a.redeemed) rows.push(['Drawn from vault', `${money(a.redeemed)} USDC`]);
+    if (a.yieldSnapshot) rows.push(['Interest earned by then', dollars(a.yieldSnapshot)]);
+    if (a.redeemed) rows.push(['Taken from savings', dollars(a.redeemed)]);
     if (rows.length) extra = `<dl class="act-extra">${rows.map(([k, v]) => `<div class="kv"><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`;
   }
   return `<div class="act" style="--i:${i}">
     <span class="act-ico ${tone}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[icon]}</svg></span>
-    <div><p class="act-title">${esc(a.title)}</p><p class="act-detail">${esc(a.detail)}</p>${extra}</div>
+    <div><p class="act-title">${esc(title)}</p>${detail ? `<p class="act-detail">${esc(detail)}</p>` : ''}${extra}</div>
     <span class="act-time">${esc(when(a.at))}</span>
   </div>`;
 }
 
 function emptyHtml(kind) {
-  if (kind === 'milestones') return `<div class="empty"><span class="empty-art"></span><h3>Nothing in the queue</h3><p>Create a milestone for the next piece of work. The amount is set aside until you approve it.</p><button class="btn btn-ink btn-sm" data-new>New milestone</button></div>`;
+  if (kind === 'milestones') return `<div class="empty"><span class="empty-art"></span><h3>Nothing waiting on you</h3><p>Add a milestone for the next piece of work. The money is set aside and only paid once you approve the result.</p><button class="btn btn-ink btn-sm" data-new>New milestone</button></div>`;
   if (kind === 'filtered') return `<div class="empty compact"><p>No milestones match this filter.</p></div>`;
-  if (kind === 'offline') return `<div class="empty compact"><p>Milestones load from the iPay server, which isn't responding.</p></div>`;
-  return `<div class="empty compact"><p>Nothing recorded yet. Approvals, screenings and payments show up here as they happen.</p></div>`;
+  if (kind === 'offline') return `<div class="empty compact"><p>Milestones will show here once iPay reconnects.</p></div>`;
+  return `<div class="empty compact"><p>Nothing yet. Approvals, checks and payments appear here as they happen.</p></div>`;
 }
 
 function animateNumber(el, to) {
   const from = shownTotal;
   shownTotal = to;
   el.classList.remove('skeleton');
-  if (reduceMotion || Math.abs(to - from) < 0.005) { el.textContent = money(to); return; }
+  if (reduceMotion || Math.abs(to - from) < 0.005) { el.textContent = dollars(to); return; }
   const start = performance.now();
   const step = now => {
     const t = Math.min(1, (now - start) / 700);
     const eased = 1 - Math.pow(1 - t, 3);
-    el.textContent = money(from + (to - from) * eased);
+    el.textContent = dollars(from + (to - from) * eased);
     if (t < 1) requestAnimationFrame(step);
   };
   requestAnimationFrame(step);
@@ -305,11 +319,11 @@ function renderBanner() {
   let cls = '';
   if (offline) {
     cls = 'bad';
-    html = `<div><strong>The iPay server isn't responding.</strong> ${esc(offlineReason)}.${data?.chainOnly ? ' The wallet balance below is read straight from Arc.' : ''} Actions are paused until it's back.</div><button class="btn btn-sm" data-refresh>Retry</button>`;
+    html = `<div><strong>iPay can't connect right now.</strong> Your money is safe. Actions are paused until the connection is back.</div><button class="btn btn-sm" data-refresh>Try again</button>`;
   } else if (serverMode === 'demo') {
-    html = '<div><strong>Demo server.</strong> Screening and payments here are simulated. No USDC moves on Arc.</div>';
+    html = '<div><strong>Practice mode.</strong> Checks and payments here are simulated. No money moves.</div>';
   } else if (workspaceSlug && data && !data.wallet?.address) {
-    html = `<div><strong>This workspace has no wallet yet.</strong> Finish setup to create one.</div><a class="btn btn-sm" href="/onboard.html">Finish setup</a>`;
+    html = `<div><strong>Your payments account isn't set up yet.</strong> Finish setup to create it.</div><a class="btn btn-sm" href="/onboard">Finish setup</a>`;
   }
   banner.className = `banner ${cls}`;
   banner.innerHTML = html;
@@ -318,7 +332,7 @@ function renderBanner() {
 
 function render() {
   renderBanner();
-  const modeText = offline ? 'Offline' : serverMode === 'live' ? 'Live · Arc Testnet' : serverMode === 'demo' ? 'Demo server' : 'Connecting';
+  const modeText = offline ? 'Offline' : serverMode === 'live' ? 'Connected' : serverMode === 'demo' ? 'Practice mode' : 'Connecting';
   $('#ws-mode').textContent = modeText;
   $$('[data-mode-text]').forEach(el => el.textContent = modeText);
   $('#synced').textContent = lastSync && !offline ? `Synced ${lastSync.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}` : '';
@@ -327,26 +341,23 @@ function render() {
     const { liquid, vault } = data.wallet;
     const total = liquid + vault;
     animateNumber($('#total'), total);
-    $('#total-sub').textContent = data.chainOnly ? 'Wallet balance read from Arc. Vault and commitments unavailable.' : `${money(data.available)} USDC free after ${money(data.committed)} committed to open milestones.`;
-    $('#liquid').textContent = money(liquid);
-    $('#vault').textContent = data.chainOnly ? '–' : money(vault);
-    $('#yield').textContent = data.wallet.yieldEarned ? `${money(data.wallet.yieldEarned)} earned` : '';
-    $('#committed').textContent = data.chainOnly ? '–' : money(data.committed);
-    $('#available').textContent = data.chainOnly ? '–' : money(data.available);
-    setBar('#bar-where', [liquid, vault], `Liquid ${money(liquid)}, in vault ${money(vault)}`);
-    setBar('#bar-for', [Math.min(data.committed, total), Math.max(0, total - data.committed)], `Committed ${money(data.committed)}, free ${money(data.available)}`);
+    $('#total-sub').textContent = data.committed > 0 ? `${dollars(data.available)} not yet assigned. ${dollars(data.committed)} is set aside for open milestones.` : 'Nothing is set aside yet. Add a milestone to reserve money for a piece of work.';
+    $('#liquid').textContent = dollars(liquid);
+    $('#vault').textContent = dollars(vault);
+    $('#yield').textContent = data.wallet.yieldEarned ? `${dollars(data.wallet.yieldEarned)} interest earned` : '';
+    $('#committed').textContent = dollars(data.committed);
+    $('#available').textContent = dollars(data.available);
+    setBar('#bar-where', [liquid, vault], `Ready to pay ${dollars(liquid)}, in savings ${dollars(vault)}`);
+    setBar('#bar-for', [Math.min(data.committed, total), Math.max(0, total - data.committed)], `Set aside ${dollars(data.committed)}, not yet assigned ${dollars(data.available)}`);
 
     const walletAddr = data.wallet.address;
-    const vaultAddr = data.wallet.vaultAddress || data.vaultAddress || (workspaceSlug ? null : DEMO_VAULT);
-    $('#acct-wallet-bal').textContent = `${money(liquid)} USDC`;
-    $('#acct-wallet-addr').textContent = walletAddr ? short(walletAddr) : 'No wallet yet';
+    $('#acct-wallet-bal').textContent = dollars(liquid);
     const link = $('#acct-wallet-link');
     link.hidden = !walletAddr;
     if (walletAddr) link.href = `${EXPLORER}/address/${walletAddr}`;
     $('[data-copy-wallet]').hidden = !walletAddr;
-    $('#acct-vault-bal').textContent = data.chainOnly ? '–' : `${money(vault)} USDC`;
-    $('#acct-vault-addr').textContent = vaultAddr ? short(vaultAddr) : 'No vault yet';
-    $('#acct-vault-note').textContent = serverMode === 'live' ? (data.wallet.yieldEarned === null || data.wallet.yieldEarned === undefined ? 'Yield not reported by Earn Kit yet.' : `Yield earned so far: ${money(data.wallet.yieldEarned)} USDC.`) : '';
+    $('#acct-vault-bal').textContent = dollars(vault);
+    $('#acct-vault-note').textContent = data.wallet.yieldEarned ? `${dollars(data.wallet.yieldEarned)} interest earned so far.` : '';
   }
 
   const milestones = data?.milestones || [];
@@ -357,7 +368,7 @@ function render() {
   const queue = milestones.filter(m => !isClosed(m)).slice(0, 5);
   $('#queue-list').innerHTML = queue.length ? queue.map((m, i) => milestoneHtml(m, i)).join('')
     : offline && !milestones.length ? emptyHtml('offline')
-    : milestones.length ? '<div class="empty compact"><p>Everything is paid or closed. Nice.</p></div>'
+    : milestones.length ? `<div class="empty compact"><p>You're all caught up. Every milestone is paid or closed.</p><button class="btn btn-sm" data-new>New milestone</button></div>`
     : emptyHtml('milestones');
 
   const filtered = milestones.filter(m => filter === 'all' || (filter === 'open' && !isClosed(m)) || (filter === 'closed' && isClosed(m)) || (filter === 'attention' && needsYou(m)));
@@ -367,6 +378,19 @@ function render() {
   $('#recent-list').innerHTML = audit.length ? audit.slice(0, 5).map((a, i) => activityHtml(a, i)).join('') : emptyHtml('audit');
   $('#audit-list').innerHTML = audit.length ? audit.map((a, i) => activityHtml(a, i, true)).join('') : emptyHtml('audit');
   $('#export-csv').hidden = !workspaceSlug || !audit.length;
+
+  const sum = list => list.reduce((total, m) => total + Number(m.amount || 0), 0);
+  const count = n => n === 1 ? '1 milestone' : `${n} milestones`;
+  const groups = {
+    paid: milestones.filter(m => m.status === 'paid'),
+    waiting: milestones.filter(m => ['in_progress', 'awaiting_verification', 'verified', 'needs_reconciliation'].includes(m.status)),
+    held: milestones.filter(m => m.status === 'review'),
+    blocked: milestones.filter(m => m.status === 'blocked')
+  };
+  for (const [key, list] of Object.entries(groups)) {
+    $(`#stat-${key}`).textContent = dollars(sum(list));
+    $(`#stat-${key}-n`).textContent = count(list.length);
+  }
 }
 
 function setView(next, push = true) {
@@ -420,6 +444,7 @@ $('#auth-form').addEventListener('submit', async event => {
       if (offline) throw new ApiError(offlineReason, 0);
     } else {
       await request('/api/workspaces');
+      await refresh();
     }
     try { sessionStorage.setItem(TOKEN_KEY, token); } catch {}
     form.reset();
@@ -443,18 +468,18 @@ function openCreate() {
 
 function openVerify(m) {
   activeId = m.id;
-  $('#verify-summary').innerHTML = `<strong>${esc(m.title)}</strong><span class="s-amt">${money(m.amount)}</span><small>${esc(m.contractor)} · ${esc(short(m.address))}</small>`;
+  $('#verify-summary').innerHTML = `<strong>${esc(m.title)}</strong><span class="s-amt">${dollars(m.amount)}</span><small>${esc(m.contractor)}</small>`;
   formError($('#verify-form'), '');
   $('#verify-dialog').showModal();
 }
 
 function outcomeMessage(m) {
   switch (m?.status) {
-    case 'paid': return ['Screened low and paid on Arc.', false];
-    case 'review': return ['CompliR returned medium. The payment is held for your review.', true];
-    case 'blocked': return ['CompliR returned high. The payment was blocked.', true];
+    case 'paid': return ['Contractor checked and paid.', false];
+    case 'review': return ['Medium risk. The payment is held until you review it.', true];
+    case 'blocked': return ['High risk. The payment was blocked.', true];
     case 'needs_reconciliation': return ['The payment was sent but not confirmed. Reconcile it from the milestone.', true];
-    case 'verified': return [m.risk?.verdict === 'UNAVAILABLE' ? 'Approved, but screening was unavailable. Try releasing again.' : 'Approved, but the release did not go through. Check the audit trail.', true];
+    case 'verified': return [m.risk?.verdict === 'UNAVAILABLE' ? 'Approved, but the contractor check was unavailable. Try paying again in a minute.' : 'Approved, but the payment did not go through. See the history for why.', true];
     default: return ['Approved.', false];
   }
 }
@@ -481,8 +506,8 @@ function openReconcile(m) {
   $('#reconcile-tx-field').hidden = !askHash;
   $('input[name=txHash]', form).required = askHash;
   $('#reconcile-intro').textContent = askHash
-    ? 'The release stopped before iPay could confirm it. Paste the Arc transaction that paid this milestone and iPay will check it on chain.'
-    : `iPay will look up ${m.txHash ? short(m.txHash) : 'the recorded transaction'} on Arc and mark the milestone paid if it matches.`;
+    ? 'This payment was sent but iPay could not confirm it arrived. Paste the receipt ID and iPay will check it.'
+    : 'iPay will look up the payment it sent and mark the milestone paid once it is confirmed.';
   $('#reconcile-dialog').showModal();
 }
 
@@ -493,22 +518,21 @@ function findRisk(ref) {
 function openProof(risk) {
   if (!risk) return;
   const msg = risk.signedProof?.typedData?.message;
+  const tone = risk.verdict === 'LOW' ? '--accent' : risk.verdict === 'MEDIUM' ? '--amber' : '--red';
+  const meaning = { LOW: 'Cleared. iPay pays automatically.', MEDIUM: 'Held. You decide whether to pay.', HIGH: 'Blocked. iPay will not pay this address.' }[risk.verdict] || 'The check could not be completed.';
   const rows = [
-    ['Verdict', `<strong style="color:var(${risk.verdict === 'LOW' ? '--accent' : risk.verdict === 'MEDIUM' ? '--amber' : '--red'})">${esc(risk.verdict)}</strong>`],
+    ['Result', `<strong style="color:var(${tone})">${esc(RISK[risk.verdict] || risk.verdict)}</strong>`],
+    ['What it means', meaning],
     ['Reason', esc(risk.rationale || risk.reason || '–')],
-    ['Screened', esc(when(risk.checkedAt)) || '–'],
-    ['Signature', risk.signatureVerified ? 'Checked against the CompliR attester' : risk.source === 'simulated' ? 'None (simulated on the demo server)' : 'Not verified'],
-    ['Source', esc(risk.source || '–')]
+    ['Checked', esc(when(risk.checkedAt)) || '–'],
+    ['Authentic', risk.signatureVerified ? 'Yes, signed by the checking service and verified by iPay' : risk.source === 'simulated' ? 'Practice mode, not a real check' : 'Not verified']
   ];
-  if (risk.decisionId) rows.push(['Decision ID', `<span class="mono">${esc(risk.decisionId)}</span>`]);
-  if (risk.signedProof?.attester) rows.push(['Attester', `<span class="mono">${esc(risk.signedProof.attester)}</span>`]);
-  if (msg?.score !== undefined) rows.push(['Score', esc(msg.score)]);
   if (msg?.validUntil) rows.push(['Valid until', esc(when(Number(msg.validUntil) * 1000))]);
-  if (msg?.decisionHash) rows.push(['Decision hash', `<span class="mono">${esc(msg.decisionHash)}</span>`]);
+  if (risk.decisionId) rows.push(['Reference', `<span class="mono">${esc(risk.decisionId)}</span>`]);
   $('#proof-content').innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
   const copy = $('#proof-copy');
   copy.hidden = !risk.signedProof;
-  copy.onclick = () => copyText(JSON.stringify(risk.signedProof, null, 2), 'Signed proof copied.');
+  copy.onclick = () => copyText(JSON.stringify(risk.signedProof, null, 2), 'Full record copied.');
   $('#proof-dialog').showModal();
 }
 
@@ -540,11 +564,11 @@ document.addEventListener('click', event => {
   if (target.closest('[data-new]')) return guarded(openCreate);
   if (target.closest('[data-refresh]')) return refresh().then(() => !offline && toast('Up to date.')).catch(error => handleAuthError(error) || toast(error.message, true));
   if (target.closest('[data-close]')) return target.closest('dialog').close();
-  if (target.closest('[data-copy-wallet]')) return data?.wallet?.address && copyText(data.wallet.address, 'Wallet address copied.');
+  if (target.closest('[data-copy-wallet]')) return data?.wallet?.address && copyText(data.wallet.address, 'Address copied. Send USDC to it to add funds.');
   if (target.closest('[data-deposit]')) return guarded(() => {
-    if (serverMode !== 'live') return toast('Vault deposits only work on a live server.', true);
+    if (serverMode !== 'live') return toast('Savings are not available in practice mode.', true);
     const max = Math.max(0, (data?.wallet?.liquid || 0) - 0.1);
-    $('#deposit-hint').textContent = `About ${money(max)} USDC can move after the gas reserve.`;
+    $('#deposit-hint').textContent = `Up to ${dollars(max)} can move. A little stays behind for fees.`;
     formError($('#deposit-form'), '');
     $('#deposit-dialog').showModal();
   });
@@ -577,8 +601,8 @@ $('#create-form').addEventListener('submit', async event => {
   event.preventDefault();
   const form = event.currentTarget;
   const payload = Object.fromEntries(new FormData(form));
-  if (data && !data.chainOnly && Number(payload.amount) > data.available) {
-    return formError(form, `That's more than the ${money(data.available)} USDC free to allocate.`);
+  if (data && Number(payload.amount) > data.available) {
+    return formError(form, `That's more than the ${dollars(data.available)} you have unassigned.`);
   }
   const done = busy($('button[type=submit]', form), 'Creating…');
   try {
@@ -596,7 +620,7 @@ $('#create-form').addEventListener('submit', async event => {
 $('#verify-form').addEventListener('submit', async event => {
   event.preventDefault();
   const form = event.currentTarget;
-  const done = busy($('button[type=submit]', form), 'Screening and sending…');
+  const done = busy($('button[type=submit]', form), 'Checking and paying…');
   try {
     data = normalise(await request(endpoint(`/api/milestones/${activeId}/verify`), { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(form))) }));
     form.reset();
@@ -622,7 +646,7 @@ $('#deposit-form').addEventListener('submit', async event => {
     form.reset();
     $('#deposit-dialog').close();
     await refresh();
-    toast(`${amount} USDC moved into the Earn vault.`);
+    toast(`${dollars(amount)} moved to savings.`);
   } catch (error) {
     if (handleAuthError(error)) $('#deposit-dialog').close();
     else formError(form, error.message);
@@ -632,13 +656,13 @@ $('#deposit-form').addEventListener('submit', async event => {
 $('#reconcile-form').addEventListener('submit', async event => {
   event.preventDefault();
   const form = event.currentTarget;
-  const done = busy($('button[type=submit]', form), 'Checking on Arc…');
+  const done = busy($('button[type=submit]', form), 'Confirming…');
   try {
     data = normalise(await request(endpoint(`/api/milestones/${activeId}/reconcile`), { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(form))) }));
     form.reset();
     $('#reconcile-dialog').close();
     render();
-    toast('Payment confirmed on Arc.');
+    toast('Payment confirmed.');
   } catch (error) {
     if (handleAuthError(error)) $('#reconcile-dialog').close();
     else formError(form, error.message);
@@ -648,18 +672,59 @@ $('#reconcile-form').addEventListener('submit', async event => {
 /* ---------- Network status ---------- */
 async function pollNetwork() {
   try {
-    const block = Number(BigInt(await rpc('eth_blockNumber')));
+    await rpc('eth_blockNumber');
     $$('[data-net-dot]').forEach(d => d.className = 'dot live');
-    $$('[data-net-text]').forEach(t => t.textContent = `Arc Testnet · #${block.toLocaleString('en-US')}`);
+    $$('[data-net-text]').forEach(t => t.textContent = 'Payments network online');
   } catch {
     $$('[data-net-dot]').forEach(d => d.className = 'dot bad');
-    $$('[data-net-text]').forEach(t => t.textContent = 'Arc unreachable');
+    $$('[data-net-text]').forEach(t => t.textContent = 'Payments network unreachable');
   }
 }
 
 /* ---------- Boot ---------- */
+/* ---------- Workspace sign-in (shown when no workspace is in the URL) ---------- */
+function showGate() {
+  document.body.classList.add('gated');
+  $('#gate').hidden = false;
+  const form = $('#gate-form');
+  let last = '';
+  try { last = localStorage.getItem(LAST_KEY) || ''; } catch {}
+  if (last) form.slug.value = last;
+  (last ? form.token : form.slug).focus();
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    const slug = form.slug.value.trim().toLowerCase();
+    const key = form.token.value.trim();
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return formError(form, 'Enter the workspace handle you chose at setup, like acme-studio.');
+    if (!key) return formError(form, 'Paste your access key.');
+    const done = busy($('button[type=submit]', form), 'Opening…');
+    try {
+      token = key;
+      await request(`/api/workspaces/${encodeURIComponent(slug)}/state`);
+      try { sessionStorage.setItem(`ipay-owner-token:${slug}`, key); localStorage.setItem(LAST_KEY, slug); } catch {}
+      location.href = `/app?workspace=${encodeURIComponent(slug)}`;
+    } catch (error) {
+      token = '';
+      formError(form, error.status === 401 || error.status === 403 ? "That handle and key don't match a workspace." : error.message);
+      done();
+    }
+  });
+}
+
 async function boot() {
+  if (!workspaceSlug && !operatorMode) {
+    // Returning in the same tab: go straight back to the workspace already unlocked.
+    try {
+      const last = localStorage.getItem(LAST_KEY);
+      if (last && sessionStorage.getItem(`ipay-owner-token:${last}`) && !params.has('switch')) {
+        location.replace(`/app?workspace=${encodeURIComponent(last)}`);
+        return;
+      }
+    } catch {}
+    return showGate();
+  }
   if (workspaceSlug) {
+    try { localStorage.setItem(LAST_KEY, workspaceSlug); } catch {}
     $('#ws-name').textContent = workspaceSlug;
     $('#ws-avatar').textContent = workspaceSlug[0].toUpperCase();
     $('#crumb-ws').textContent = workspaceSlug;
@@ -677,7 +742,7 @@ async function boot() {
     offlineReason = error.message;
   }
 
-  if (workspaceSlug && !token) {
+  if ((workspaceSlug || serverMode === 'live') && !token) {
     render();
     return openAuth();
   }
@@ -689,6 +754,13 @@ async function boot() {
     if (document.hidden || $('dialog[open]')) return;
     refresh().catch(() => {});
   }, 30_000);
+}
+
+if (operatorMode) {
+  $('#ws-name').textContent = 'Operator treasury';
+  $('#ws-avatar').textContent = 'O';
+  $('#crumb-ws').textContent = 'Operator';
+  $('#auth-intro').textContent = 'This is the server owner\'s own treasury. Paste the admin key to open it.';
 }
 
 window.addEventListener('hashchange', () => setView(location.hash.slice(1) || 'overview', false));

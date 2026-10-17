@@ -1,6 +1,4 @@
 const ARC_RPC = 'https://rpc.testnet.arc.io';
-const USDC = '0x3600000000000000000000000000000000000000';
-const DEMO_TREASURY = '0xb3ccbf94b1965844e062bd9ad22df72b9a45ba17';
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wait = ms => new Promise(resolve => setTimeout(resolve, reduceMotion ? 0 : ms));
 
@@ -96,7 +94,6 @@ async function rpc(method, params = []) {
   const clone = track.firstElementChild.cloneNode(true);
   clone.setAttribute('aria-hidden', 'true');
   clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
-  clone.querySelector('.tape-live b')?.classList.add('tape-block-clone');
   track.appendChild(clone);
 })();
 
@@ -119,34 +116,21 @@ async function rpc(method, params = []) {
   steps.forEach(step => io.observe(step));
 })();
 
-/* Live Arc data: demo treasury balance and latest block */
+/* Status chip in the footer */
 (async function live() {
-  const balance = document.getElementById('hero-balance');
   const dot = document.getElementById('net-dot');
   const text = document.getElementById('net-text');
-  const blockEls = () => [document.getElementById('tape-block'), ...document.querySelectorAll('.tape-block-clone')].filter(Boolean);
 
   async function tick() {
     try {
-      const block = Number(BigInt(await rpc('eth_blockNumber')));
-      const label = block.toLocaleString('en-US');
-      blockEls().forEach(el => el.textContent = label);
+      await rpc('eth_blockNumber');
       dot.className = 'dot live';
-      text.textContent = `Arc Testnet · block ${label}`;
+      text.textContent = 'All systems working';
     } catch {
       dot.className = 'dot bad';
-      text.textContent = 'Arc Testnet unreachable';
-      blockEls().forEach(el => el.textContent = 'offline');
+      text.textContent = 'Payments network unreachable';
     }
   }
   tick();
   setInterval(() => { if (!document.hidden) tick(); }, 12_000);
-
-  try {
-    const raw = await rpc('eth_call', [{ to: USDC, data: `0x70a08231${DEMO_TREASURY.slice(2).padStart(64, '0')}` }, 'latest']);
-    const usdc = Number(BigInt(raw)) / 1e6;
-    balance.textContent = `${usdc.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC`;
-  } catch {
-    balance.textContent = 'unavailable';
-  }
 })();

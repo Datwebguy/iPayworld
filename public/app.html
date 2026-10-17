@@ -15,6 +15,30 @@
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
+  <!-- Workspace sign-in: shown when the URL names no workspace -->
+  <div class="gate" id="gate" hidden>
+    <div class="gate-card">
+      <a class="wordmark" href="/" aria-label="iPay home">
+        <svg class="emblem" viewBox="0 0 32 32" aria-hidden="true"><polygon class="e-ink" points="6.5,5.5 22.5,5.5 26.5,9.5 10.5,9.5"/><polygon class="e-acc" points="26.5,6.5 26.5,22.5 22.5,26.5 22.5,10.5"/><polygon class="e-ink" points="25.5,26.5 9.5,26.5 5.5,22.5 21.5,22.5"/><polygon class="e-acc" points="5.5,25.5 5.5,9.5 9.5,5.5 9.5,21.5"/><polygon class="e-ink" points="16,11.5 20.5,16 16,20.5 11.5,16"/><circle class="e-acc" cx="16" cy="16" r="1.6"/></svg>
+        <span>iPay</span>
+      </a>
+      <h1>Open your workspace</h1>
+      <p class="gate-lede">Each business has its own private workspace. Use the handle and key you saved when you set yours up.</p>
+      <form id="gate-form" class="gate-form" novalidate>
+        <label class="field">Workspace handle
+          <input class="input mono" name="slug" required autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="acme-studio">
+        </label>
+        <label class="field">Access key
+          <input class="input mono" name="token" type="password" required autocomplete="current-password" spellcheck="false" placeholder="Paste your key">
+          <span class="hint">Owner and team keys both work. The key stays in this browser tab only.</span>
+        </label>
+        <p class="form-error" data-error hidden></p>
+        <button class="btn btn-ink btn-lg" type="submit">Open workspace</button>
+      </form>
+      <p class="gate-alt">New to iPay? <a href="/onboard">Set up a workspace</a></p>
+    </div>
+  </div>
+
   <div class="shell">
     <!-- Desktop sidebar -->
     <aside class="side" aria-label="Workspace">
@@ -29,6 +53,7 @@
           <strong id="ws-name">Main treasury</strong>
           <small id="ws-mode">Connecting…</small>
         </div>
+        <a class="ws-switch" href="/app?switch" title="Open a different workspace">Switch</a>
       </div>
 
       <nav class="side-nav" aria-label="Views">
@@ -49,12 +74,12 @@
 
       <div class="side-foot">
         <div class="side-policy">
-          <p class="side-label">Release policy</p>
-          <p><span class="v-dot low"></span>Low pays out</p>
-          <p><span class="v-dot med"></span>Medium waits for you</p>
-          <p><span class="v-dot high"></span>High is blocked</p>
+          <p class="side-label">Payment rules</p>
+          <p><span class="v-dot low"></span>Low risk: paid automatically</p>
+          <p><span class="v-dot med"></span>Medium risk: waits for you</p>
+          <p><span class="v-dot high"></span>High risk: blocked</p>
         </div>
-        <p class="net"><span class="dot" data-net-dot></span><span data-net-text>Arc Testnet</span></p>
+        <p class="net"><span class="dot" data-net-dot></span><span data-net-text>Checking connection</span></p>
       </div>
     </aside>
 
@@ -93,19 +118,19 @@
       <section class="view" id="view-overview">
         <div class="balance card">
           <div class="balance-main">
-            <p class="label">Total in treasury</p>
-            <p class="figure mono"><span id="total" class="skeleton">0.00</span><span class="unit">USDC</span></p>
-            <p class="balance-sub" id="total-sub">Reading balances…</p>
+            <p class="label">Total balance</p>
+            <p class="figure mono"><span id="total" class="skeleton">$0.00</span></p>
+            <p class="balance-sub" id="total-sub">Loading your balance…</p>
           </div>
           <dl class="balance-split">
-            <div><dt><span class="key liquid"></span>Liquid in wallet</dt><dd class="mono" id="liquid">–</dd></div>
-            <div><dt><span class="key vault"></span>In Earn vault</dt><dd class="mono" id="vault">–</dd><small id="yield" class="muted"></small></div>
-            <div><dt><span class="key committed"></span>Committed</dt><dd class="mono" id="committed">–</dd></div>
-            <div><dt><span class="key free"></span>Free to allocate</dt><dd class="mono" id="available">–</dd></div>
+            <div><dt><span class="key liquid"></span>Ready to pay</dt><dd class="mono" id="liquid">–</dd></div>
+            <div><dt><span class="key vault"></span>In savings</dt><dd class="mono" id="vault">–</dd><small id="yield" class="muted"></small></div>
+            <div><dt><span class="key committed"></span>Set aside for work</dt><dd class="mono" id="committed">–</dd></div>
+            <div><dt><span class="key free"></span>Not yet assigned</dt><dd class="mono" id="available">–</dd></div>
           </dl>
           <div class="bars">
             <div class="bar-row">
-              <span class="bar-label">Where it sits</span>
+              <span class="bar-label">Where it is</span>
               <div class="bar" id="bar-where" role="img" aria-label=""><span class="seg-liquid"></span><span class="seg-vault"></span></div>
             </div>
             <div class="bar-row">
@@ -116,47 +141,65 @@
         </div>
 
         <div class="grid">
-          <section class="card panel queue">
-            <header class="panel-head">
-              <h2>Release queue</h2>
-              <button class="link-btn" data-view="milestones">All milestones</button>
-            </header>
-            <div id="queue-list" class="rows"></div>
-          </section>
+          <div class="col">
+            <section class="card panel queue">
+              <header class="panel-head">
+                <h2>Needs your attention</h2>
+                <button class="link-btn" data-view="milestones">All milestones</button>
+              </header>
+              <div id="queue-list" class="rows"></div>
+            </section>
 
-          <section class="card panel accounts">
-            <header class="panel-head"><h2>Accounts</h2></header>
-            <div class="acct">
-              <div class="acct-top">
-                <p class="acct-name">Circle wallet</p>
-                <p class="acct-bal mono" id="acct-wallet-bal">–</p>
-              </div>
-              <div class="acct-addr">
-                <code class="mono" id="acct-wallet-addr">–</code>
-                <button class="mini" data-copy-wallet aria-label="Copy wallet address">Copy</button>
-                <a class="mini" id="acct-wallet-link" target="_blank" rel="noopener">Explorer</a>
-              </div>
-            </div>
-            <div class="acct">
-              <div class="acct-top">
-                <p class="acct-name">Earn vault</p>
-                <p class="acct-bal mono" id="acct-vault-bal">–</p>
-              </div>
-              <div class="acct-addr">
-                <code class="mono" id="acct-vault-addr">–</code>
-                <button class="mini mini-strong" data-deposit>Deposit</button>
-              </div>
-              <p class="acct-note muted" id="acct-vault-note"></p>
-            </div>
-          </section>
+            <section class="card panel recent">
+              <header class="panel-head">
+                <h2>Recent activity</h2>
+                <button class="link-btn" data-view="activity">Full history</button>
+              </header>
+              <div id="recent-list" class="rows"></div>
+            </section>
+          </div>
 
-          <section class="card panel recent">
-            <header class="panel-head">
-              <h2>Recent activity</h2>
-              <button class="link-btn" data-view="activity">Audit trail</button>
-            </header>
-            <div id="recent-list" class="rows"></div>
-          </section>
+          <div class="col">
+            <section class="card panel accounts">
+              <header class="panel-head"><h2>Accounts</h2></header>
+              <div class="acct">
+                <div class="acct-top">
+                  <div>
+                    <p class="acct-name">Payments account</p>
+                    <p class="acct-desc">Where contractor payments are sent from</p>
+                  </div>
+                  <p class="acct-bal mono" id="acct-wallet-bal">–</p>
+                </div>
+                <div class="acct-actions">
+                  <button class="mini" data-copy-wallet>Copy address to add funds</button>
+                  <a class="mini" id="acct-wallet-link" target="_blank" rel="noopener">History ↗</a>
+                </div>
+              </div>
+              <div class="acct">
+                <div class="acct-top">
+                  <div>
+                    <p class="acct-name">Savings</p>
+                    <p class="acct-desc">Earns interest until a payment needs it</p>
+                  </div>
+                  <p class="acct-bal mono" id="acct-vault-bal">–</p>
+                </div>
+                <div class="acct-actions">
+                  <button class="mini mini-strong" data-deposit>Move money to savings</button>
+                </div>
+                <p class="acct-note muted" id="acct-vault-note"></p>
+              </div>
+            </section>
+
+            <section class="card panel summary-panel">
+              <header class="panel-head"><h2>Payments so far</h2></header>
+              <dl class="stats">
+                <div><dt>Paid out</dt><dd class="mono" id="stat-paid">–</dd><small id="stat-paid-n"></small></div>
+                <div><dt>Waiting on you</dt><dd class="mono" id="stat-waiting">–</dd><small id="stat-waiting-n"></small></div>
+                <div><dt>Held for review</dt><dd class="mono" id="stat-held">–</dd><small id="stat-held-n"></small></div>
+                <div><dt>Blocked</dt><dd class="mono" id="stat-blocked">–</dd><small id="stat-blocked-n"></small></div>
+              </dl>
+            </section>
+          </div>
         </div>
       </section>
 
@@ -179,7 +222,7 @@
       <section class="view" id="view-activity" hidden>
         <div class="card panel">
           <header class="panel-head wrap">
-            <p class="muted small">Approvals, screening results, vault moves and payments, newest first.</p>
+            <p class="muted small">Every approval, contractor check, savings move and payment, newest first.</p>
             <button class="btn btn-sm" id="export-csv" hidden>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
               Export CSV
@@ -224,7 +267,7 @@
       </header>
       <p class="sheet-intro" id="auth-intro">Paste the owner or team key for this workspace. It stays in this browser tab and is cleared when you close it.</p>
       <label class="field">Access key
-        <input class="input mono" name="token" type="password" required autocomplete="current-password" spellcheck="false" placeholder="ipay_ws_…">
+        <input class="input mono" name="token" type="password" required autocomplete="current-password" spellcheck="false" placeholder="Paste your key">
       </label>
       <p class="form-error" data-error hidden></p>
       <footer class="sheet-actions">
@@ -239,7 +282,7 @@
         <h2>New milestone</h2>
         <button type="button" class="icon-btn" data-close aria-label="Close"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       </header>
-      <p class="sheet-intro">The amount is set aside from your free budget. Nothing is paid until you approve the work and the wallet clears screening.</p>
+      <p class="sheet-intro">The amount is set aside from your unassigned balance. Nothing is paid until you approve the work and the contractor passes a risk check.</p>
       <label class="field">What's being delivered
         <input class="input" name="title" required maxlength="100" placeholder="Checkout redesign, phase 2">
       </label>
@@ -248,10 +291,10 @@
           <input class="input" name="contractor" required maxlength="100" placeholder="Maya Okafor">
         </label>
         <label class="field">Amount
-          <span class="input-affix"><input class="input mono" name="amount" required type="number" inputmode="decimal" min="0.01" max="1000000" step="0.01" placeholder="0.00"><span>USDC</span></span>
+          <span class="input-affix"><input class="input mono" name="amount" required type="number" inputmode="decimal" min="0.01" max="1000000" step="0.01" placeholder="0.00"><span>USD</span></span>
         </label>
       </div>
-      <label class="field">Contractor's Arc wallet
+      <label class="field">Contractor's payment address
         <input class="input mono" name="address" required pattern="0x[a-fA-F0-9]{40}" placeholder="0x…" spellcheck="false" autocomplete="off">
       </label>
       <label class="field">Notes <span class="hint">optional</span>
@@ -276,7 +319,7 @@
         <textarea class="input" name="evidence" required minlength="8" maxlength="1000" rows="4" placeholder="Reviewed the staging build, all acceptance items pass. Figma handoff link in notes."></textarea>
         <span class="hint">Saved with the payment record. At least 8 characters.</span>
       </label>
-      <p class="sheet-intro small">Approving starts the release: CompliR screens the wallet, and a low verdict sends the USDC on Arc.</p>
+      <p class="sheet-intro small">When you approve, iPay runs a risk check on the contractor. If it comes back low risk, they are paid right away.</p>
       <p class="form-error" data-error hidden></p>
       <footer class="sheet-actions">
         <button type="button" class="btn btn-ghost" data-close>Cancel</button>
@@ -288,12 +331,12 @@
   <dialog id="deposit-dialog" class="sheet">
     <form id="deposit-form" class="sheet-body">
       <header class="sheet-head">
-        <h2>Deposit to Earn vault</h2>
+        <h2>Move money to savings</h2>
         <button type="button" class="icon-btn" data-close aria-label="Close"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       </header>
-      <p class="sheet-intro">Moves liquid USDC from the wallet into the vault. It comes back out automatically when a release needs it. A small amount stays in the wallet for gas.</p>
+      <p class="sheet-intro">Savings earn interest while you wait on work. When a payment needs the money, iPay moves it back automatically. A small amount always stays behind to cover network fees.</p>
       <label class="field">Amount
-        <span class="input-affix"><input class="input mono" name="amount" required type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00"><span>USDC</span></span>
+        <span class="input-affix"><input class="input mono" name="amount" required type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00"><span>USD</span></span>
         <span class="hint" id="deposit-hint"></span>
       </label>
       <p class="form-error" data-error hidden></p>
@@ -307,17 +350,17 @@
   <dialog id="reconcile-dialog" class="sheet">
     <form id="reconcile-form" class="sheet-body">
       <header class="sheet-head">
-        <h2>Reconcile payment</h2>
+        <h2>Confirm a payment</h2>
         <button type="button" class="icon-btn" data-close aria-label="Close"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       </header>
-      <p class="sheet-intro" id="reconcile-intro">The release stopped before iPay could confirm it. Check the transaction on Arc and confirm it here.</p>
-      <label class="field" id="reconcile-tx-field">Arc transaction hash
+      <p class="sheet-intro" id="reconcile-intro">This payment was sent but iPay could not confirm it arrived. Confirm it here.</p>
+      <label class="field" id="reconcile-tx-field">Payment receipt ID
         <input class="input mono" name="txHash" pattern="0x[0-9a-fA-F]{64}" placeholder="0x…" spellcheck="false" autocomplete="off">
       </label>
       <p class="form-error" data-error hidden></p>
       <footer class="sheet-actions">
         <button type="button" class="btn btn-ghost" data-close>Cancel</button>
-        <button class="btn btn-ink" type="submit">Check on Arc</button>
+        <button class="btn btn-ink" type="submit">Confirm payment</button>
       </footer>
     </form>
   </dialog>
@@ -325,12 +368,12 @@
   <dialog id="proof-dialog" class="sheet">
     <div class="sheet-body">
       <header class="sheet-head">
-        <h2>Screening record</h2>
+        <h2>Contractor check</h2>
         <button type="button" class="icon-btn" data-close aria-label="Close"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       </header>
       <dl class="proof" id="proof-content"></dl>
       <footer class="sheet-actions">
-        <button type="button" class="btn" id="proof-copy">Copy signed proof</button>
+        <button type="button" class="btn" id="proof-copy">Copy full record</button>
         <button type="button" class="btn btn-ink" data-close>Done</button>
       </footer>
     </div>
