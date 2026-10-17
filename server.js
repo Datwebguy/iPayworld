@@ -510,6 +510,22 @@ async function reconcilePending(workspace) {
   await workspaceDataStore.write(workspace, tenantState);
 }
 
+// Every workspace response carries live balances, so the dashboard never shows a stale $0.
+const lastBalances = new Map();
+async function workspaceView(workspace, tenantState) {
+  const wallet = { ...(tenantState.wallet || {}), address: workspace.walletAddress, vaultAddress: workspace.vaultAddress };
+  if (mode === 'live' && workspace.walletAddress && workspace.vaultAddress) {
+    try {
+      const balances = await liveBalances(liveClients({ ...process.env, CIRCLE_WALLET_ADDRESS: workspace.walletAddress, EARN_VAULT_ADDRESS: workspace.vaultAddress }));
+      lastBalances.set(workspace.slug, { liquid: Number(balances.liquidUsdc), vault: Number(balances.vaultUsdc), yieldEarned: balances.yieldEarned === null ? null : Number(balances.yieldEarned) });
+    } catch (err) {
+      console.warn('Could not refresh tenant live balances:', err.message);
+    }
+    Object.assign(wallet, lastBalances.get(workspace.slug) || {});
+  }
+  return { ...tenantState, wallet, mode, screeningMode, agent: { settings: agentSettings(tenantState), lastRun: tenantState.agent?.lastRun || null, engine: agentEngine() } };
+}
+
 function deliveryTarget(input) {
   const workspace = workspaceRegistry.bySlug(String(input.workspace || ''));
   if (!workspace) failure(404, 'This delivery link is not valid');
@@ -550,7 +566,7 @@ async function api(req, res, path) {
     if (agentMatch[2]) {
       if (req.method !== 'POST') failure(405, 'Method not allowed');
       const result = await runAgent(workspace, 'manual');
-      return respond(res, 200, result || await workspaceDataStore.read(workspace));
+      return respond(res, 200, await workspaceView(workspace, result || await workspaceDataStore.read(workspace)));
     }
     if (req.method !== 'PUT') failure(405, 'Method not allowed');
     const input = await body(req);
@@ -565,7 +581,7 @@ async function api(req, res, path) {
     tenantState.agent = { ...(tenantState.agent || {}), settings };
     tenantAudit(tenantState, 'agent_settings', 'Agent settings changed', settings.enabled ? `Auto-pay up to $${settings.autoPayLimit}` : 'Agent paused');
     await workspaceDataStore.write(workspace, tenantState);
-    return respond(res, 200, tenantState);
+    return respond(res, 200, await workspaceView(workspace, tenantState));
   }
   if (path === '/api/signup') {
     if (req.method !== 'POST') failure(405, 'Method not allowed');
@@ -642,22 +658,7 @@ async function api(req, res, path) {
       : requireWorkspaceRole(req, slug, ['owner', 'finance']);
     const tenantState = await workspaceDataStore.read(workspace);
     if (req.method === 'GET' && resource === 'state') {
-      if (mode === 'live' && workspace.walletAddress && workspace.vaultAddress) {
-        try {
-          const tenantClients = liveClients({ ...process.env, CIRCLE_WALLET_ADDRESS: workspace.walletAddress, EARN_VAULT_ADDRESS: workspace.vaultAddress });
-          const balances = await liveBalances(tenantClients);
-          tenantState.wallet = {
-            address: workspace.walletAddress,
-            vaultAddress: workspace.vaultAddress,
-            liquid: Number(balances.liquidUsdc),
-            vault: Number(balances.vaultUsdc),
-            yieldEarned: balances.yieldEarned === null ? null : Number(balances.yieldEarned),
-          };
-        } catch (err) {
-          console.warn('Could not refresh tenant live balances:', err.message);
-        }
-      }
-      return respond(res, 200, { ...tenantState, mode, screeningMode, agent: { settings: agentSettings(tenantState), lastRun: tenantState.agent?.lastRun || null, engine: agentEngine() } });
+      return respond(res, 200, await workspaceView(workspace, tenantState));
     }
     if (req.method === 'POST' && resource === 'milestones') {
       const input = await body(req);
@@ -675,7 +676,7 @@ async function api(req, res, path) {
       tenantState.milestones.unshift(milestone);
       tenantState.audit.unshift({ id: randomUUID(), type: 'milestone_created', title: 'Milestone created', detail: `${title} · ${value.toLocaleString()} USDC`, at: new Date().toISOString() });
       await workspaceDataStore.write(workspace, tenantState);
-      return respond(res, 201, tenantState);
+      return respond(res, 201, await workspaceView(workspace, tenantState));
     }
     failure(405, 'Method not allowed');
   }
@@ -701,7 +702,7 @@ async function api(req, res, path) {
       delete milestoneRecord.releaseError;
       tenantAudit(tenantState, 'payment_reconciled', 'Payment reconciled on Arc', `${milestoneRecord.amount.toFixed(2)} USDC to ${milestoneRecord.contractor}`, { milestoneId: milestoneRecord.id, risk: milestoneRecord.risk, txHash: milestoneRecord.txHash, withdrawTxHash: milestoneRecord.withdrawTxHash, yieldSnapshot: milestoneRecord.yieldSnapshot });
       await workspaceDataStore.write(workspace, tenantState);
-      return respond(res, 200, tenantState);
+      return respond(res, 200, await workspaceView(workspace, tenantState));
     }
     if (action === 'verify') {
       if (!['in_progress', 'awaiting_verification', 'delivered'].includes(milestoneRecord.status)) failure(409, 'This milestone cannot be verified now');
@@ -724,7 +725,7 @@ async function api(req, res, path) {
       milestoneRecord.releaseError = error.message;
       await workspaceDataStore.write(workspace, tenantState).catch(() => {});
     });
-    return respond(res, 202, tenantState);
+    return respond(res, 202, await workspaceView(workspace, tenantState));
   }
   const provisionMatch = path.match(/^\/api\/workspaces\/([a-z0-9-]+)\/provision-treasury$/);
   if (provisionMatch) {
