@@ -6,3 +6,5 @@ recovery/
 
 .vercel
 .railway
+
+.claude/settings.local.json
