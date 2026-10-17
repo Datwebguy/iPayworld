@@ -1,7 +1,7 @@
 import http from 'node:http';
 import { readFile, mkdir, rename, writeFile } from 'node:fs/promises';
 import { join, extname, resolve, sep } from 'node:path';
-import { randomUUID, createHash, timingSafeEqual } from 'node:crypto';
+import { randomUUID, randomBytes, createHash, timingSafeEqual } from 'node:crypto';
 import { createWorkspaceRegistry } from './lib/workspace-registry.js';
 import { createWorkspaceDataStore } from './lib/workspace-data.js';
 import { createPostgresWorkspaceStores } from './lib/postgres-workspaces.js';
@@ -9,6 +9,7 @@ import { initiateDeveloperControlledWalletsClient } from '@circle-fin/developer-
 import { fetchVerdict } from './lib/complir.js';
 import { readArcWallet } from './lib/arc-wallet.js';
 import { readEarnPosition } from './lib/earn-position.js';
+import { DEFAULT_AGENT, agentEngine, buildContext, decide } from './lib/agent.js';
 import { liveClients, liveBalances, assertUsdcVault, depositToVault, withdrawForRelease, sendPayment, verifyPaymentReceipt } from './lib/live-payments.js';
 
 const root = resolve(import.meta.dirname);
@@ -362,7 +363,199 @@ async function provisionTreasury(workspace) {
   });
 }
 
+/* ---------- Payments agent ----------
+   lib/agent.js decides; this runner enforces. A "pay" above the auto-pay limit or the
+   workspace policy becomes a hold, and every payment still goes through CompliR. */
+const agentRuns = new Set();
+const round2 = value => Math.round(value * 100) / 100;
+
+function agentSettings(tenantState) {
+  return { ...DEFAULT_AGENT, ...(tenantState.agent?.settings || {}) };
+}
+
+async function runAgent(workspace, trigger) {
+  if (agentRuns.has(workspace.slug)) return null;
+  agentRuns.add(workspace.slug);
+  let again = false;
+  try {
+    let tenantState = await workspaceDataStore.read(workspace);
+    const settings = agentSettings(tenantState);
+    if (!settings.enabled && trigger !== 'manual') return tenantState;
+    const policy = workspace.policy || { maxPerTxUsdc: 5000, maxPerDayUsdc: 25000 };
+    const live = mode === 'live' && workspace.walletAddress && workspace.vaultAddress;
+    const tenantClients = live ? liveClients({ ...process.env, CIRCLE_WALLET_ADDRESS: workspace.walletAddress, EARN_VAULT_ADDRESS: workspace.vaultAddress }) : null;
+    const reserve = live ? Number(tenantClients.config.gasReserveUsdc) : 0;
+    let balances = { liquid: Number(tenantState.wallet?.liquid || 0), vault: Number(tenantState.wallet?.vault || 0), reserve };
+    if (live) {
+      const read = await liveBalances(tenantClients);
+      balances = { liquid: Number(read.liquidUsdc), vault: Number(read.vaultUsdc), reserve };
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    const paidOn = state => state.milestones.filter(m => m.status === 'paid' && m.paidAt?.slice(0, 10) === today).reduce((s, m) => s + m.amount, 0);
+    const context = buildContext({ workspaceName: workspace.name, state: tenantState, balances, agent: settings, policy, paidToday: paidOn(tenantState) });
+    const decision = await decide(context);
+    // Deciding can take a while; apply to fresh state so deliveries or edits made meanwhile are not overwritten.
+    tenantState = await workspaceDataStore.read(workspace);
+    let paidToday = paidOn(tenantState);
+    const ceiling = Math.min(Number(settings.autoPayLimit), Number(policy.maxPerTxUsdc));
+    const agentAudit = (title, detail, extra = {}) => tenantAudit(tenantState, 'agent_decision', title, detail, { engine: decision.engine, ...extra });
+
+    for (const choice of decision.milestones) {
+      const m = tenantState.milestones.find(item => item.id === choice.id && item.status === 'delivered');
+      if (!m) continue;
+      let action = choice.action;
+      let reason = choice.reason;
+      if (action === 'pay' && m.amount > ceiling) {
+        action = 'hold';
+        reason = `${reason} It is above the $${ceiling} I can pay on my own, so it needs your approval.`;
+      }
+      if (action === 'pay' && paidToday + m.amount > Number(policy.maxPerDayUsdc)) {
+        action = 'hold';
+        reason = `${reason} Paying it would pass today's spending limit, so it waits for you.`;
+      }
+      m.agentDecision = { action, reason, confidence: choice.confidence, engine: decision.engine, at: new Date().toISOString() };
+      if (action === 'hold') {
+        m.status = 'awaiting_verification';
+        agentAudit('Agent held a payment', reason, { milestoneId: m.id, action });
+      } else if (action === 'request_changes') {
+        m.status = 'in_progress';
+        m.changeRequests = (m.changeRequests || 0) + 1;
+        agentAudit('Agent asked for changes', reason, { milestoneId: m.id, action });
+      } else {
+        m.evidence = `Approved by the payments agent: ${reason}`;
+        m.verifiedAt = new Date().toISOString();
+        m.status = 'verified';
+        agentAudit('Agent approved a payment', reason, { milestoneId: m.id, action });
+        if (live) {
+          await workspaceDataStore.write(workspace, tenantState);
+          await processWorkspaceLiveRelease(workspace, tenantState, m);
+          if (m.status === 'paid') paidToday += m.amount;
+        }
+      }
+    }
+
+    // Treasury move, bounded by what open work actually needs.
+    const t = decision.treasury;
+    if (live && t.action !== 'none' && t.amount >= 5) {
+      const fresh = await liveBalances(tenantClients);
+      const liquid = Number(fresh.liquidUsdc);
+      const vault = Number(fresh.vaultUsdc);
+      const needed = tenantState.milestones.filter(m => !['paid', 'blocked'].includes(m.status)).reduce((s, m) => s + m.amount, 0);
+      const amountUsd = t.action === 'move_to_savings'
+        ? Math.floor(Math.min(t.amount, liquid - needed - reserve - 1))
+        : Math.ceil(Math.min(t.amount, vault));
+      if (amountUsd >= 5) {
+        try {
+          const result = t.action === 'move_to_savings'
+            ? await depositToVault(tenantClients, amountUsd.toFixed(2))
+            : await withdrawForRelease(tenantClients, amountUsd.toFixed(2));
+          tenantAudit(tenantState, t.action === 'move_to_savings' ? 'vault_deposit' : 'vault_withdrawal', t.action === 'move_to_savings' ? 'Agent moved money to savings' : 'Agent moved money from savings', `${amountUsd.toFixed(2)} USDC · ${t.reason}`, { txHash: result.txHash, engine: decision.engine });
+        } catch (error) {
+          agentAudit('Agent could not move savings', `${t.reason} The move did not go through: ${error.message}`);
+        }
+      }
+    }
+
+    const latest = await workspaceDataStore.read(workspace);
+    // Keep anything that changed during the payment steps, then layer this run's results on top.
+    for (const m of tenantState.milestones) {
+      const i = latest.milestones.findIndex(item => item.id === m.id);
+      if (i >= 0 && m.agentDecision?.at && m.agentDecision.at !== latest.milestones[i].agentDecision?.at) latest.milestones[i] = m;
+    }
+    const known = new Set(latest.audit.map(a => a.id));
+    latest.audit = [...tenantState.audit.filter(a => !known.has(a.id)), ...latest.audit].sort((a, b) => b.at.localeCompare(a.at));
+    latest.agent = { settings: agentSettings(latest), lastRun: { at: new Date().toISOString(), trigger, engine: decision.engine, model: decision.model || null, summary: decision.summary, note: decision.note || null, treasury: decision.treasury } };
+    await workspaceDataStore.write(workspace, latest);
+    again = latest.milestones.some(m => m.status === 'delivered');
+    return latest;
+  } catch (error) {
+    console.error(`Agent run failed for ${workspace.slug}:`, error);
+    throw error;
+  } finally {
+    agentRuns.delete(workspace.slug);
+    // A delivery that arrived mid-run gets its own run right away.
+    if (again) setTimeout(() => runAgent(workspace, 'followup').catch(() => {}), 1000);
+  }
+}
+
+// Confirm payments that were sent but not confirmed in time (slow network, App Kit timeout).
+async function reconcilePending(workspace) {
+  if (mode !== 'live' || !workspace.walletAddress) return;
+  const tenantState = await workspaceDataStore.read(workspace);
+  const pending = tenantState.milestones.filter(m => m.status === 'needs_reconciliation' && m.txHash && m.risk?.verdict === 'LOW' && m.risk?.signatureVerified);
+  if (!pending.length) return;
+  const tenantClients = liveClients({ ...process.env, CIRCLE_WALLET_ADDRESS: workspace.walletAddress, EARN_VAULT_ADDRESS: workspace.vaultAddress });
+  for (const m of pending) {
+    try {
+      const receipt = await verifyPaymentReceipt(tenantClients, m.txHash, m.address, m.amount.toFixed(2));
+      if (!riskCoversReceipt(m.risk, receipt.blockTimestamp)) continue;
+      m.status = 'paid';
+      m.paidAt = new Date(receipt.blockTimestamp * 1000).toISOString();
+      m.paymentBlockNumber = receipt.blockNumber;
+      delete m.releaseError;
+      tenantAudit(tenantState, 'payment_reconciled', 'Payment confirmed on Arc', `${m.amount.toFixed(2)} USDC to ${m.contractor}`, { milestoneId: m.id, risk: m.risk, txHash: m.txHash });
+    } catch (error) { console.warn(`Reconcile pending for ${m.id}:`, error.message); }
+  }
+  await workspaceDataStore.write(workspace, tenantState);
+}
+
+function deliveryTarget(input) {
+  const workspace = workspaceRegistry.bySlug(String(input.workspace || ''));
+  if (!workspace) failure(404, 'This delivery link is not valid');
+  return workspace;
+}
+function tokenMatches(expected, supplied) {
+  const a = Buffer.from(String(expected || ''));
+  const b = Buffer.from(String(supplied || ''));
+  return a.length > 0 && a.length === b.length && timingSafeEqual(a, b);
+}
+
 async function api(req, res, path) {
+  // Contractor delivery: public, authorized by the milestone's private link token.
+  if (path === '/api/deliver') {
+    const input = req.method === 'GET' ? Object.fromEntries(new URL(req.url, 'http://x').searchParams) : await body(req);
+    const workspace = deliveryTarget(input);
+    const tenantState = await workspaceDataStore.read(workspace);
+    const m = tenantState.milestones.find(item => item.id === input.milestone);
+    if (!m || !tokenMatches(m.deliveryToken, input.token)) failure(404, 'This delivery link is not valid');
+    const view = () => ({ business: workspace.name, title: m.title, scope: m.description, amount: m.amount, contractor: m.contractor, dueDate: m.dueDate, status: m.status, delivery: m.delivery || null, agentDecision: m.agentDecision || null, paidAt: m.paidAt || null, txHash: m.status === 'paid' ? m.txHash : null });
+    if (req.method === 'GET') return respond(res, 200, view());
+    if (req.method !== 'POST') failure(405, 'Method not allowed');
+    if (!['in_progress', 'awaiting_verification'].includes(m.status)) failure(409, m.status === 'paid' ? 'This milestone is already paid' : 'This milestone is not open for delivery right now');
+    const note = String(input.note || '').trim();
+    const link = String(input.link || '').trim();
+    if (note.length < 10 || note.length > 2000) failure(400, 'Describe what you delivered in at least 10 characters');
+    if (link && (!/^https?:\/\/\S+$/i.test(link) || link.length > 500)) failure(400, 'Enter a full link starting with https://');
+    m.delivery = { note, link: link || null, at: new Date().toISOString() };
+    m.status = 'delivered';
+    tenantAudit(tenantState, 'delivery_submitted', 'Work delivered', `${m.contractor} submitted ${m.title}`, { milestoneId: m.id });
+    await workspaceDataStore.write(workspace, tenantState);
+    runAgent(workspace, 'delivery').catch(() => {});
+    return respond(res, 200, view());
+  }
+  const agentMatch = path.match(/^\/api\/workspaces\/([a-z0-9-]+)\/agent(\/run)?$/);
+  if (agentMatch) {
+    const workspace = requireWorkspaceRole(req, agentMatch[1], ['owner', 'finance']);
+    if (agentMatch[2]) {
+      if (req.method !== 'POST') failure(405, 'Method not allowed');
+      const result = await runAgent(workspace, 'manual');
+      return respond(res, 200, result || await workspaceDataStore.read(workspace));
+    }
+    if (req.method !== 'PUT') failure(405, 'Method not allowed');
+    const input = await body(req);
+    const tenantState = await workspaceDataStore.read(workspace);
+    const settings = agentSettings(tenantState);
+    if (input.enabled !== undefined) settings.enabled = Boolean(input.enabled);
+    if (input.autoPayLimit !== undefined) {
+      const limit = Number(input.autoPayLimit);
+      if (!Number.isFinite(limit) || limit < 0 || limit > 100000) failure(400, 'Enter an auto-pay limit between 0 and 100,000');
+      settings.autoPayLimit = round2(limit);
+    }
+    tenantState.agent = { ...(tenantState.agent || {}), settings };
+    tenantAudit(tenantState, 'agent_settings', 'Agent settings changed', settings.enabled ? `Auto-pay up to $${settings.autoPayLimit}` : 'Agent paused');
+    await workspaceDataStore.write(workspace, tenantState);
+    return respond(res, 200, tenantState);
+  }
   if (path === '/api/signup') {
     if (req.method !== 'POST') failure(405, 'Method not allowed');
     const input = await body(req);
@@ -446,7 +639,7 @@ async function api(req, res, path) {
           console.warn('Could not refresh tenant live balances:', err.message);
         }
       }
-      return respond(res, 200, { ...tenantState, mode, screeningMode });
+      return respond(res, 200, { ...tenantState, mode, screeningMode, agent: { settings: agentSettings(tenantState), lastRun: tenantState.agent?.lastRun || null, engine: agentEngine() } });
     }
     if (req.method === 'POST' && resource === 'milestones') {
       const input = await body(req);
@@ -457,7 +650,10 @@ async function api(req, res, path) {
       if (!title || title.length > 100 || !contractor || contractor.length > 100 || description.length > 500 || !addressPattern.test(address)) failure(400, 'Enter a title, contractor, and valid Arc address');
       if (workspace.walletAddress && address.toLowerCase() === workspace.walletAddress.toLowerCase()) failure(400, 'Contractor address must differ from the workspace wallet');
       const value = amount(input.amount);
-      const milestone = { id: randomUUID(), title, contractor, address, description, amount: value, status: 'in_progress', createdAt: new Date().toISOString(), evidence: null };
+      const dueDate = String(input.dueDate || '').trim();
+      if (dueDate && !/^\d{4}-\d{2}-\d{2}$/.test(dueDate)) failure(400, 'Enter the due date as a date');
+      // The contractor submits delivery through a private link carrying this token.
+      const milestone = { id: randomUUID(), title, contractor, address, description, amount: value, dueDate: dueDate || null, status: 'in_progress', createdAt: new Date().toISOString(), evidence: null, deliveryToken: randomBytes(18).toString('base64url') };
       tenantState.milestones.unshift(milestone);
       tenantState.audit.unshift({ id: randomUUID(), type: 'milestone_created', title: 'Milestone created', detail: `${title} · ${value.toLocaleString()} USDC`, at: new Date().toISOString() });
       await workspaceDataStore.write(workspace, tenantState);
@@ -490,7 +686,7 @@ async function api(req, res, path) {
       return respond(res, 200, tenantState);
     }
     if (action === 'verify') {
-      if (!['in_progress', 'awaiting_verification'].includes(milestoneRecord.status)) failure(409, 'This milestone cannot be verified now');
+      if (!['in_progress', 'awaiting_verification', 'delivered'].includes(milestoneRecord.status)) failure(409, 'This milestone cannot be verified now');
       const evidence = String(input.evidence || '').trim();
       if (evidence.length < 8 || evidence.length > 1000) failure(400, 'Add at least 8 characters of verification evidence');
       milestoneRecord.evidence = evidence;
@@ -654,4 +850,16 @@ http.createServer(async (req, res) => {
     respond(res, error.status || 500, { error: error.status ? error.message : 'Internal server error' });
   }
 }).listen(port, '0.0.0.0', () => console.log(`iPay running on port ${port} (${mode} mode)`));
+
+// Safety net for deliveries whose immediate agent run failed or overlapped another run.
+setInterval(async () => {
+  for (const item of workspaceRegistry.list()) {
+    try {
+      const workspace = workspaceRegistry.bySlug(item.slug);
+      const tenantState = await workspaceDataStore.read(workspace);
+      if (tenantState.milestones.some(m => m.status === 'delivered')) await runAgent(workspace, 'sweep');
+      if (tenantState.milestones.some(m => m.status === 'needs_reconciliation' && m.txHash)) await reconcilePending(workspace);
+    } catch (error) { console.warn(`Agent sweep skipped ${item.slug}:`, error.message); }
+  }
+}, Number(process.env.IPAY_AGENT_SWEEP_MS || 180_000)).unref();
 

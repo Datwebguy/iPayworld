@@ -83,16 +83,18 @@
       <section class="pane" data-pane="3" hidden>
         <p class="pane-step mono">Step 3</p>
         <h2>Add money to pay with</h2>
-        <p class="pane-lede">iPay runs on the Arc test network right now, so you can get free test dollars and make real payments with them. You can also send USDC to your account yourself.</p>
+        <p class="pane-lede">iPay runs on the Arc test network, so you can get 20 free test dollars from Circle and make real payments with them.</p>
+        <ol class="fund-steps">
+          <li><span class="mono">1</span><div><strong>Copy your account address</strong><button type="button" class="btn btn-sm" id="copy-address">Copy address</button></div></li>
+          <li><span class="mono">2</span><div><strong>Open the Circle faucet</strong><small>Pick <b>USDC</b> and <b>Arc Testnet</b>, paste the address, and send.</small><a class="btn btn-sm" id="open-faucet" href="https://faucet.circle.com/" target="_blank" rel="noopener">Open faucet ↗</a></div></li>
+          <li><span class="mono">3</span><div><strong>Come back here</strong><small>This page notices the money arrive by itself.</small></div></li>
+        </ol>
         <div class="task" id="task-fund">
           <span class="task-dot"></span>
-          <div><strong>Payments account</strong><small id="wallet-status">Ready</small></div>
-          <button type="button" class="btn btn-sm" id="copy-address">Copy address</button>
+          <div><strong>Your balance</strong><small id="wallet-status">Waiting for funds</small></div>
         </div>
         <p class="form-error" data-error hidden></p>
-        <p class="pane-note" id="fund-status" hidden></p>
         <div class="pane-actions">
-          <button class="btn btn-ink btn-lg" id="fund">Get free test dollars</button>
           <button class="btn btn-ghost btn-lg" id="skip-fund">Skip for now</button>
         </div>
       </section>

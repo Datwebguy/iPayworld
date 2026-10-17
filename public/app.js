@@ -8,7 +8,7 @@ const operatorMode = !workspaceSlug && params.has('operator');
 const TOKEN_KEY = workspaceSlug ? `ipay-owner-token:${workspaceSlug}` : 'ipay-owner-token';
 const LAST_KEY = 'ipay-last-workspace';
 const ARC_RPC = 'https://rpc.testnet.arc.io';
-const EXPLORER = 'https://testnet.arcscan.app';
+const EXPLORER = 'https://explorer.testnet.arc.io';
 const VIEWS = { overview: 'Overview', milestones: 'Milestones', activity: 'Audit trail' };
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -26,7 +26,7 @@ const when = value => {
   return Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(date);
 };
 const isClosed = m => ['paid', 'blocked'].includes(m.status);
-const needsYou = m => ['in_progress', 'awaiting_verification', 'verified', 'review', 'needs_reconciliation'].includes(m.status);
+const needsYou = m => ['awaiting_verification', 'verified', 'review', 'needs_reconciliation'].includes(m.status);
 
 let data = null;
 let serverMode = null;
@@ -143,7 +143,8 @@ async function refresh() {
 /* ---------- Rendering ---------- */
 const STATUS = {
   in_progress: ['Waiting on delivery', ''],
-  awaiting_verification: ['Waiting for approval', ''],
+  delivered: ['Agent reviewing', 'busy'],
+  awaiting_verification: ['Needs your approval', 'warn'],
   verified: ['Approved, not paid yet', 'warn'],
   checking: ['Checking contractor', 'busy'],
   withdrawing: ['Moving from savings', 'busy'],
@@ -154,12 +155,13 @@ const STATUS = {
   blocked: ['Blocked', 'bad'],
   paid: ['Paid', 'ok']
 };
-const STAGES = ['Created', 'Approved', 'Checked', 'Paid'];
+const STAGES = ['Delivered', 'Approved', 'Checked', 'Paid'];
 const RISK = { LOW: 'Low risk', MEDIUM: 'Medium risk', HIGH: 'High risk', UNAVAILABLE: 'Check unavailable' };
 function stages(m) {
   switch (m.status) {
-    case 'in_progress':
-    case 'awaiting_verification': return ['done', 'now', '', ''];
+    case 'in_progress': return [m.changeRequests ? 'warn' : '', '', '', ''];
+    case 'delivered': return ['done', 'now', '', ''];
+    case 'awaiting_verification': return [m.delivery ? 'done' : '', 'warn', '', ''];
     case 'verified': return ['done', 'done', m.risk?.verdict === 'UNAVAILABLE' ? 'warn' : '', ''];
     case 'checking': return ['done', 'done', 'now', ''];
     case 'withdrawing':
@@ -176,25 +178,40 @@ function stages(m) {
 function actionsFor(m) {
   const out = [];
   if (m.risk) out.push(`<button class="mini" data-proof="m:${esc(m.id)}">Risk check</button>`);
-  if (['in_progress', 'awaiting_verification'].includes(m.status)) out.push(`<button class="btn btn-ink btn-sm" data-action="verify" data-id="${esc(m.id)}">Approve work</button>`);
+  if (m.deliveryToken && workspaceSlug && ['in_progress', 'awaiting_verification'].includes(m.status)) out.push(`<button class="mini" data-copy="${esc(deliveryLink(m))}" data-copy-msg="Link copied. Send it to ${esc(m.contractor)} so they can submit their work.">Contractor link</button>`);
+  if (['in_progress', 'awaiting_verification', 'delivered'].includes(m.status)) out.push(`<button class="btn btn-ink btn-sm" data-action="verify" data-id="${esc(m.id)}">${m.status === 'awaiting_verification' ? 'Approve and pay' : 'Approve work'}</button>`);
   if (m.status === 'verified') out.push(`<button class="btn btn-accent btn-sm" data-action="release" data-id="${esc(m.id)}">Pay now</button>`);
   if (m.status === 'needs_reconciliation' && serverMode === 'live') out.push(`<button class="btn btn-sm" data-action="reconcile" data-id="${esc(m.id)}">Confirm payment</button>`);
   if (m.status === 'paid' && m.txHash && serverMode === 'live') out.push(`<a class="mini" href="${EXPLORER}/tx/${esc(m.txHash)}" target="_blank" rel="noopener">Receipt ↗</a>`);
   return out.join('');
 }
 
+function deliveryLink(m) {
+  return `${location.origin}/deliver?${new URLSearchParams({ workspace: workspaceSlug, milestone: m.id, token: m.deliveryToken })}`;
+}
+
+const AGENT_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>';
+function agentNote(m) {
+  const d = m.agentDecision;
+  if (!d) return '';
+  const label = { pay: 'Agent approved', hold: 'Agent wants you to look', request_changes: 'Agent asked for changes' }[d.action] || 'Agent';
+  return `<p class="m-agent ${d.action === 'pay' ? '' : 'warn'}">${AGENT_ICON}<span><b>${label}.</b>${esc(d.reason)}</span></p>`;
+}
+
 function noteFor(m, detailed) {
   const parts = [];
+  if (detailed && m.delivery) parts.push(`<b>Delivered</b>${esc(m.delivery.note)}${m.delivery.link ? ` <a href="${esc(m.delivery.link)}" target="_blank" rel="noopener nofollow">Open ↗</a>` : ''}`);
+  if (detailed && m.dueDate) parts.push(`<b>Due</b>${esc(new Date(`${m.dueDate}T00:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }))}`);
   if (m.status === 'review' || m.status === 'blocked') parts.push(`<b>${RISK[m.risk?.verdict] || 'Risk check'}</b>${esc(m.risk?.rationale || m.risk?.reason || '')}`);
   else if (m.risk?.verdict === 'UNAVAILABLE') parts.push(`<b>Risk check failed</b>The checking service did not answer. Try paying again in a minute.`);
   if (m.releaseError) parts.push(`<b>Payment stopped</b>${esc(m.releaseError)}`);
-  if (detailed && m.description) parts.push(`<b>Notes</b>${esc(m.description)}`);
+  if (detailed && m.description) parts.push(`<b>Done means</b>${esc(m.description)}`);
   if (detailed && m.evidence) parts.push(`<b>Approved because</b>${esc(m.evidence)}`);
   return parts.length ? `<p class="m-note">${parts.join('<br>')}</p>` : '';
 }
 
 function milestoneHtml(m, i, detailed = false) {
-  const [label, tone] = STATUS[m.status] || [m.status, ''];
+  const [label, tone] = m.status === 'in_progress' && m.changeRequests ? ['Changes requested', 'warn'] : STATUS[m.status] || [m.status, ''];
   const track = stages(m).map((cls, n) => `<span class="pip ${cls}">${STAGES[n]}</span>`).join('');
   return `<article class="m-row" style="--i:${i}">
     <div>
@@ -202,6 +219,7 @@ function milestoneHtml(m, i, detailed = false) {
       <p class="m-sub"><span>${esc(m.contractor)}</span>${m.createdAt ? `<span>· ${esc(when(m.createdAt))}</span>` : ''}<button class="addr-btn" data-copy="${esc(m.address)}">copy address</button></p>
     </div>
     <p class="m-amt mono">${dollars(m.amount)}</p>
+    ${agentNote(m)}
     ${noteFor(m, detailed)}
     <div class="m-bottom">
       <div class="track" aria-label="Progress: ${esc(label)}">${track}</div>
@@ -218,7 +236,8 @@ const ICONS = {
   x: '<path d="M18 6 6 18M6 6l12 12"/>',
   alert: '<path d="M12 8v5M12 16.5v.5"/><circle cx="12" cy="12" r="9"/>',
   down: '<path d="M12 4v12M7 11l5 5 5-5"/>',
-  up: '<path d="M12 20V8M7 13l5-5 5 5"/>'
+  up: '<path d="M12 20V8M7 13l5-5 5 5"/>',
+  agent: '<path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/>'
 };
 function activityLook(a) {
   const verdict = a.risk?.verdict;
@@ -228,6 +247,9 @@ function activityLook(a) {
     case 'risk_check': return ['shield', verdict === 'LOW' ? 'ok' : verdict === 'MEDIUM' ? 'warn' : 'bad'];
     case 'milestone_verified': return ['check', ''];
     case 'milestone_created': return ['plus', ''];
+    case 'agent_decision': return ['agent', a.action === 'pay' ? 'agent' : 'warn'];
+    case 'agent_settings': return ['agent', ''];
+    case 'delivery_submitted': return ['down', ''];
     case 'vault_deposit': return ['down', ''];
     case 'vault_withdrawal': return ['up', ''];
     case 'release_failed':
@@ -251,13 +273,16 @@ function describe(a) {
   const deposited = a.detail?.match(/[\d.]+/)?.[0];
   switch (a.type) {
     case 'milestone_created': return ['Milestone created', [what, amt].filter(Boolean).join(' · ')];
+    case 'delivery_submitted': return ['Work delivered', [who, what].filter(Boolean).join(' · ')];
+    case 'agent_decision': return [a.title, a.detail];
+    case 'agent_settings': return ['Agent settings changed', a.detail];
     case 'milestone_verified': return ['Work approved', [what, who].filter(Boolean).join(' · ')];
     case 'risk_check': return [`Contractor check: ${(RISK[verdict] || 'done').toLowerCase()}`, verdict === 'LOW' ? `${who || 'Contractor'} cleared for payment` : verdict === 'MEDIUM' ? `Payment to ${who || 'the contractor'} held for your review` : `Payment to ${who || 'the contractor'} blocked`];
     case 'risk_unavailable': return ['Contractor check unavailable', 'Try paying again in a minute'];
     case 'payment': return ['Payment sent', [amt, who && `to ${who}`].filter(Boolean).join(' ')];
     case 'payment_reconciled': return ['Payment confirmed', [amt, who && `to ${who}`].filter(Boolean).join(' ')];
-    case 'vault_deposit': return ['Moved to savings', deposited ? dollars(deposited) : ''];
-    case 'vault_withdrawal': return ['Moved from savings', what ? `For ${what}` : ''];
+    case 'vault_deposit': return [a.engine ? 'Agent moved money to savings' : 'Moved to savings', [deposited ? dollars(deposited) : '', a.detail?.split(' · ')[1]].filter(Boolean).join(' · ')];
+    case 'vault_withdrawal': return [a.engine ? 'Agent moved money from savings' : 'Moved from savings', what ? `For ${what}` : (a.detail?.split(' · ')[1] || '')];
     case 'release_failed': return ['Payment not sent', 'Not enough money in the account'];
     case 'release_uncertain': return ['Payment unconfirmed', 'Confirm it from the milestone'];
     default: return [a.title, ''];
@@ -322,6 +347,8 @@ function renderBanner() {
     html = `<div><strong>iPay can't connect right now.</strong> Your money is safe. Actions are paused until the connection is back.</div><button class="btn btn-sm" data-refresh>Try again</button>`;
   } else if (serverMode === 'demo') {
     html = '<div><strong>Practice mode.</strong> Checks and payments here are simulated. No money moves.</div>';
+  } else if (workspaceSlug && data?.wallet?.address && data.wallet.liquid + data.wallet.vault === 0) {
+    html = `<div><strong>Your account is empty.</strong> Get 20 free test USDC: copy your address, open the Circle faucet, choose USDC and Arc Testnet, and paste it.</div><button class="btn btn-sm" data-copy-wallet>Copy address</button><a class="btn btn-sm" href="https://faucet.circle.com/" target="_blank" rel="noopener">Open faucet ↗</a>`;
   } else if (workspaceSlug && data && !data.wallet?.address) {
     html = `<div><strong>Your payments account isn't set up yet.</strong> Finish setup to create it.</div><a class="btn btn-sm" href="/onboard">Finish setup</a>`;
   }
@@ -330,8 +357,27 @@ function renderBanner() {
   banner.hidden = !html;
 }
 
+function renderAgent() {
+  const panel = $('#agent-panel');
+  const agent = data?.agent;
+  panel.hidden = !agent || !workspaceSlug;
+  if (panel.hidden) return;
+  const { settings, lastRun, engine } = agent;
+  const reviewing = (data.milestones || []).some(m => m.status === 'delivered');
+  $('#agent-enabled').checked = settings.enabled;
+  $('#agent-dot').className = `agent-dot ${reviewing ? 'busy' : settings.enabled ? 'on' : ''}`;
+  if (document.activeElement !== $('#agent-limit')) $('#agent-limit').value = settings.autoPayLimit;
+  const brain = engine === 'claude' ? 'Decisions by Claude' : 'Decisions by built-in rules';
+  $('#agent-last').innerHTML = reviewing
+    ? `<strong>Reviewing a delivery now…</strong><small>${brain}</small>`
+    : lastRun
+      ? `<strong>${esc(lastRun.summary)}</strong>${lastRun.treasury && lastRun.treasury.action !== 'none' ? `<span>${esc(lastRun.treasury.reason)}</span>` : ''}<small>${esc(when(lastRun.at))} · ${lastRun.engine === 'claude' ? 'Decided by Claude' : 'Decided by built-in rules'}${lastRun.note ? ` · ${esc(lastRun.note)}` : ''}</small>`
+      : `<strong>${settings.enabled ? 'Waiting for the first delivery.' : 'Paused. Turn it on to let it review and pay.'}</strong><small>${brain}</small>`;
+}
+
 function render() {
   renderBanner();
+  renderAgent();
   const modeText = offline ? 'Offline' : serverMode === 'live' ? 'Connected' : serverMode === 'demo' ? 'Practice mode' : 'Connecting';
   $('#ws-mode').textContent = modeText;
   $$('[data-mode-text]').forEach(el => el.textContent = modeText);
@@ -573,7 +619,7 @@ document.addEventListener('click', event => {
     $('#deposit-dialog').showModal();
   });
   const copy = target.closest('[data-copy]');
-  if (copy) return copyText(copy.dataset.copy, 'Address copied.');
+  if (copy) return copyText(copy.dataset.copy, copy.dataset.copyMsg || 'Address copied.');
   const proof = target.closest('[data-proof]');
   if (proof) return openProof(findRisk(proof.dataset.proof));
   const filterBtn = target.closest('[data-filter]');
@@ -610,7 +656,13 @@ $('#create-form').addEventListener('submit', async event => {
     form.reset();
     $('#create-dialog').close();
     render();
-    toast('Milestone created.');
+    const created = data.milestones[0];
+    if (workspaceSlug && created?.deliveryToken) {
+      navigator.clipboard.writeText(deliveryLink(created))
+        .then(() => toast(`Milestone created. The contractor link is copied: send it to ${created.contractor}.`))
+        .catch(() => toast('Milestone created. Use "Contractor link" on it to copy the link for your contractor.'));
+    }
+    else toast('Milestone created.');
   } catch (error) {
     if (handleAuthError(error)) $('#create-dialog').close();
     else formError(form, error.message);
@@ -668,6 +720,38 @@ $('#reconcile-form').addEventListener('submit', async event => {
     else formError(form, error.message);
   } finally { done(); }
 });
+
+/* ---------- Agent controls ---------- */
+async function saveAgent(changes, message) {
+  try {
+    data = normalise(await request(`/api/workspaces/${encodeURIComponent(workspaceSlug)}/agent`, { method: 'PUT', body: JSON.stringify(changes) }));
+    render();
+    toast(message);
+  } catch (error) {
+    if (!handleAuthError(error)) toast(error.message, true);
+    render();
+  }
+}
+$('#agent-enabled').addEventListener('change', event => {
+  const on = event.currentTarget.checked;
+  guarded(() => saveAgent({ enabled: on }, on ? 'Agent is on. It will review deliveries as they arrive.' : 'Agent paused. Deliveries will wait for you.'));
+});
+$('#agent-limit-form').addEventListener('submit', event => {
+  event.preventDefault();
+  const limit = Number($('#agent-limit').value);
+  if (!Number.isFinite(limit) || limit < 0) return toast('Enter a dollar amount.', true);
+  guarded(() => saveAgent({ autoPayLimit: limit }, `The agent can now pay up to ${dollars(limit)} on its own.`));
+});
+$('#agent-run').addEventListener('click', event => guarded(async () => {
+  const done = busy(event.currentTarget, 'Agent working…');
+  try {
+    data = normalise(await request(`/api/workspaces/${encodeURIComponent(workspaceSlug)}/agent/run`, { method: 'POST', body: '{}' }));
+    render();
+    toast(data.agent?.lastRun?.summary || 'Agent run finished.');
+  } catch (error) {
+    if (!handleAuthError(error)) toast(error.message, true);
+  } finally { done(); }
+}));
 
 /* ---------- Network status ---------- */
 async function pollNetwork() {
@@ -752,8 +836,9 @@ async function boot() {
   // Keep balances current while the tab is visible and nothing is being edited.
   setInterval(() => {
     if (document.hidden || $('dialog[open]')) return;
-    refresh().catch(() => {});
-  }, 30_000);
+    const working = data?.milestones?.some(m => ['delivered', 'checking', 'withdrawing', 'sending', 'confirming'].includes(m.status));
+    if (working || Date.now() - (lastSync?.getTime() || 0) > 30_000) refresh().catch(() => {});
+  }, 5_000);
 }
 
 if (operatorMode) {

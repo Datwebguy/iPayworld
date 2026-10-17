@@ -118,32 +118,45 @@ async function ensureAccount() {
   $('#wallet-status').textContent = 'Ready';
 }
 
-/* Step 3: add money */
+/* Step 3: add money via the public Circle faucet, watching the balance until it lands */
+let watching;
+function watchBalance() {
+  if (watching) return;
+  const task = $('#task-fund');
+  task.className = 'task running';
+  $('#wallet-status').textContent = 'Waiting for funds…';
+  watching = setInterval(async () => {
+    try {
+      const state = await call(`/api/workspaces/${workspace.slug}/state`, { headers: { Authorization: `Bearer ${ownerToken}` } });
+      const balance = Number(state.wallet?.liquid || 0) + Number(state.wallet?.vault || 0);
+      if (balance > 0) {
+        clearInterval(watching);
+        task.className = 'task done';
+        $('#wallet-status').textContent = `$${balance.toFixed(2)} received`;
+        setTimeout(() => go(4), 1200);
+      }
+    } catch {}
+  }, 5000);
+}
 $('#copy-address').addEventListener('click', async event => {
   const button = event.currentTarget;
-  try { await ensureAccount(); await navigator.clipboard.writeText(workspace.walletAddress); button.textContent = 'Copied'; }
-  catch { button.textContent = 'Copy failed'; }
-});
-$('#fund').addEventListener('click', async event => {
-  const pane = $('.pane[data-pane="3"]');
-  const task = $('#task-fund');
-  showError(pane, '');
-  task.className = 'task running';
-  const done = busy(event.currentTarget, 'Requesting…');
+  showError($('.pane[data-pane="3"]'), '');
   try {
     await ensureAccount();
-    await call(`/api/workspaces/${workspace.slug}/fund-testnet`, { method: 'POST', headers: { Authorization: `Bearer ${ownerToken}` } });
-    task.className = 'task done';
-    const note = $('#fund-status');
-    note.hidden = false;
-    note.textContent = 'Requested. Test dollars usually arrive within a minute.';
-    setTimeout(() => go(4), 900);
+    await navigator.clipboard.writeText(workspace.walletAddress);
+    button.textContent = 'Copied';
+    watchBalance();
   } catch (error) {
-    task.className = 'task failed';
-    showError(pane, `${error.message} You can skip this and add money later.`);
-  } finally { done(); }
+    if (workspace?.walletAddress) {
+      button.textContent = workspace.walletAddress;
+      button.style.whiteSpace = 'normal';
+      button.style.wordBreak = 'break-all';
+      watchBalance();
+    } else showError($('.pane[data-pane="3"]'), error.message);
+  }
 });
-$('#skip-fund').addEventListener('click', () => go(4));
+$('#open-faucet').addEventListener('click', () => watchBalance());
+$('#skip-fund').addEventListener('click', () => { clearInterval(watching); go(4); });
 
 /* Step 4: team keys */
 $('#member-form').addEventListener('submit', async event => {

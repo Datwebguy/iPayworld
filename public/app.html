@@ -160,6 +160,30 @@
           </div>
 
           <div class="col">
+            <section class="card panel agent-panel" id="agent-panel" hidden>
+              <header class="panel-head">
+                <h2><span class="agent-dot" id="agent-dot"></span>Payments agent</h2>
+                <label class="switch" title="Turn the agent on or off">
+                  <input type="checkbox" id="agent-enabled">
+                  <span class="switch-track" aria-hidden="true"></span>
+                  <span class="sr-only">Agent on</span>
+                </label>
+              </header>
+              <div class="agent-body">
+                <p class="agent-what">Reviews delivered work against what you agreed, pays what checks out, holds anything odd for you, and keeps spare money in savings.</p>
+                <form class="agent-limit" id="agent-limit-form">
+                  <label for="agent-limit">Pays on its own up to</label>
+                  <span class="input-affix"><input class="input mono" id="agent-limit" type="number" min="0" step="1" inputmode="numeric"><span>USD</span></span>
+                  <button class="mini" type="submit">Save</button>
+                </form>
+                <div class="agent-last" id="agent-last"></div>
+                <button class="btn btn-sm agent-run" id="agent-run" type="button">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 4l14 8-14 8z"/></svg>
+                  Run now
+                </button>
+              </div>
+            </section>
+
             <section class="card panel accounts">
               <header class="panel-head"><h2>Accounts</h2></header>
               <div class="acct">
@@ -282,7 +306,7 @@
         <h2>New milestone</h2>
         <button type="button" class="icon-btn" data-close aria-label="Close"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       </header>
-      <p class="sheet-intro">The amount is set aside from your unassigned balance. Nothing is paid until you approve the work and the contractor passes a risk check.</p>
+      <p class="sheet-intro">The amount is set aside from your unassigned balance. You'll get a private link to send the contractor. When they submit their work, the agent reviews it and pays if it checks out.</p>
       <label class="field">What's being delivered
         <input class="input" name="title" required maxlength="100" placeholder="Checkout redesign, phase 2">
       </label>
@@ -294,11 +318,14 @@
           <span class="input-affix"><input class="input mono" name="amount" required type="number" inputmode="decimal" min="0.01" max="1000000" step="0.01" placeholder="0.00"><span>USD</span></span>
         </label>
       </div>
+      <label class="field">Due date <span class="hint">optional</span>
+        <input class="input" name="dueDate" type="date">
+      </label>
       <label class="field">Contractor's payment address
         <input class="input mono" name="address" required pattern="0x[a-fA-F0-9]{40}" placeholder="0x…" spellcheck="false" autocomplete="off">
       </label>
-      <label class="field">Notes <span class="hint">optional</span>
-        <textarea class="input" name="description" maxlength="500" rows="3" placeholder="Scope, links, acceptance criteria"></textarea>
+      <label class="field">What counts as done <span class="hint">the agent checks deliveries against this</span>
+        <textarea class="input" name="description" maxlength="500" rows="3" placeholder="New cart, payment step and confirmation screens, responsive, matching the Figma file."></textarea>
       </label>
       <p class="form-error" data-error hidden></p>
       <footer class="sheet-actions">

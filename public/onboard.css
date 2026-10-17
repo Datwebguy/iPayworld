@@ -103,3 +103,12 @@
   .key-actions .btn { flex: 1; }
   .roles { grid-template-columns: 1fr; }
 }
+
+/* Funding steps */
+.fund-steps { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 10px; }
+.fund-steps li { display: grid; grid-template-columns: 28px 1fr; gap: 12px; padding: 14px; border: 1px solid var(--rule); border-radius: var(--r); }
+.fund-steps li > span { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; background: var(--paper-2); color: var(--ink-2); }
+.fund-steps li div { display: grid; gap: 6px; justify-items: start; }
+.fund-steps strong { font-size: 14px; font-weight: 500; }
+.fund-steps small { font-size: 13px; color: var(--ink-3); }
+.fund-steps b { font-weight: 600; color: var(--ink-2); }
