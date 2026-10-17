@@ -19,7 +19,7 @@
       <svg class="emblem" viewBox="0 0 32 32" aria-hidden="true"><polygon class="e-ink" points="6.5,5.5 22.5,5.5 26.5,9.5 10.5,9.5"/><polygon class="e-acc" points="26.5,6.5 26.5,22.5 22.5,26.5 22.5,10.5"/><polygon class="e-ink" points="25.5,26.5 9.5,26.5 5.5,22.5 21.5,22.5"/><polygon class="e-acc" points="5.5,25.5 5.5,9.5 9.5,5.5 9.5,21.5"/><polygon class="e-ink" points="16,11.5 20.5,16 16,20.5 11.5,16"/><circle class="e-acc" cx="16" cy="16" r="1.6"/></svg>
       <span>iPay</span>
     </a>
-    <a href="/app" class="btn btn-ghost btn-sm">Sign in</a>
+    <a href="/" class="btn btn-ghost btn-sm">Home</a>
   </header>
 
   <div class="ob">
@@ -27,7 +27,7 @@
       <p class="ob-kicker mono">Workspace setup</p>
       <h1 class="ob-title">Ready to pay in about a minute.</h1>
       <ol class="steps" id="steps">
-        <li data-step="1"><span class="n mono">1</span><span><strong>Name your business</strong><small>That is all you type</small></span></li>
+        <li data-step="1"><span class="n mono">1</span><span><strong>Name your business</strong><small>Or sign in with your key</small></span></li>
         <li data-step="2"><span class="n mono">2</span><span><strong>Save your key</strong><small>Shown once, keep it safe</small></span></li>
         <li data-step="3"><span class="n mono">3</span><span><strong>Add money</strong><small>Free test dollars, one click</small></span></li>
         <li data-step="4"><span class="n mono">4</span><span><strong>Start paying</strong><small>Invite your team if you like</small></span></li>
@@ -39,16 +39,19 @@
     <main class="ob-panel">
       <!-- 1 -->
       <section class="pane" data-pane="1">
-        <p class="pane-step mono">Step 1</p>
-        <h2>Name your business</h2>
-        <p class="pane-lede">Free, no card, no email. You get a private workspace with its own payments account, milestones and history.</p>
+        <p class="pane-step mono">Start here</p>
+        <h2>Start or open your workspace</h2>
+        <p class="pane-lede">New here? Type your business name and continue. It's free, with no card and no email. Coming back? Type your workspace handle and paste your key.</p>
         <form id="workspace-form" class="pane-form" novalidate>
-          <label class="field">Business name
-            <input class="input" name="name" required maxlength="100" placeholder="Acme Design Studio" autocomplete="organization">
+          <label class="field">Business name or workspace handle
+            <input class="input" name="name" required maxlength="100" placeholder="Acme Design Studio" autocomplete="username">
+          </label>
+          <label class="field">Key <span class="hint">only if you already have a workspace</span>
+            <input class="input mono" name="key" type="password" autocomplete="current-password" spellcheck="false" placeholder="Leave empty to create a new workspace">
           </label>
           <p class="form-error" data-error hidden></p>
           <div class="pane-actions">
-            <button class="btn btn-ink btn-lg" type="submit">Create my workspace</button>
+            <button class="btn btn-ink btn-lg" type="submit" id="entry-submit">Create my workspace</button>
           </div>
         </form>
       </section>

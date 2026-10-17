@@ -815,7 +815,8 @@ async function boot() {
         return;
       }
     } catch {}
-    return showGate();
+    location.replace('/onboard');
+    return;
   }
   if (workspaceSlug) {
     try { localStorage.setItem(LAST_KEY, workspaceSlug); } catch {}

@@ -48,6 +48,8 @@ function go(next) {
   });
   $('#progress').style.width = `${(step / 4) * 100}%`;
   $('#progress-text').textContent = `Step ${step} of 4`;
+  // Setup is finished at step 4; forget it so the next visit opens the entry screen.
+  if (step === 4) setTimeout(() => { try { sessionStorage.removeItem(STEP_KEY); } catch {} }, 0);
   if (workspace) $('#dashboard').href = `/app?workspace=${encodeURIComponent(workspace.slug)}`;
   persist();
   const focusable = $(`.pane[data-pane="${step}"] input, .pane[data-pane="${step}"] button`);
@@ -55,22 +57,52 @@ function go(next) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-/* Step 1: create */
+/* Step 1: one entry for everyone. No key creates a workspace; a key signs in. */
 const form = $('#workspace-form');
+const toSlug = value => String(value || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+// Accept a pasted "Workspace handle: x / Key: y" block from the copy button or key file.
+function parseEntry() {
+  let name = form.name.value.trim();
+  let key = form.key.value.trim();
+  const pasted = `${name}\n${key}`;
+  const handle = pasted.match(/Workspace handle:\s*([a-z0-9-]+)/i)?.[1];
+  const token = pasted.match(/(ipay_(?:ws|member)_[A-Za-z0-9_-]+)/)?.[1];
+  if (token) key = token;
+  if (handle) name = handle;
+  return { name, key };
+}
+form.key.addEventListener('input', () => {
+  $('#entry-submit').textContent = form.key.value.trim() ? 'Open my workspace' : 'Create my workspace';
+});
+
+async function signIn(handle, key) {
+  const slug = toSlug(handle);
+  const response = await fetch(`/api/workspaces/${encodeURIComponent(slug)}/state`, { headers: { Authorization: `Bearer ${key}` } });
+  if (response.status === 401 || response.status === 403 || response.status === 404) throw new Error("That workspace handle and key don't match. Check both and try again.");
+  if (!response.ok) throw new Error('Could not reach iPay. Try again in a moment.');
+  try { sessionStorage.setItem(`ipay-owner-token:${slug}`, key); localStorage.setItem('ipay-last-workspace', slug); } catch {}
+  location.href = `/app?workspace=${encodeURIComponent(slug)}`;
+}
 
 form.addEventListener('submit', async event => {
   event.preventDefault();
   showError(form, '');
   if (!form.checkValidity()) {
     const bad = form.querySelector(':invalid');
-    showError(form, 'Enter your business name.');
+    showError(form, 'Enter your business name, or your workspace handle if you already have one.');
     return bad.focus();
+  }
+  const entry = parseEntry();
+  if (entry.key) {
+    const doneSignIn = busy($('button[type=submit]', form), 'Opening…');
+    try { return await signIn(entry.name, entry.key); }
+    catch (error) { showError(form, error.message); doneSignIn(); return; }
   }
   const done = busy($('button[type=submit]', form), 'Creating…');
   try {
     const result = await call('/api/signup', {
       method: 'POST',
-      body: JSON.stringify({ name: form.name.value })
+      body: JSON.stringify({ name: entry.name })
     });
     workspace = result.workspace;
     ownerToken = result.ownerToken;
@@ -209,3 +241,12 @@ call('/api/config').then(config => {
   if (last) last.textContent = '2';
   $$('#steps li[data-step="3"] small').forEach(el => { el.textContent = 'Send USDC to your account'; });
 }).catch(() => {});
+
+/* Returning on this device: prefill the handle so only the key is needed. */
+try {
+  const last = localStorage.getItem('ipay-last-workspace');
+  if (last && step === 1 && !form.name.value) {
+    form.name.value = last;
+    form.key.focus();
+  }
+} catch {}
