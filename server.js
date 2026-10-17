@@ -1,3 +1,4 @@
+import './lib/rpc-alias.js';
 import http from 'node:http';
 import { readFile, mkdir, rename, writeFile } from 'node:fs/promises';
 import { join, extname, resolve, sep } from 'node:path';
@@ -28,6 +29,16 @@ if (mode === 'live' && screeningMode !== 'live') throw new Error('Live payments 
 if (mode === 'live' && (!process.env.IPAY_OWNER_TOKEN || process.env.IPAY_OWNER_TOKEN.length < 32)) throw new Error('Set a random IPAY_OWNER_TOKEN of at least 32 characters for live payments');
 const clients = mode === 'live' ? liveClients() : null;
 const addressPattern = /^0x[a-fA-F0-9]{40}$/;
+// What the browser needs to know about the network this server pays on.
+const network = (() => {
+  const mainnet = clients?.config.chain === 'Arc';
+  return {
+    chain: clients?.config.chain || 'Arc_Testnet',
+    testnet: !mainnet,
+    rpcUrl: clients?.config.rpcUrl || 'https://rpc.testnet.arc.io',
+    explorerUrl: process.env.ARC_EXPLORER_URL || (mainnet ? '' : 'https://explorer.testnet.arc.io')
+  };
+})();
 const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8', '.txt': 'text/plain; charset=utf-8', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.png': 'image/png', '.webp': 'image/webp', '.woff2': 'font/woff2', '.webmanifest': 'application/manifest+json' };
 
 function initialState() {
@@ -518,7 +529,7 @@ async function api(req, res, path) {
     const tenantState = await workspaceDataStore.read(workspace);
     const m = tenantState.milestones.find(item => item.id === input.milestone);
     if (!m || !tokenMatches(m.deliveryToken, input.token)) failure(404, 'This delivery link is not valid');
-    const view = () => ({ business: workspace.name, title: m.title, scope: m.description, amount: m.amount, contractor: m.contractor, dueDate: m.dueDate, status: m.status, delivery: m.delivery || null, agentDecision: m.agentDecision || null, paidAt: m.paidAt || null, txHash: m.status === 'paid' ? m.txHash : null });
+    const view = () => ({ explorerUrl: network.explorerUrl, testnet: network.testnet, business: workspace.name, title: m.title, scope: m.description, amount: m.amount, contractor: m.contractor, dueDate: m.dueDate, status: m.status, delivery: m.delivery || null, agentDecision: m.agentDecision || null, paidAt: m.paidAt || null, txHash: m.status === 'paid' ? m.txHash : null });
     if (req.method === 'GET') return respond(res, 200, view());
     if (req.method !== 'POST') failure(405, 'Method not allowed');
     if (!['in_progress', 'awaiting_verification'].includes(m.status)) failure(409, m.status === 'paid' ? 'This milestone is already paid' : 'This milestone is not open for delivery right now');
@@ -560,13 +571,20 @@ async function api(req, res, path) {
     if (req.method !== 'POST') failure(405, 'Method not allowed');
     const input = await body(req);
     allowSignup(req);
+    // The handle is derived from the business name; a short suffix resolves collisions.
+    const base = String(input.slug || input.name || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 48);
     let created;
-    try { created = await workspaceRegistry.create({ name: input.name, slug: input.slug }); }
-    catch (error) {
-      // A rejected name or taken handle should not use up the visitor's quota.
+    let lastError;
+    for (let attempt = 0; attempt < 4 && !created; attempt++) {
+      const slug = attempt === 0 ? base : `${base}-${randomBytes(2).toString('hex')}`;
+      try { created = await workspaceRegistry.create({ name: input.name, slug }); }
+      catch (error) { lastError = error; if (!/already in use/i.test(error.message)) break; }
+    }
+    if (!created) {
+      // A rejected name should not use up the visitor's quota.
       signupLog.get(clientIp(req))?.pop();
       signupDay.count -= 1;
-      failure(400, error.message);
+      failure(400, lastError?.message || 'Could not create the workspace');
     }
     // Create the workspace's own Circle wallet straight away; setup can retry if Circle is slow.
     if (mode === 'live') {
@@ -696,8 +714,17 @@ async function api(req, res, path) {
       await workspaceDataStore.write(workspace, tenantState);
     } else if (milestoneRecord.status !== 'verified') failure(409, 'Verify the milestone before release');
     assertWorkspacePaymentPolicy(workspace, tenantState, milestoneRecord);
-    await processWorkspaceLiveRelease(workspace, tenantState, milestoneRecord);
-    return respond(res, 200, tenantState);
+    // Screening and settlement can outlast the proxy timeout, so pay in the background
+    // and let the dashboard follow the milestone status.
+    milestoneRecord.status = 'checking';
+    await workspaceDataStore.write(workspace, tenantState);
+    processWorkspaceLiveRelease(workspace, tenantState, milestoneRecord).catch(async error => {
+      console.error(`Release failed for ${milestoneRecord.id}:`, error);
+      milestoneRecord.status = 'verified';
+      milestoneRecord.releaseError = error.message;
+      await workspaceDataStore.write(workspace, tenantState).catch(() => {});
+    });
+    return respond(res, 202, tenantState);
   }
   const provisionMatch = path.match(/^\/api\/workspaces\/([a-z0-9-]+)\/provision-treasury$/);
   if (provisionMatch) {
@@ -745,7 +772,7 @@ async function api(req, res, path) {
     await workspaceDataStore.write(workspace, tenantState);
     return respond(res, 200, { deposit, wallet: { liquidUsdc: after.liquidUsdc, vaultUsdc: after.vaultUsdc, yieldEarned: after.yieldEarned } });
   }
-  if (req.method === 'GET' && path === '/api/config') return respond(res, 200, { mode, chain: clients?.config.chain || null });
+  if (req.method === 'GET' && path === '/api/config') return respond(res, 200, { mode, chain: clients?.config.chain || null, network });
   // The server's own treasury belongs to the operator; users only ever see their workspace.
   if (req.method === 'GET' && ['/api/state', '/api/arc-wallet', '/api/earn-position'].includes(path)) requireOwner(req);
   if (req.method === 'GET' && path === '/api/state') {

@@ -31,7 +31,7 @@ function showResult(view) {
       break;
     case 'paid':
       tone = 'ok'; label = 'Paid';
-      message = `${dollars(view.amount)} was sent to your wallet.${decision?.reason ? ` ${decision.reason}` : ''}${view.txHash ? ` <a href="https://explorer.testnet.arc.io/tx/${view.txHash}" target="_blank" rel="noopener">View receipt ↗</a>` : ''}`;
+      message = `${dollars(view.amount)} was sent to your wallet.${decision?.reason ? ` ${decision.reason}` : ''}${view.txHash && view.explorerUrl ? ` <a href="${view.explorerUrl}/tx/${view.txHash}" target="_blank" rel="noopener">View receipt ↗</a>` : ''}`;
       break;
     case 'awaiting_verification':
       tone = 'warn'; label = 'With the business for approval';

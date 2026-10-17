@@ -112,3 +112,7 @@
 .fund-steps strong { font-size: 14px; font-weight: 500; }
 .fund-steps small { font-size: 13px; color: var(--ink-3); }
 .fund-steps b { font-weight: 600; color: var(--ink-2); }
+
+.key-label { margin: 0 0 4px; font-size: 12px; color: var(--ink-3); }
+.key-label:not(:first-child) { margin-top: 14px; }
+.key-handle { font-size: 16px !important; font-weight: 500; }

@@ -27,7 +27,7 @@
       <p class="ob-kicker mono">Workspace setup</p>
       <h1 class="ob-title">Ready to pay in about a minute.</h1>
       <ol class="steps" id="steps">
-        <li data-step="1"><span class="n mono">1</span><span><strong>Name your business</strong><small>Your payments account is created for you</small></span></li>
+        <li data-step="1"><span class="n mono">1</span><span><strong>Name your business</strong><small>That is all you type</small></span></li>
         <li data-step="2"><span class="n mono">2</span><span><strong>Save your key</strong><small>Shown once, keep it safe</small></span></li>
         <li data-step="3"><span class="n mono">3</span><span><strong>Add money</strong><small>Free test dollars, one click</small></span></li>
         <li data-step="4"><span class="n mono">4</span><span><strong>Start paying</strong><small>Invite your team if you like</small></span></li>
@@ -46,10 +46,6 @@
           <label class="field">Business name
             <input class="input" name="name" required maxlength="100" placeholder="Acme Design Studio" autocomplete="organization">
           </label>
-          <label class="field">URL handle
-            <span class="input-prefix"><span class="mono">ipay /</span><input class="input mono" name="slug" required maxlength="64" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="acme-studio" spellcheck="false" autocomplete="off"></span>
-            <span class="hint">You'll use this to sign in. Filled in from the name.</span>
-          </label>
           <p class="form-error" data-error hidden></p>
           <div class="pane-actions">
             <button class="btn btn-ink btn-lg" type="submit">Create my workspace</button>
@@ -60,12 +56,15 @@
       <!-- 2 -->
       <section class="pane" data-pane="2" hidden>
         <p class="pane-step mono">Step 2</p>
-        <h2>Save your key for <span id="ws-name">your workspace</span></h2>
-        <p class="pane-lede">This key is how you sign in and approve payments. iPay keeps no copy of it, so if you lose it, nobody can show it to you again.</p>
+        <h2>Save how you sign in to <span id="ws-name">your workspace</span></h2>
+        <p class="pane-lede">There's no password or email. You sign in with your workspace handle and this key. iPay keeps no copy of the key, so if you lose it, nobody can show it to you again.</p>
         <div class="key-box">
+          <p class="key-label">Workspace handle</p>
+          <code id="ws-handle" class="mono key-handle"></code>
+          <p class="key-label">Key</p>
           <code id="owner-token" class="mono"></code>
           <div class="key-actions">
-            <button type="button" class="btn btn-sm" id="copy-key">Copy</button>
+            <button type="button" class="btn btn-sm" id="copy-key">Copy both</button>
             <button type="button" class="btn btn-sm" id="download-key">Download .txt</button>
           </div>
         </div>

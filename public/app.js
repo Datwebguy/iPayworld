@@ -7,8 +7,10 @@ const workspaceSlug = params.get('workspace');
 const operatorMode = !workspaceSlug && params.has('operator');
 const TOKEN_KEY = workspaceSlug ? `ipay-owner-token:${workspaceSlug}` : 'ipay-owner-token';
 const LAST_KEY = 'ipay-last-workspace';
-const ARC_RPC = 'https://rpc.testnet.arc.io';
-const EXPLORER = 'https://explorer.testnet.arc.io';
+// Network details come from /api/config at boot; these are the testnet defaults.
+let ARC_RPC = 'https://rpc.testnet.arc.io';
+let EXPLORER = 'https://explorer.testnet.arc.io';
+let TESTNET = true;
 const VIEWS = { overview: 'Overview', milestones: 'Milestones', activity: 'Audit trail' };
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -182,7 +184,7 @@ function actionsFor(m) {
   if (['in_progress', 'awaiting_verification', 'delivered'].includes(m.status)) out.push(`<button class="btn btn-ink btn-sm" data-action="verify" data-id="${esc(m.id)}">${m.status === 'awaiting_verification' ? 'Approve and pay' : 'Approve work'}</button>`);
   if (m.status === 'verified') out.push(`<button class="btn btn-accent btn-sm" data-action="release" data-id="${esc(m.id)}">Pay now</button>`);
   if (m.status === 'needs_reconciliation' && serverMode === 'live') out.push(`<button class="btn btn-sm" data-action="reconcile" data-id="${esc(m.id)}">Confirm payment</button>`);
-  if (m.status === 'paid' && m.txHash && serverMode === 'live') out.push(`<a class="mini" href="${EXPLORER}/tx/${esc(m.txHash)}" target="_blank" rel="noopener">Receipt ↗</a>`);
+  if (m.status === 'paid' && m.txHash && serverMode === 'live' && EXPLORER) out.push(`<a class="mini" href="${EXPLORER}/tx/${esc(m.txHash)}" target="_blank" rel="noopener">Receipt ↗</a>`);
   return out.join('');
 }
 
@@ -260,7 +262,8 @@ function activityLook(a) {
 }
 function txLink(hash, simulated) {
   if (!hash) return '';
-  return simulated ? 'Simulated' : `<a href="${EXPLORER}/tx/${esc(hash)}" target="_blank" rel="noopener">View receipt ↗</a>`;
+  if (simulated) return 'Simulated';
+  return EXPLORER ? `<a href="${EXPLORER}/tx/${esc(hash)}" target="_blank" rel="noopener">View receipt ↗</a>` : `<span class="mono">${esc(short(hash))}</span>`;
 }
 
 // Plain-language title and detail, built from our own records rather than the server's internal strings.
@@ -348,7 +351,9 @@ function renderBanner() {
   } else if (serverMode === 'demo') {
     html = '<div><strong>Practice mode.</strong> Checks and payments here are simulated. No money moves.</div>';
   } else if (workspaceSlug && data?.wallet?.address && data.wallet.liquid + data.wallet.vault === 0) {
-    html = `<div><strong>Your account is empty.</strong> Get 20 free test USDC: copy your address, open the Circle faucet, choose USDC and Arc Testnet, and paste it.</div><button class="btn btn-sm" data-copy-wallet>Copy address</button><a class="btn btn-sm" href="https://faucet.circle.com/" target="_blank" rel="noopener">Open faucet ↗</a>`;
+    html = TESTNET
+      ? `<div><strong>Your account is empty.</strong> Get 20 free test USDC: copy your address, open the Circle faucet, choose USDC and Arc Testnet, and paste it.</div><button class="btn btn-sm" data-copy-wallet>Copy address</button><a class="btn btn-sm" href="https://faucet.circle.com/" target="_blank" rel="noopener">Open faucet ↗</a>`
+      : `<div><strong>Your account is empty.</strong> Send USDC on Arc to your account address to start paying contractors.</div><button class="btn btn-sm" data-copy-wallet>Copy address</button>`;
   } else if (workspaceSlug && data && !data.wallet?.address) {
     html = `<div><strong>Your payments account isn't set up yet.</strong> Finish setup to create it.</div><a class="btn btn-sm" href="/onboard">Finish setup</a>`;
   }
@@ -400,7 +405,7 @@ function render() {
     const walletAddr = data.wallet.address;
     $('#acct-wallet-bal').textContent = dollars(liquid);
     const link = $('#acct-wallet-link');
-    link.hidden = !walletAddr;
+    link.hidden = !walletAddr || !EXPLORER;
     if (walletAddr) link.href = `${EXPLORER}/address/${walletAddr}`;
     $('[data-copy-wallet]').hidden = !walletAddr;
     $('#acct-vault-bal').textContent = dollars(vault);
@@ -527,6 +532,10 @@ function outcomeMessage(m) {
     case 'blocked': return ['High risk. The payment was blocked.', true];
     case 'needs_reconciliation': return ['The payment was sent but not confirmed. Reconcile it from the milestone.', true];
     case 'verified': return [m.risk?.verdict === 'UNAVAILABLE' ? 'Approved, but the contractor check was unavailable. Try paying again in a minute.' : 'Approved, but the payment did not go through. See the history for why.', true];
+    case 'checking':
+    case 'withdrawing':
+    case 'sending':
+    case 'confirming': return ['Approved. Checking the contractor and paying now; this updates by itself.', false];
     default: return ['Approved.', false];
   }
 }
@@ -822,6 +831,7 @@ async function boot() {
   try {
     const config = await request('/api/config');
     serverMode = config.mode;
+    if (config.network) { ARC_RPC = config.network.rpcUrl; EXPLORER = config.network.explorerUrl; TESTNET = config.network.testnet; }
   } catch (error) {
     offline = true;
     offlineReason = error.message;

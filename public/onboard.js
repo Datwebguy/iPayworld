@@ -1,6 +1,5 @@
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
-const slugify = value => String(value || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 64);
 const STEP_KEY = 'ipay-setup';
 
 let workspace = null;
@@ -58,28 +57,26 @@ function go(next) {
 
 /* Step 1: create */
 const form = $('#workspace-form');
-let slugTouched = false;
-form.slug.addEventListener('input', () => { slugTouched = true; });
-form.name.addEventListener('input', () => { if (!slugTouched) form.slug.value = slugify(form.name.value); });
 
 form.addEventListener('submit', async event => {
   event.preventDefault();
   showError(form, '');
   if (!form.checkValidity()) {
     const bad = form.querySelector(':invalid');
-    showError(form, bad.name === 'slug' ? 'The handle can only use lowercase letters, numbers and single dashes.' : `Fill in the ${bad.closest('label').firstChild.textContent.trim().toLowerCase()}.`);
+    showError(form, 'Enter your business name.');
     return bad.focus();
   }
   const done = busy($('button[type=submit]', form), 'Creating…');
   try {
     const result = await call('/api/signup', {
       method: 'POST',
-      body: JSON.stringify({ name: form.name.value, slug: form.slug.value })
+      body: JSON.stringify({ name: form.name.value })
     });
     workspace = result.workspace;
     ownerToken = result.ownerToken;
     $('#ws-name').textContent = workspace.name;
     $('#owner-token').textContent = ownerToken;
+    $('#ws-handle').textContent = workspace.slug;
     try { localStorage.setItem('ipay-last-workspace', workspace.slug); } catch {}
     $('#wallet-status').textContent = workspace.walletAddress ? 'Ready' : 'Created when you add money';
     go(2);
@@ -91,14 +88,15 @@ form.addEventListener('submit', async event => {
 /* Step 2: save the key */
 $('#saved-key').addEventListener('change', event => { $('#to-3').disabled = !event.target.checked; });
 $('#copy-key').addEventListener('click', async event => {
+  const button = event.currentTarget;
   try {
-    await navigator.clipboard.writeText(ownerToken);
-    event.currentTarget.textContent = 'Copied';
-    setTimeout(() => { event.target.textContent = 'Copy'; }, 2000);
-  } catch { event.currentTarget.textContent = 'Select and copy manually'; }
+    await navigator.clipboard.writeText(`Workspace handle: ${workspace.slug}\nKey: ${ownerToken}`);
+    button.textContent = 'Copied';
+    setTimeout(() => { button.textContent = 'Copy both'; }, 2000);
+  } catch { button.textContent = 'Select and copy manually'; }
 });
 $('#download-key').addEventListener('click', () => {
-  const text = `iPay owner key\nWorkspace: ${workspace.name} (${workspace.slug})\nCreated: ${new Date().toISOString()}\n\n${ownerToken}\n`;
+  const text = `iPay sign-in for ${workspace.name}\nSign in at ${location.origin}/app\n\nWorkspace handle: ${workspace.slug}\nKey: ${ownerToken}\n\nCreated ${new Date().toISOString()}. Keep this file private.\n`;
   const url = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
   const a = Object.assign(document.createElement('a'), { href: url, download: `ipay-${workspace.slug}-owner-key.txt` });
   document.body.append(a);
@@ -200,3 +198,14 @@ $('#member-form').addEventListener('submit', async event => {
   } catch {}
   go(1);
 })();
+
+/* On mainnet there is no faucet: the funding step asks for a real USDC deposit instead. */
+call('/api/config').then(config => {
+  if (config.network?.testnet !== false) return;
+  const pane = $('.pane[data-pane="3"]');
+  $('.pane-lede', pane).textContent = 'Send USDC on Arc to your payments account. Payments to contractors come out of this balance.';
+  $('#open-faucet').closest('li').remove();
+  const last = $('.fund-steps li:last-child span', pane);
+  if (last) last.textContent = '2';
+  $$('#steps li[data-step="3"] small').forEach(el => { el.textContent = 'Send USDC to your account'; });
+}).catch(() => {});
