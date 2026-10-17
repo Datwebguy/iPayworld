@@ -94,16 +94,27 @@ body {
 }
 
 .logo-symbol {
-  width: 32px;
-  height: 32px;
-  background: #ffffff;
-  color: #000000;
-  font-weight: 900;
-  font-size: 19px;
-  display: grid;
-  place-items: center;
-  border-radius: var(--radius-xs);
-  letter-spacing: -0.5px;
+  width: 34px;
+  height: 34px;
+  background: #0E0E0E;
+  border: 1px solid #222222;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.landing-logo:hover .logo-symbol {
+  border-color: #333333;
+  transform: translateY(-1px);
+}
+
+.logo-symbol svg {
+  display: block;
+  width: 22px;
+  height: 22px;
 }
 
 .logo-badge {

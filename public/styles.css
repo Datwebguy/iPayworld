@@ -124,19 +124,25 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 .brand-mark {
   width: 30px;
   height: 30px;
-  border-radius: var(--radius-xs);
-  background: #ffffff;
-  color: #000000;
-  display: grid;
-  place-items: center;
-  font-weight: 900;
-  font-size: 18px;
-  line-height: 1;
+  border-radius: 7px;
+  background: #0E0E0E;
+  border: 1px solid #222222;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
 }
 
-.brand-mark span {
-  font-size: 9px;
-  transform: translate(-1px, -5px);
+.brand:hover .brand-mark {
+  border-color: #333333;
+  transform: translateY(-1px);
+}
+
+.brand-mark svg {
+  display: block;
+  width: 20px;
+  height: 20px;
 }
 
 .rail-section-label {

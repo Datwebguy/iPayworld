@@ -8,15 +8,25 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="stylesheet" href="/onboard.css">
 </head>
 <body>
   <header class="onboard-nav">
     <a class="brand" href="/" aria-label="iPay Home">
-      <div class="brand-symbol">i</div>
+      <div class="brand-symbol" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="6.5,5.5 22.5,5.5 26.5,9.5 10.5,9.5" fill="#FFFFFF"/>
+          <polygon points="26.5,6.5 26.5,22.5 22.5,26.5 22.5,10.5" fill="#00D182"/>
+          <polygon points="25.5,26.5 9.5,26.5 5.5,22.5 21.5,22.5" fill="#FFFFFF"/>
+          <polygon points="5.5,25.5 5.5,9.5 9.5,5.5 9.5,21.5" fill="#00D182"/>
+          <polygon points="16,11.5 20.5,16 16,20.5 11.5,16" fill="#FFFFFF"/>
+          <circle cx="16" cy="16" r="1.6" fill="#00D182"/>
+        </svg>
+      </div>
       <span>iPay</span>
     </a>
-    <a href="/app.html" class="nav-link">Open Treasury -></a>
+    <a href="/app.html" class="nav-link">Open Treasury <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: -1px; margin-left: 2px;"><polyline points="9 18 15 12 9 6"/></svg></a>
   </header>
 
   <main>
@@ -38,7 +48,7 @@
           Workspace Handle (URL identifier)
           <input name="slug" required maxlength="64" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="e.g. acme-studio">
         </label>
-        <button type="submit">Create Workspace <span>-></span></button>
+        <button type="submit">Create Workspace <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: -1px; margin-left: 4px;"><polyline points="9 18 15 12 9 6"/></svg></button>
       </form>
     </section>
 
@@ -86,7 +96,7 @@
         </div>
       </div>
 
-      <a id="dashboard" class="dashboard hidden">Open Workspace Dashboard <span>-></span></a>
+      <a id="dashboard" class="dashboard hidden">Open Workspace Dashboard <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: -1px; margin-left: 4px;"><polyline points="9 18 15 12 9 6"/></svg></a>
     </section>
   </main>
 
