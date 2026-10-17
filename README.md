@@ -1,188 +1,115 @@
 # iPay
 
-**Proof-gated contractor payments for teams.** iPay creates a dedicated Circle treasury for each business, keeps approved idle USDC in an Earn Kit vault, obtains a signed CompliR risk attestation before every release, and settles verified contractor milestones on Arc.
+**A payments agent for contractor work, built on Arc.** Contractors submit their work through a private link. iPay's agent checks it against what was agreed, screens the contractor's wallet with CompliR, and pays in USDC on Arc only when both hold up. Every decision comes with a reason you can read.
 
-> **Network status:** live application on **Arc Testnet**. It creates real Circle developer-controlled testnet wallets, requests test USDC, calls CompliR, and sends testnet USDC. Mainnet remains deliberately disabled until production Circle credentials, an approved vault, and funded mainnet wallets are configured.
+Built for the Tameion Agents Hackathon (Canteen, Circle and Arc).
 
-## Links
+| | Website | API |
+| --- | --- | --- |
+| **Mainnet** | [ipayonarc.vercel.app](https://ipayonarc.vercel.app) | [ipay-mainnet-production.up.railway.app](https://ipay-mainnet-production.up.railway.app/api/config) |
+| **Testnet** | [ipayonarctestnet.vercel.app](https://ipayonarctestnet.vercel.app) | [ipay-api-production.up.railway.app](https://ipay-api-production.up.railway.app/api/config) |
 
-- **Application:** [ipay-five.vercel.app](https://ipay-five.vercel.app)
-- **Create a business workspace:** [ipay-five.vercel.app/onboard.html](https://ipay-five.vercel.app/onboard.html)
-- **API:** [ipay-api-production.up.railway.app/api/config](https://ipay-api-production.up.railway.app/api/config)
-- **Arc documentation:** [docs.arc.io](https://docs.arc.io)
-- **Circle Agent Stack:** [developers.circle.com/agent-stack](https://developers.circle.com/agent-stack)
-- **CompliR:** [trycomplir.xyz](https://trycomplir.xyz)
+## Who it's for
 
-## What iPay does
+Studios, agencies and small teams that pay freelancers per milestone. Today they either pay before anyone has checked the work, or pay a wallet nobody has checked at all. iPay holds the budget, checks both, and pays.
 
-1. A platform administrator creates a business workspace.
-2. The workspace owner provisions a dedicated Circle developer-controlled wallet on Arc.
-3. The owner funds it with Arc Testnet USDC and can deposit idle USDC into a configured Earn Kit vault.
-4. A finance member creates a contractor milestone.
-5. An owner or reviewer attaches verification evidence.
-6. iPay retrieves and verifies a signed CompliR attestation for the contractor wallet.
-7. `LOW` releases the verified amount; `MEDIUM` enters review; `HIGH` is blocked.
-8. When liquid USDC is short, iPay withdraws only the required amount plus a gas reserve from Earn Kit.
-9. iPay validates the Arc receipt, then stores the milestone, evidence, signed risk verdict, transaction hashes, and yield snapshot in the audit record.
+## How it works
 
-## Platform capabilities
+1. **Sign up with a business name.** No email, no card. iPay creates a Circle developer-controlled wallet on Arc that belongs to that business alone, and gives the owner a workspace handle and a key. The same screen signs returning users in.
+2. **Add money.** Send USDC to the workspace wallet. On testnet the setup screen walks you through the Circle faucet and detects the deposit. On Arc, USDC also pays for gas, so it is the only token a business needs.
+3. **Create a milestone.** Amount, contractor wallet, and what counts as done. The amount is set aside, and the milestone gets a private contractor link.
+4. **The contractor delivers.** They open the link, describe the work and add a link to it. No account needed.
+5. **The agent decides.** It compares the delivery with the agreed scope and the contractor's history, then pays, holds it for the owner, or asks for changes, with a plain-language reason.
+6. **CompliR screens the wallet.** iPay fetches CompliR's attestation for the recipient and verifies its EIP-712 signature against CompliR's published attester. Only a signed `LOW` verdict can pay. `MEDIUM` is held for review, `HIGH` is blocked, and nothing moves.
+7. **USDC settles on Arc.** iPay confirms the transfer in the Arc receipt and stores the milestone, delivery, agent reasoning, signed verdict and transaction together in the workspace history, exportable as CSV.
 
-| Capability | Implementation |
+Idle budget can sit in a Circle Earn USDC vault. iPay withdraws exactly what a payment needs.
+
+## Guardrails the agent cannot talk past
+
+The model decides; the server enforces.
+
+- **Auto-pay limit** set by the owner (default $250). Anything above it is held for approval.
+- **Per-payment and daily limits** per workspace (default $5,000 and $25,000).
+- **CompliR signature check** on every payment, against a pinned attester address.
+- **Contractor text is untrusted.** Instructions inside a delivery note are ignored and treated as a reason to hold.
+- **Arc receipt check** before a payment is recorded as paid. Payments whose confirmation times out are confirmed automatically from their transaction hash.
+
+## Stack
+
+| Layer | Used for |
 | --- | --- |
-| Business isolation | Each workspace has its own Circle wallet, milestones, role tokens, limits, and audit data. |
-| Roles | Owner, finance, and reviewer access tokens. |
-| Treasury | Circle developer-controlled wallets on `ARC-TESTNET`. |
-| Yield | Earn Kit USDC vault deposits and withdrawals. |
-| Risk gate | Signed CompliR attestation is mandatory before sending USDC. |
-| Release controls | Per-transaction and daily USDC limits; default $5,000 / $25,000. |
-| Recovery | Uncertain sends enter `needs_reconciliation`; a receipt must validate before marking them paid. |
-| Audit | PostgreSQL-backed workspace records with CSV export. |
-
-## Arc Testnet deployment
-
-The deployed API currently reports:
-
-```json
-{ "mode": "live", "chain": "Arc_Testnet" }
-```
-
-| Setting | Value |
-| --- | --- |
-| Network | Arc Testnet |
-| Chain ID | `5042002` |
-| RPC | `https://rpc.testnet.arc.network` |
-| Asset | Test USDC |
-| Wallet type | Circle developer-controlled EOA |
-| Frontend | Vercel |
-| API and database | Railway + PostgreSQL |
-
-### Try the hosted Testnet product
-
-1. Open [workspace onboarding](https://ipay-five.vercel.app/onboard.html).
-2. Create a workspace with the platform owner token.
-3. Save the displayed workspace owner token. It is shown only once.
-4. Select **Provision treasury** to create that business's Circle testnet wallet.
-5. Select **Request test funds**. Circle credits test USDC and native gas asynchronously.
-6. Open the workspace dashboard, create a small milestone to a testnet recipient address, then verify it with evidence.
-7. iPay runs CompliR and releases only on a signed `LOW` result.
-
-Use testnet addresses and test USDC only. Do not enter a production private key, Circle API key, entity secret, owner token, or recovery file in a browser form or GitHub issue.
+| **Arc** (testnet and mainnet) | USDC settlement and gas |
+| **Circle Developer-Controlled Wallets** | One wallet per business, created at signup |
+| **Circle App Kit** | Sending USDC to contractors |
+| **Circle Earn** | Interest on idle budget, withdrawn on demand |
+| **CompliR** | Signed counterparty risk verdicts before every payment |
+| **OpenAI** (`gpt-5.4-mini`) or **Claude** | The agent's decisions; a built-in rules engine is the fallback |
+| **Railway** | API servers and storage (PostgreSQL on testnet, volume on mainnet) |
+| **Vercel** | The website for each network |
 
 ## Run locally
 
-### Prerequisites
-
-- [Node.js 22 or newer](https://nodejs.org/en/download)
-- A Circle developer-controlled wallet project for live Testnet operations
-- Circle API key and entity secret
-- A reachable Earn Kit USDC vault on the selected network
+Requires Node.js 22 or newer.
 
 ```bash
 git clone https://github.com/Datwebguy/iPayworld.git
 cd iPayworld
 npm install
-Copy-Item .env.example .env
+cp .env.example .env
 npm start
 ```
 
-Open `http://127.0.0.1:3000`. With the default `.env`, iPay runs entirely in demo mode and never creates a chain transaction.
+Open `http://localhost:3000`. The default `.env` runs in demo mode: payments and screening are simulated and nothing touches a chain. For live Arc Testnet operation, fill in the live section of `.env` (see below) and set `IPAY_MODE=live`.
 
-### Local Testnet configuration
-
-Set the following values in `.env`. `.env` is ignored by Git.
-
-```dotenv
-IPAY_MODE=live
-COMPLIR_MODE=live
-EARN_CHAIN=Arc_Testnet
-ARC_TESTNET_RPC_URL=https://rpc.testnet.arc.network
-
-CIRCLE_API_KEY=YOUR_CIRCLE_TEST_API_KEY
-CIRCLE_ENTITY_SECRET=YOUR_REGISTERED_ENTITY_SECRET
-CIRCLE_WALLET_ADDRESS=0xYOUR_CIRCLE_TESTNET_WALLET
-EARN_VAULT_ADDRESS=0xYOUR_EARN_TESTNET_VAULT
-
-IPAY_OWNER_TOKEN=GENERATE_A_RANDOM_32_CHARACTER_OR_LONGER_SECRET
-IPAY_GAS_RESERVE_USDC=0.10
-DATABASE_URL=postgresql://USER:PASSWORD@HOST:PORT/DATABASE
+```bash
+npm test                       # CompliR verification tests
+npm run earn -- vaults         # list Circle Earn USDC vaults
+npm run create-wallet          # create a testnet operator wallet
+node create-mainnet-wallet.js  # create a mainnet operator wallet (live Circle key)
 ```
 
-Generate a local owner token in PowerShell:
+The wallet and Earn scripts perform real network operations. Check `EARN_CHAIN` before running them.
 
-```powershell
-[Convert]::ToBase64String((1..48 | ForEach-Object { Get-Random -Maximum 256 }))
-```
+## Configuration
 
-The wallet address is public. API keys, entity secrets, owner tokens, member access tokens, database URLs, and recovery files are secrets.
+| Variable | Purpose |
+| --- | --- |
+| `IPAY_MODE` | `demo` (simulated) or `live` |
+| `COMPLIR_MODE` | `live` is required when `IPAY_MODE=live` |
+| `EARN_CHAIN` | `Arc_Testnet` or `Arc` |
+| `IPAY_ALLOW_MAINNET` | Must be `YES` to run with `EARN_CHAIN=Arc` |
+| `CIRCLE_API_KEY`, `CIRCLE_ENTITY_SECRET` | Circle developer-controlled wallets (test or live key) |
+| `CIRCLE_WALLET_ADDRESS` | Operator wallet required at startup; business wallets are created per workspace |
+| `EARN_VAULT_ADDRESS` | Circle Earn USDC vault |
+| `IPAY_OWNER_TOKEN` | Admin key for the operator view (`/app?operator`), 32+ characters |
+| `OPENAI_API_KEY`, `IPAY_OPENAI_MODEL` | Agent decisions with OpenAI |
+| `ANTHROPIC_API_KEY`, `IPAY_AGENT_MODEL` | Agent decisions with Claude (takes priority when set) |
+| `DATABASE_URL` | PostgreSQL; without it, data is stored as files in `IPAY_DATA_DIR` |
+| `IPAY_SIGNUPS_PER_HOUR`, `IPAY_SIGNUPS_PER_DAY` | Public signup limits (default 5 and 500) |
+| `IPAY_GAS_RESERVE_USDC` | USDC kept back for gas, default `0.10` |
+| `ARC_TESTNET_RPC_URL`, `ARC_MAINNET_RPC_URL`, `ARC_EXPLORER_URL` | Network overrides |
 
-## Environment reference
+## API
 
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `IPAY_MODE` | Yes | `demo` for simulation, `live` for Testnet/mainnet operations. |
-| `COMPLIR_MODE` | Live only | Must be `live` when `IPAY_MODE=live`. |
-| `EARN_CHAIN` | Live only | `Arc_Testnet` today; `Arc` after mainnet approval. |
-| `CIRCLE_API_KEY` | Live only | Circle developer-controlled wallet API key. |
-| `CIRCLE_ENTITY_SECRET` | Live only | Entity secret registered with Circle. |
-| `CIRCLE_WALLET_ADDRESS` | Global live treasury | Circle wallet used by the global dashboard. Tenant wallets are provisioned per workspace. |
-| `EARN_VAULT_ADDRESS` | Live only | Earn Kit USDC vault address. |
-| `IPAY_OWNER_TOKEN` | Live only | Platform administrator credential. |
-| `DATABASE_URL` | Hosted multi-tenant | Railway PostgreSQL connection string. |
-| `IPAY_GAS_RESERVE_USDC` | Optional | USDC retained for settlement, default `0.10`. |
-| `IPAY_ALLOW_MAINNET` | Mainnet only | Must equal `YES` before mainnet operations can start. |
-
-## API overview
-
-All workspace endpoints require a Bearer token. Workspace owner tokens are created during onboarding; finance and reviewer tokens are issued by the owner.
+Workspace endpoints take a Bearer key: the owner key from signup, or a finance or reviewer key issued by the owner.
 
 | Endpoint | Purpose |
 | --- | --- |
-| `POST /api/workspaces` | Create a workspace (platform owner). |
-| `POST /api/workspaces/:slug/provision-treasury` | Create a dedicated Circle wallet. |
-| `POST /api/workspaces/:slug/fund-testnet` | Request Circle test USDC and gas. |
-| `POST /api/workspaces/:slug/members` | Issue a finance or reviewer access token. |
-| `POST /api/workspaces/:slug/milestones` | Create a payment milestone. |
-| `POST /api/workspaces/:slug/milestones/:id/verify` | Store evidence and begin the compliance-gated release. |
-| `POST /api/workspaces/:slug/milestones/:id/reconcile` | Confirm an uncertain payment from its Arc receipt. |
-| `POST /api/workspaces/:slug/earn/deposit` | Deposit idle USDC into Earn Kit. |
-| `PUT /api/workspaces/:slug/policy` | Update owner-controlled daily and per-payment limits. |
-| `GET /api/workspaces/:slug/audit.csv` | Export the workspace audit trail. |
+| `POST /api/signup` | Create a workspace and its Circle wallet (public, rate limited) |
+| `GET /api/workspaces/:slug/state` | Balances, milestones, history, agent status |
+| `POST /api/workspaces/:slug/milestones` | Create a milestone and its contractor link |
+| `GET`, `POST /api/deliver` | Contractor delivery page data and submission (authorized by the link token) |
+| `POST /api/workspaces/:slug/milestones/:id/verify` | Owner approves and pays |
+| `POST /api/workspaces/:slug/milestones/:id/release` | Pay an approved milestone |
+| `PUT /api/workspaces/:slug/agent` | Turn the agent on or off, set the auto-pay limit |
+| `POST /api/workspaces/:slug/agent/run` | Run the agent now |
+| `POST /api/workspaces/:slug/earn/deposit` | Move USDC to the Earn vault |
+| `POST /api/workspaces/:slug/members` | Issue a finance or reviewer key |
+| `GET /api/workspaces/:slug/audit.csv` | Export the history |
 
-## Mainnet cutover
+## Security notes
 
-Do this only after completing a small Testnet end-to-end payment and operational review.
+Circle credentials and model keys stay on the server. Workspace and member keys are stored only as SHA-256 hashes; the browser keeps the key for the current tab only. iPay holds no customer funds of its own: each business's money sits in its own wallet.
 
-1. Create or select a **production** Circle developer-controlled wallet project and register a production entity secret.
-2. Select an Arc mainnet Earn Kit USDC vault; review liquidity, fees, terms, and withdrawal behavior.
-3. Create and fund dedicated business wallets with mainnet USDC and native gas.
-4. Configure Railway with production-only values: `EARN_CHAIN=Arc`, production Circle credentials, the mainnet vault, `ARC_MAINNET_RPC_URL`, and `IPAY_ALLOW_MAINNET=YES`.
-5. Keep `IPAY_MODE=live` and `COMPLIR_MODE=live`; do not bypass the signed CompliR check.
-6. Verify the production vault and recipient flow with a minimal, approved payment.
-7. Update this README's network status and deployment details only after the transaction is confirmed.
-
-## Architecture and supporting docs
-
-- [Architecture](architecture.md)
-- [Product specification](product.md)
-- [Integration map](integrations.md)
-- [Testnet setup guide](setup-guide.md)
-- [Deployment guide](deployment.md)
-- [Operational resources](resources.md)
-- [Hackathon submission](submission.md)
-
-## Security model
-
-iPay never places Circle credentials in client code. Secrets stay in server environment variables. Workspace and member tokens are stored only as SHA-256 hashes. The UI keeps a token in `sessionStorage` for the active browser session. Payment proof is independently checked against the Arc receipt before a release is recorded as paid.
-
-This is an early-stage Testnet product. Before handling production customer funds, complete a security review, introduce account-based authentication and token rotation, configure backups and monitoring, establish an incident and reconciliation runbook, and obtain legal/compliance review for the intended markets.
-
-## Development
-
-```bash
-npm test
-npm run earn -- vaults
-npm run create-wallet
-npm run fund-testnet
-```
-
-`npm run earn` and the wallet scripts execute real configured network operations. Review your `.env` network setting before running them.
+iPay is an early product. Before handling significant customer funds it needs a security review, account-based authentication with key rotation, monitoring, and legal and compliance review for its markets.
