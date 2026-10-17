@@ -124,7 +124,7 @@ function activityHtml(a, detailed = false) {
     if (a.evidence) extra += `<div class="audit-extra">Approval Notes: ${escapeHtml(a.evidence)}</div>`;
     if (a.yieldSnapshot !== undefined) extra += `<div class="audit-extra">Yield accrual: ${a.yieldSnapshot === null ? 'unavailable' : money(a.yieldSnapshot)}${a.redeemed !== undefined ? ` · vault withdrawn: ${money(a.redeemed)}` : ''}</div>`;
   }
-  return `<div class="activity-row"><div class="activity-dot">${glyph}</div><div><strong>${escapeHtml(a.title)}</strong><small>${escapeHtml(a.detail)}</small>${extra}</div><div class="activity-time">${time(a.at)}</div></div>`;
+  return `<div class="activity-row"><div class="activity-dot">${glyph}</div><div class="activity-detail"><strong>${escapeHtml(a.title)}</strong><small>${escapeHtml(a.detail)}</small>${extra}</div><div class="activity-time">${time(a.at)}</div></div>`;
 }
 
 function emptyMilestonesHtml() {
@@ -214,7 +214,7 @@ function render() {
 
   // Audit trail rendering with rich empty states
   const audit = data.audit || [];
-  $('#activity-preview-list').innerHTML = audit.length ? audit.slice(0, 3).map(a => activityHtml(a)).join('') : emptyActivityHtml();
+  $('#activity-preview-list').innerHTML = audit.length ? audit.slice(0, 4).map(a => activityHtml(a)).join('') : emptyActivityHtml();
   $('#all-activity').innerHTML = audit.length ? audit.map(a => activityHtml(a, true)).join('') : emptyActivityHtml();
 
   const labels = { overview: ['Overview', 'Your money, moving with purpose.', 'A controlled release system for teams that pay on proof.'], milestones: ['Milestones', 'Make progress. Release payment.', 'Define the deliverable, verify the work, and track every release.'], activity: ['Audit trail', 'Every payment has a story.', 'Follow deliverable approvals, compliance clearances, and settlement receipts.'] };

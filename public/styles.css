@@ -975,11 +975,12 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
   background: #e6e6e6;
 }
 
-/* Right Stack Policies & Signal */
-.right-stack {
+/* Dashboard Left & Right Stacks */
+.left-stack, .right-stack {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
 }
 
 .policy-live {
@@ -1268,7 +1269,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 
 /* Empty State Card (OKX Grade) */
 .empty-state-card {
-  padding: 48px 32px;
+  padding: 32px 24px;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -1287,8 +1288,8 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 }
 
 .empty-state-card.mini {
-  padding: 28px 20px;
-  margin: 12px;
+  padding: 22px 18px;
+  margin: 14px 16px 16px;
 }
 
 .empty-state-icon {
@@ -1330,7 +1331,13 @@ button:focus-visible, input:focus-visible, textarea:focus-visible {
 
 /* Activity & Audit Trail */
 .activity-preview {
-  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-detail {
+  flex: 1;
+  min-width: 0;
 }
 
 .activity-row {

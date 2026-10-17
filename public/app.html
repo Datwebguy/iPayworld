@@ -170,15 +170,28 @@
           </section>
 
           <section class="dashboard-grid">
-            <div class="panel queue-panel">
-              <div class="panel-head">
-                <div>
-                  <div class="section-kicker">RELEASE QUEUE</div>
-                  <h2>Active Milestones</h2>
+            <div class="left-stack">
+              <div class="panel queue-panel">
+                <div class="panel-head">
+                  <div>
+                    <div class="section-kicker">RELEASE QUEUE</div>
+                    <h2>Active Milestones</h2>
+                  </div>
+                  <button class="text-button" data-view="milestones">View all -></button>
                 </div>
-                <button class="text-button" data-view="milestones">View all -></button>
+                <div id="milestone-list" class="milestone-list"></div>
               </div>
-              <div id="milestone-list" class="milestone-list"></div>
+
+              <div class="panel activity-preview">
+                <div class="panel-head">
+                  <div>
+                    <div class="section-kicker">ACTIVITY LOG</div>
+                    <h2>Recent Decisions &amp; Receipts</h2>
+                  </div>
+                  <button class="text-button" data-view="activity">Open audit trail -></button>
+                </div>
+                <div id="activity-preview-list"></div>
+              </div>
             </div>
 
             <div class="right-stack">
@@ -296,17 +309,6 @@
                 </div>
               </div>
             </div>
-          </section>
-
-          <section class="panel activity-preview">
-            <div class="panel-head">
-              <div>
-                <div class="section-kicker">ACTIVITY LOG</div>
-                <h2>Recent Decisions &amp; Receipts</h2>
-              </div>
-              <button class="text-button" data-view="activity">Open audit trail -></button>
-            </div>
-            <div id="activity-preview-list"></div>
           </section>
         </div>
 
