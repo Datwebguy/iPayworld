@@ -367,11 +367,12 @@ function renderAgent() {
   $('#agent-enabled').checked = settings.enabled;
   $('#agent-dot').className = `agent-dot ${reviewing ? 'busy' : settings.enabled ? 'on' : ''}`;
   if (document.activeElement !== $('#agent-limit')) $('#agent-limit').value = settings.autoPayLimit;
-  const brain = engine === 'claude' ? 'Decisions by Claude' : 'Decisions by built-in rules';
+  const ENGINE = { claude: 'Claude', openai: 'OpenAI' };
+  const brain = ENGINE[engine] ? `Decisions by ${ENGINE[engine]}` : 'Decisions by built-in rules';
   $('#agent-last').innerHTML = reviewing
     ? `<strong>Reviewing a delivery now…</strong><small>${brain}</small>`
     : lastRun
-      ? `<strong>${esc(lastRun.summary)}</strong>${lastRun.treasury && lastRun.treasury.action !== 'none' ? `<span>${esc(lastRun.treasury.reason)}</span>` : ''}<small>${esc(when(lastRun.at))} · ${lastRun.engine === 'claude' ? 'Decided by Claude' : 'Decided by built-in rules'}${lastRun.note ? ` · ${esc(lastRun.note)}` : ''}</small>`
+      ? `<strong>${esc(lastRun.summary)}</strong>${lastRun.treasury && lastRun.treasury.action !== 'none' ? `<span>${esc(lastRun.treasury.reason)}</span>` : ''}<small>${esc(when(lastRun.at))} · ${ENGINE[lastRun.engine] ? `Decided by ${ENGINE[lastRun.engine]}` : 'Decided by built-in rules'}${lastRun.note ? ` · ${esc(lastRun.note)}` : ''}</small>`
       : `<strong>${settings.enabled ? 'Waiting for the first delivery.' : 'Paused. Turn it on to let it review and pay.'}</strong><small>${brain}</small>`;
 }
 
