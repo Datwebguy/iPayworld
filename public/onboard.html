@@ -2,103 +2,153 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#000000">
-  <title>iPay · Create Workspace Treasury</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f3f1ea" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f100e" media="(prefers-color-scheme: dark)">
+  <title>iPay · Set up a workspace</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/base.css">
   <link rel="stylesheet" href="/onboard.css">
 </head>
 <body>
-  <header class="onboard-nav">
-    <a class="brand" href="/" aria-label="iPay Home">
-      <div class="brand-symbol" aria-hidden="true">
-        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <polygon points="6.5,5.5 22.5,5.5 26.5,9.5 10.5,9.5" fill="#FFFFFF"/>
-          <polygon points="26.5,6.5 26.5,22.5 22.5,26.5 22.5,10.5" fill="#00D182"/>
-          <polygon points="25.5,26.5 9.5,26.5 5.5,22.5 21.5,22.5" fill="#FFFFFF"/>
-          <polygon points="5.5,25.5 5.5,9.5 9.5,5.5 9.5,21.5" fill="#00D182"/>
-          <polygon points="16,11.5 20.5,16 16,20.5 11.5,16" fill="#FFFFFF"/>
-          <circle cx="16" cy="16" r="1.6" fill="#00D182"/>
-        </svg>
-      </div>
+  <header class="ob-nav">
+    <a class="wordmark" href="/" aria-label="iPay home">
+      <svg class="emblem" viewBox="0 0 32 32" aria-hidden="true"><polygon class="e-ink" points="6.5,5.5 22.5,5.5 26.5,9.5 10.5,9.5"/><polygon class="e-acc" points="26.5,6.5 26.5,22.5 22.5,26.5 22.5,10.5"/><polygon class="e-ink" points="25.5,26.5 9.5,26.5 5.5,22.5 21.5,22.5"/><polygon class="e-acc" points="5.5,25.5 5.5,9.5 9.5,5.5 9.5,21.5"/><polygon class="e-ink" points="16,11.5 20.5,16 16,20.5 11.5,16"/><circle class="e-acc" cx="16" cy="16" r="1.6"/></svg>
       <span>iPay</span>
     </a>
-    <a href="/app.html" class="nav-link">Open Treasury <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: -1px; margin-left: 2px;"><polyline points="9 18 15 12 9 6"/></svg></a>
+    <a href="/app.html" class="btn btn-ghost btn-sm">Open treasury</a>
   </header>
 
-  <main>
-    <section class="card" id="create-card">
-      <p class="eyebrow">STEP 1 · WORKSPACE CREATION</p>
-      <h1>Create a Business Treasury</h1>
-      <p>Every business workspace receives isolated credentials, a dedicated Circle Treasury Vault on Arc, and an unshared audit ledger.</p>
+  <div class="ob">
+    <aside class="ob-rail">
+      <p class="ob-kicker mono">Workspace setup</p>
+      <h1 class="ob-title">Five steps to your first release.</h1>
+      <ol class="steps" id="steps">
+        <li data-step="1"><span class="n mono">1</span><span><strong>Name it</strong><small>Business name and URL handle</small></span></li>
+        <li data-step="2"><span class="n mono">2</span><span><strong>Save the owner key</strong><small>Shown once, keep it safe</small></span></li>
+        <li data-step="3"><span class="n mono">3</span><span><strong>Create the wallet</strong><small>Circle wallet on Arc</small></span></li>
+        <li data-step="4"><span class="n mono">4</span><span><strong>Fund it</strong><small>Testnet USDC from the faucet</small></span></li>
+        <li data-step="5"><span class="n mono">5</span><span><strong>Open the treasury</strong><small>Invite your team if you like</small></span></li>
+      </ol>
+      <div class="ob-progress" aria-hidden="true"><span id="progress"></span></div>
+      <p class="ob-progress-text mono" id="progress-text">Step 1 of 5</p>
+    </aside>
 
-      <form id="workspace-form">
-        <label>
-          Master Security Key
-          <input name="adminToken" type="password" required autocomplete="current-password" placeholder="Enter platform security key">
-        </label>
-        <label>
-          Business Name
-          <input name="name" required maxlength="100" placeholder="e.g. Acme Design Studio">
-        </label>
-        <label>
-          Workspace Handle (URL identifier)
-          <input name="slug" required maxlength="64" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="e.g. acme-studio">
-        </label>
-        <button type="submit">Create Workspace <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: -1px; margin-left: 4px;"><polyline points="9 18 15 12 9 6"/></svg></button>
-      </form>
-    </section>
-
-    <section class="card hidden" id="success-card">
-      <p class="eyebrow">STEP 2 · TREASURY ACTIVATION</p>
-      <h1 id="workspace-name">Workspace Ready</h1>
-      <p>Save this workspace security key immediately. It is shown once and provides administrative access to this treasury.</p>
-
-      <div class="token-box-wrapper">
-        <code id="owner-token"></code>
-        <button type="button" class="copy-token-btn" id="copy-owner-btn">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          <span>Copy Security Key</span>
-        </button>
-      </div>
-
-      <div class="actions">
-        <button id="provision">Activate Circle Vault</button>
-        <button id="fund" class="secondary" disabled>Allocate Treasury Reserves</button>
-      </div>
-
-      <p class="status" id="status"></p>
-
-      <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--okx-border);">
-        <p class="eyebrow" style="color: var(--okx-text-secondary);">OPTIONAL · TEAM ROLES</p>
-        <p>Issue dedicated keys for finance approvers or milestone reviewers.</p>
-
-        <form id="member-form">
-          <label>
-            Team Member Name
-            <input name="name" required maxlength="100" placeholder="e.g. Sarah Connor (Finance)">
+    <main class="ob-panel">
+      <!-- 1 -->
+      <section class="pane" data-pane="1">
+        <p class="pane-step mono">Step 1</p>
+        <h2>Name your workspace</h2>
+        <p class="pane-lede">Each workspace gets its own wallet, its own milestones and its own audit trail. Nothing is shared with other workspaces.</p>
+        <form id="workspace-form" class="pane-form" novalidate>
+          <label class="field">Business name
+            <input class="input" name="name" required maxlength="100" placeholder="Acme Design Studio" autocomplete="organization">
           </label>
-          <label>
-            Role
-            <select name="role">
-              <option value="finance">Finance (Can create milestones &amp; deposit yield)</option>
-              <option value="reviewer">Reviewer (Can review deliverable evidence)</option>
-            </select>
+          <label class="field">URL handle
+            <span class="input-prefix"><span class="mono">?workspace=</span><input class="input mono" name="slug" required maxlength="64" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="acme-studio" spellcheck="false" autocomplete="off"></span>
+            <span class="hint">Lowercase letters, numbers and single dashes. Filled in from the name.</span>
           </label>
-          <button type="submit" class="secondary">Issue Team Access Key</button>
+          <label class="field">Platform admin key
+            <input class="input mono" name="adminToken" type="password" required autocomplete="current-password" placeholder="Set as IPAY_OWNER_TOKEN on the server">
+            <span class="hint">Only the person running this iPay server has it.</span>
+          </label>
+          <p class="form-error" data-error hidden></p>
+          <div class="pane-actions">
+            <button class="btn btn-ink btn-lg" type="submit">Create workspace</button>
+          </div>
         </form>
+      </section>
 
-        <div class="token-box-wrapper" style="margin-top: 14px;">
-          <code id="member-token" class="hidden"></code>
+      <!-- 2 -->
+      <section class="pane" data-pane="2" hidden>
+        <p class="pane-step mono">Step 2</p>
+        <h2>Save the owner key for <span id="ws-name">your workspace</span></h2>
+        <p class="pane-lede">This key unlocks the treasury and approves payments. iPay only stores a hash of it, so if you lose it, nobody can show it to you again.</p>
+        <div class="key-box">
+          <code id="owner-token" class="mono"></code>
+          <div class="key-actions">
+            <button type="button" class="btn btn-sm" id="copy-key">Copy</button>
+            <button type="button" class="btn btn-sm" id="download-key">Download .txt</button>
+          </div>
         </div>
-      </div>
+        <label class="check">
+          <input type="checkbox" id="saved-key">
+          <span>I've saved this key somewhere safe</span>
+        </label>
+        <div class="pane-actions">
+          <button class="btn btn-ink btn-lg" id="to-3" disabled>Continue</button>
+        </div>
+      </section>
 
-      <a id="dashboard" class="dashboard hidden">Open Workspace Dashboard <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: -1px; margin-left: 4px;"><polyline points="9 18 15 12 9 6"/></svg></a>
-    </section>
-  </main>
+      <!-- 3 -->
+      <section class="pane" data-pane="3" hidden>
+        <p class="pane-step mono">Step 3</p>
+        <h2>Create the workspace wallet</h2>
+        <p class="pane-lede">iPay asks Circle for a new developer-controlled wallet on Arc Testnet. Budget goes in, contractor payments go out from it.</p>
+        <div class="task" id="task-wallet">
+          <span class="task-dot"></span>
+          <div><strong>Circle wallet</strong><small id="wallet-status">Not created yet</small></div>
+        </div>
+        <p class="form-error" data-error hidden></p>
+        <div class="pane-actions">
+          <button class="btn btn-ink btn-lg" id="provision">Create wallet</button>
+        </div>
+      </section>
+
+      <!-- 4 -->
+      <section class="pane" data-pane="4" hidden>
+        <p class="pane-step mono">Step 4</p>
+        <h2>Fund it with testnet USDC</h2>
+        <p class="pane-lede">Request USDC from the Circle faucet so you have something to pay with. On Arc, USDC also pays for gas. You can also send USDC to the address yourself.</p>
+        <div class="task" id="task-fund">
+          <span class="task-dot"></span>
+          <div><strong>Wallet address</strong><small class="mono" id="wallet-address">–</small></div>
+          <button type="button" class="btn btn-sm" id="copy-address">Copy</button>
+        </div>
+        <p class="form-error" data-error hidden></p>
+        <p class="pane-note" id="fund-status" hidden></p>
+        <div class="pane-actions">
+          <button class="btn btn-ink btn-lg" id="fund">Request testnet USDC</button>
+          <button class="btn btn-ghost btn-lg" id="skip-fund">I'll fund it myself</button>
+        </div>
+      </section>
+
+      <!-- 5 -->
+      <section class="pane" data-pane="5" hidden>
+        <p class="pane-step mono">Step 5</p>
+        <h2>Ready.</h2>
+        <p class="pane-lede">Your treasury is set up. Faucet funds can take a minute to show in the balance.</p>
+        <div class="pane-actions">
+          <a class="btn btn-accent btn-lg" id="dashboard" href="/app.html">Open the treasury <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+
+        <details class="team">
+          <summary>
+            <span><strong>Invite your team</strong><small>Optional. Give finance or reviewers their own key.</small></span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+          </summary>
+          <form id="member-form" class="pane-form">
+            <label class="field">Name
+              <input class="input" name="name" required maxlength="100" placeholder="Sam Rivera">
+            </label>
+            <fieldset class="roles">
+              <legend class="sr-only">Role</legend>
+              <label class="role"><input type="radio" name="role" value="finance" checked><span><strong>Finance</strong><small>Creates milestones, releases payments, deposits to the vault</small></span></label>
+              <label class="role"><input type="radio" name="role" value="reviewer"><span><strong>Reviewer</strong><small>Approves delivered work</small></span></label>
+            </fieldset>
+            <p class="form-error" data-error hidden></p>
+            <div class="pane-actions">
+              <button type="submit" class="btn">Create team key</button>
+            </div>
+          </form>
+          <ul class="issued" id="issued"></ul>
+        </details>
+      </section>
+    </main>
+  </div>
 
   <script type="module" src="/onboard.js"></script>
 </body>

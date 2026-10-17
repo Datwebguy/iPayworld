@@ -27,7 +27,7 @@ if (mode === 'live' && screeningMode !== 'live') throw new Error('Live payments 
 if (mode === 'live' && (!process.env.IPAY_OWNER_TOKEN || process.env.IPAY_OWNER_TOKEN.length < 32)) throw new Error('Set a random IPAY_OWNER_TOKEN of at least 32 characters for live payments');
 const clients = mode === 'live' ? liveClients() : null;
 const addressPattern = /^0x[a-fA-F0-9]{40}$/;
-const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.ico': 'image/x-icon' };
+const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8', '.txt': 'text/plain; charset=utf-8', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.png': 'image/png', '.webp': 'image/webp', '.woff2': 'font/woff2', '.webmanifest': 'application/manifest+json' };
 
 function initialState() {
   const defaultWallet = clients?.config?.walletAddress || '0xb3ccbf94b1965844e062bd9ad22df72b9a45ba17';
@@ -98,7 +98,7 @@ function amount(value) {
 function snapshot() {
   const committed = state.milestones.filter(m => !['paid', 'blocked'].includes(m.status)).reduce((sum, m) => sum + m.amount, 0);
   const reserve = mode === 'live' ? Number(clients.config.gasReserveUsdc) : 0;
-  return { mode, screeningMode, wallet: state.wallet, committed, available: Math.max(0, Math.round((state.wallet.liquid + state.wallet.vault - committed - reserve) * 100) / 100), milestones: state.milestones, audit: state.audit };
+  return { mode, screeningMode, wallet: { ...state.wallet, vaultAddress: state.vaultAddress }, committed, available: Math.max(0, Math.round((state.wallet.liquid + state.wallet.vault - committed - reserve) * 100) / 100), milestones: state.milestones, audit: state.audit };
 }
 function requireOwner(req) {
   if (mode !== 'live') return;
@@ -396,6 +396,7 @@ async function api(req, res, path) {
       const address = String(input.address || '').trim();
       const description = String(input.description || '').trim();
       if (!title || title.length > 100 || !contractor || contractor.length > 100 || description.length > 500 || !addressPattern.test(address)) failure(400, 'Enter a title, contractor, and valid Arc address');
+      if (workspace.walletAddress && address.toLowerCase() === workspace.walletAddress.toLowerCase()) failure(400, 'Contractor address must differ from the workspace wallet');
       const value = amount(input.amount);
       const milestone = { id: randomUUID(), title, contractor, address, description, amount: value, status: 'in_progress', createdAt: new Date().toISOString(), evidence: null };
       tenantState.milestones.unshift(milestone);
@@ -583,7 +584,8 @@ async function api(req, res, path) {
 }
 
 async function staticFile(res, path) {
-  const target = path === '/' ? '/index.html' : path;
+  // Mirror Vercel's cleanUrls so /app and /onboard work locally too.
+  const target = path === '/' ? '/index.html' : extname(path) ? path : `${path.replace(/\/$/, '')}.html`;
   const file = resolve(publicDir, `.${target}`);
   if (!file.startsWith(publicDir + sep) && file !== publicDir) failure(403, 'Forbidden');
   try {

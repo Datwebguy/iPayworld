@@ -1,406 +1,258 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="no-js">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#000000">
-  <meta name="description" content="iPay: Policy-controlled contractor treasury on Arc. Dedicated Circle institutional vaults, automated Earn Kit yield accrual, and real-time compliance clearance.">
-  <title>iPay · Policy-Controlled Contractor Treasury on Arc</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f3f1ea" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f100e" media="(prefers-color-scheme: dark)">
+  <meta name="description" content="iPay holds a project budget in USDC on Arc, keeps the idle part in an Earn vault, screens every contractor with CompliR, and pays only when the work is approved.">
+  <title>iPay · Milestone payments on Arc</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/base.css">
   <link rel="stylesheet" href="/landing.css">
+  <script>document.documentElement.classList.remove('no-js')</script>
 </head>
 <body>
-  <div class="page-container">
-    <!-- Navigation -->
-    <header class="landing-nav">
-      <a href="/" class="landing-logo">
-        <div class="logo-symbol" aria-hidden="true">
-          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="6.5,5.5 22.5,5.5 26.5,9.5 10.5,9.5" fill="#FFFFFF"/>
-            <polygon points="26.5,6.5 26.5,22.5 22.5,26.5 22.5,10.5" fill="#00D182"/>
-            <polygon points="25.5,26.5 9.5,26.5 5.5,22.5 21.5,22.5" fill="#FFFFFF"/>
-            <polygon points="5.5,25.5 5.5,9.5 9.5,5.5 9.5,21.5" fill="#00D182"/>
-            <polygon points="16,11.5 20.5,16 16,20.5 11.5,16" fill="#FFFFFF"/>
-            <circle cx="16" cy="16" r="1.6" fill="#00D182"/>
-          </svg>
-        </div>
+  <header class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="/" class="wordmark" aria-label="iPay home">
+        <svg class="emblem" viewBox="0 0 32 32" aria-hidden="true"><polygon class="e-ink" points="6.5,5.5 22.5,5.5 26.5,9.5 10.5,9.5"/><polygon class="e-acc" points="26.5,6.5 26.5,22.5 22.5,26.5 22.5,10.5"/><polygon class="e-ink" points="25.5,26.5 9.5,26.5 5.5,22.5 21.5,22.5"/><polygon class="e-acc" points="5.5,25.5 5.5,9.5 9.5,5.5 9.5,21.5"/><polygon class="e-ink" points="16,11.5 20.5,16 16,20.5 11.5,16"/><circle class="e-acc" cx="16" cy="16" r="1.6"/></svg>
         <span>iPay</span>
-        <span class="logo-badge">ARC NETWORK</span>
       </a>
-
-      <nav class="nav-links">
-        <a href="#features">Features</a>
-        <a href="#how-it-works">How It Works</a>
-        <a href="#proof">Security Layer</a>
-        <a href="#specs">Specifications</a>
+      <nav class="nav-links" id="nav-links" aria-label="Sections">
+        <a href="#how">How it works</a>
+        <a href="#policy">Policy</a>
+        <a href="#stack">Stack</a>
+        <a href="/onboard.html" class="nav-mobile-only">Set up a workspace</a>
+        <a href="/app.html" class="nav-mobile-only">Open treasury</a>
       </nav>
-
       <div class="nav-actions">
-        <a href="/onboard.html" class="btn btn-ghost">Create Workspace</a>
-        <a href="/app.html" class="btn btn-primary">Open Treasury <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
+        <a href="/onboard.html" class="btn btn-ghost btn-sm">Set up</a>
+        <a href="/app.html" class="btn btn-ink btn-sm">Open treasury</a>
       </div>
-    </header>
+      <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Menu">
+        <span></span><span></span>
+      </button>
+    </div>
+  </header>
 
-    <main>
-      <!-- Hero Section -->
-      <section class="hero-section">
-        <div class="hero-content">
-          <div class="status-beacon">
-            <span class="pulse-dot"></span>
-            <span>ARC SETTLEMENT · SECURE ENCLAVE</span>
-          </div>
-
-          <h1 class="hero-title">
-            Pay for <span class="highlight-text">verified proof</span>, not promises.
-          </h1>
-
-          <p class="hero-subtitle">
-            The intelligent contractor treasury for Web3 organizations. Protect corporate reserves in dedicated Circle vaults, generate automatic yield on unallocated USDC with Earn Kit, and release funds only upon verified milestone delivery and compliance clearance.
-          </p>
-
-          <div class="hero-cta-group">
-            <a href="/app.html" class="btn btn-primary">Open Treasury Dashboard <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
-            <a href="/onboard.html" class="btn btn-ghost">Create Business Workspace</a>
-          </div>
-
-          <div class="hero-features-strip">
-            <div class="hero-tag">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <span>USDC Native</span>
-            </div>
-            <div class="hero-tag">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <span>Earn Kit Yield</span>
-            </div>
-            <div class="hero-tag">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <span>Compliance Clearing</span>
-            </div>
-          </div>
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="kicker reveal"><span class="dot live"></span> USDC on Arc · screened by CompliR</p>
+        <h1 class="hero-title reveal" style="--d:.06s">Pay contractors when the work is done. <em>Not before.</em></h1>
+        <p class="hero-lede reveal" style="--d:.12s">
+          iPay holds your project budget, keeps the idle part earning in an Earn vault, and releases each milestone only after you approve the work and the contractor's wallet clears a risk check.
+        </p>
+        <div class="hero-cta reveal" style="--d:.18s">
+          <a href="/onboard.html" class="btn btn-ink btn-lg">Set up a workspace <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a href="/app.html" class="btn btn-lg">Open the treasury</a>
         </div>
-
-        <div class="hero-visual">
-          <!-- Interactive Treasury Showcase Card -->
-          <div class="interactive-treasury-card">
-            <div class="card-header-row">
-              <div class="card-title-tag">TREASURY OVERVIEW</div>
-              <div class="live-pill">
-                <span class="pulse-dot" style="width: 5px; height: 5px;"></span>
-                <span>PROTECTED VAULT</span>
-              </div>
-            </div>
-
-            <div class="balance-showcase">
-              <div class="balance-caption">Total Controlled Capital</div>
-              <div id="landing-hero-balance" class="balance-amount">$19.00 <span>USDC</span></div>
-              <div class="balance-yield-badge">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
-                <span id="landing-yield-badge">+4.8% APY · Real-Time Yield Enclave</span>
-              </div>
-            </div>
-
-            <!-- Interactive Milestone & Risk Simulator -->
-            <div class="milestone-simulator">
-              <div class="sim-header">
-                <span class="sim-label">Automated Payout Pipeline</span>
-                <span class="sim-amount">1,250.00 USDC</span>
-              </div>
-
-              <div class="sim-flow-steps">
-                <div class="sim-step active">
-                  <div class="step-icon">1</div>
-                  <div class="sim-step-text">
-                    <strong>Milestone Approved</strong>
-                    <span>Deliverables Verified</span>
-                  </div>
-                </div>
-
-                <div class="sim-step active" id="sim-step-risk">
-                  <div class="step-icon">2</div>
-                  <div class="sim-step-text">
-                    <strong>Compliance Screening</strong>
-                    <span>Low Risk · Cleared</span>
-                  </div>
-                </div>
-
-                <div class="sim-step active" id="sim-step-settle">
-                  <div class="step-icon">3</div>
-                  <div class="sim-step-text">
-                    <strong>Instant Settlement</strong>
-                    <span>1,250.00 USDC Released</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Interactive Risk Controller -->
-              <div class="risk-interactive-controls">
-                <div class="risk-controls-title">
-                  <span>Policy Guardrails Status</span>
-                  <span style="color: var(--okx-green);">Risk Tiers ↓</span>
-                </div>
-                <div class="risk-btn-group">
-                  <button class="risk-toggle-btn active" data-verdict="LOW">LOW</button>
-                  <button class="risk-toggle-btn" data-verdict="MEDIUM">MEDIUM</button>
-                  <button class="risk-toggle-btn" data-verdict="HIGH">HIGH</button>
-                </div>
-                <div id="verdict-outcome" class="verdict-outcome-banner low">
-                  [APPROVED] Low Risk: Automated compliance cleared. 1,250 USDC released on Arc.
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ==========================================================================
-           INFINITE TEXT SCROLLING FLOW (OKX Style Ticker Marquee)
-           ========================================================================== -->
-      <section class="marquee-container" aria-label="Live Protocol Metrics">
-        <div class="marquee-track">
-          <span class="marquee-item"><span class="beacon"></span> <span>ARC PROTOCOL</span> <strong>INSTANT SETTLEMENT</strong></span>
-          <span class="marquee-item"><span class="beacon"></span> <span>CUSTODY:</span> <strong>CIRCLE ENTERPRISE VAULTS</strong></span>
-          <span class="marquee-item"><span class="beacon"></span> <span>YIELD ENGINE:</span> <strong>CONTINUOUS CAPITAL ACCRUAL</strong></span>
-          <span class="marquee-item"><span class="beacon"></span> <span>RISK SCREENING:</span> <strong>REAL-TIME COMPLIANCE CLEARING</strong></span>
-          <span class="marquee-item"><span class="beacon"></span> <span>SETTLEMENT ASSET:</span> <strong>NATIVE DIGITAL DOLLARS (USDC)</strong></span>
-          <span class="marquee-item"><span class="beacon"></span> <span>EXECUTION SPEED:</span> <strong>SUB-SECOND FINALITY</strong></span>
-          <span class="marquee-item"><span class="beacon"></span> <span>SECURITY:</span> <strong>DUAL-KEY POLICY GOVERNANCE</strong></span>
-          <span class="marquee-item"><span class="beacon"></span> <span>AUDIT TRAIL:</span> <strong>IMMUTABLE TRANSACTION LOGS</strong></span>
-          <!-- Duplicate for continuous seamless loop -->
-          <span class="marquee-item"><span class="beacon"></span> <span>ARC PROTOCOL</span> <strong>INSTANT SETTLEMENT</strong></span>
-          <span class="marquee-item"><span class="beacon"></span> <span>CUSTODY:</span> <strong>CIRCLE ENTERPRISE VAULTS</strong></span>
-          <span class="marquee-item"><span class="beacon"></span> <span>YIELD ENGINE:</span> <strong>CONTINUOUS CAPITAL ACCRUAL</strong></span>
-          <span class="marquee-item"><span class="beacon"></span> <span>RISK SCREENING:</span> <strong>REAL-TIME COMPLIANCE CLEARING</strong></span>
-          <span class="marquee-item"><span class="beacon"></span> <span>SETTLEMENT ASSET:</span> <strong>NATIVE DIGITAL DOLLARS (USDC)</strong></span>
-          <span class="marquee-item"><span class="beacon"></span> <span>EXECUTION SPEED:</span> <strong>SUB-SECOND FINALITY</strong></span>
-          <span class="marquee-item"><span class="beacon"></span> <span>SECURITY:</span> <strong>DUAL-KEY POLICY GOVERNANCE</strong></span>
-          <span class="marquee-item"><span class="beacon"></span> <span>AUDIT TRAIL:</span> <strong>IMMUTABLE TRANSACTION LOGS</strong></span>
-        </div>
-      </section>
-
-      <!-- Features Section (Strictly Vector Icons, Zero Emojis) -->
-      <section id="features" class="section">
-        <div class="section-head">
-          <span class="section-eyebrow">Architecture &amp; Capabilities</span>
-          <h2 class="section-title">Built for financial precision and zero trust leakage.</h2>
-          <p class="section-desc">
-            Contractor payments shouldn't rely on blind faith or static idle reserves. iPay automates custody, yield generation, risk gates, and cryptographic auditability in a single system.
-          </p>
-        </div>
-
-        <div class="grid-cards">
-          <div class="feature-card">
-            <div class="feature-icon-box">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            </div>
-            <h3>Dedicated Institutional Vaults</h3>
-            <p>Every business workspace operates an isolated, institutional treasury vault on Arc. No pooled balances, no shared keys, and zero cross-organization exposure.</p>
-            <div class="feature-badge">
-              <span>Circle Institutional Vaults</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon-box">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            </div>
-            <h3>Automated Idle Yield</h3>
-            <p>Unallocated contractor budget doesn't sit idle. Approved USDC automatically works inside Earn Kit vaults, with precise on-demand liquidity withdrawals when milestones clear.</p>
-            <div class="feature-badge">
-              <span>Earn Yield Vault</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon-box">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            </div>
-            <h3>CompliR Risk Screening</h3>
-            <p>Before any USDC payout executes, CompliR automatically verifies counterparty compliance in real time. Low risk releases immediately, medium requires review, and high halts transfers automatically.</p>
-            <div class="feature-badge">
-              <span>Real-Time Compliance Clearance</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon-box">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-            </div>
-            <h3>Cryptographic Audit Trail</h3>
-            <p>Every payment decision records milestone deliverable proof, compliance verification certificates, settlement receipts, and yield history into an immutable ledger.</p>
-            <div class="feature-badge">
-              <span>Tamper-Proof Audit Receipts</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- How It Works Flow -->
-      <section id="how-it-works" class="section flow-section">
-        <div class="section-head">
-          <span class="section-eyebrow">The Release Pipeline</span>
-          <h2 class="section-title">How iPay executes payment on proof.</h2>
-          <p class="section-desc">
-            A continuous loop from budget deposit to contractor settlement with zero manual escrow friction.
-          </p>
-        </div>
-
-        <div class="flow-grid">
-          <div class="flow-step-card">
-            <span class="flow-step-num">01</span>
-            <h3>Fund Once</h3>
-            <p>Deposit project budget into your organization's dedicated Circle Treasury Vault on Arc with isolated administrative credentials.</p>
-          </div>
-
-          <div class="flow-step-card">
-            <span class="flow-step-num">02</span>
-            <h3>Keep It Earning</h3>
-            <p>Idle USDC rests inside the Earn vault, generating continuous yield while contractors work on deliverables.</p>
-          </div>
-
-          <div class="flow-step-card">
-            <span class="flow-step-num">03</span>
-            <h3>Verify Deliverable</h3>
-            <p>Review work, attach deliverable confirmation, and trigger automated compliance clearance.</p>
-          </div>
-
-          <div class="flow-step-card">
-            <span class="flow-step-num">04</span>
-            <h3>Instant Settlement</h3>
-            <p>iPay draws only the exact required amount from the Earn vault and settles natively in USDC on Arc with an immutable receipt.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- Proof Layer Section -->
-      <section id="proof" class="section">
-        <div class="proof-section">
-          <div class="proof-left">
-            <span class="section-eyebrow">Security Architecture</span>
-            <h2 class="section-title">Every transaction is backed by authenticated evidence.</h2>
-            <p class="section-desc">
-              No blind transfers. Prior to authorizing an Arc USDC payout, the system automatically verifies counterparty compliance and generates an immutable clearance record.
-            </p>
-            <div style="display: flex; gap: 14px; margin-top: 10px;">
-              <a href="/app.html" class="btn btn-primary">Open Treasury Dashboard <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
-              <a href="/onboard.html" class="btn btn-ghost">Create Business Workspace</a>
-            </div>
-          </div>
-
-          <div class="proof-terminal">
-            <div class="terminal-topbar">
-              <div class="terminal-dots">
-                <span class="terminal-dot"></span>
-                <span class="terminal-dot"></span>
-                <span class="terminal-dot"></span>
-              </div>
-              <span class="terminal-title">COMPLIANCE CLEARANCE CERTIFICATE</span>
-            </div>
-            <div class="terminal-body" style="display: flex; flex-direction: column; gap: 12px; padding: 22px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a1a1a; padding-bottom: 10px;">
-                <span style="color: var(--okx-text-secondary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Clearance Status</span>
-                <span style="color: var(--okx-green); font-weight: 700; font-size: 12px;">APPROVED FOR SETTLEMENT</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a1a1a; padding-bottom: 10px;">
-                <span style="color: var(--okx-text-secondary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Risk Rating</span>
-                <span style="color: var(--okx-green); font-weight: 700; font-size: 12px;">LOW (ZERO FLAGS)</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a1a1a; padding-bottom: 10px;">
-                <span style="color: var(--okx-text-secondary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Sanctions &amp; AML</span>
-                <span style="color: #ffffff; font-weight: 600; font-size: 12px;">PASSED · GLOBAL WATCHLISTS</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a1a1a; padding-bottom: 10px;">
-                <span style="color: var(--okx-text-secondary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Beneficiary Account</span>
-                <span style="color: #ffffff; font-family: var(--font-mono); font-size: 12px;">0x67471d8d5421…e60ca</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a1a1a; padding-bottom: 10px;">
-                <span style="color: var(--okx-text-secondary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Settlement Protocol</span>
-                <span style="color: #ffffff; font-weight: 600; font-size: 12px;">ARC INSTANT SETTLEMENT</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="color: var(--okx-text-secondary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Audit Reference</span>
-                <span style="color: #8F9CA9; font-family: var(--font-mono); font-size: 12px;">DEC-ARC-789124A</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Protocol Specifications -->
-      <section id="specs" class="section">
-        <div class="section-head">
-          <span class="section-eyebrow">Specifications &amp; Parameters</span>
-          <h2 class="section-title">Production readiness checklist.</h2>
-        </div>
-
-        <div class="grid-cards">
-          <div class="feature-card">
-            <div class="card-title-tag">NETWORK</div>
-            <h3>Arc Protocol</h3>
-            <p>High-throughput, sub-second block finality with enterprise stability and predictable network fees.</p>
-          </div>
-          <div class="feature-card">
-            <div class="card-title-tag">SETTLEMENT ASSET</div>
-            <h3>Native USDC</h3>
-            <p>USDC stablecoin standard. Guaranteed 1:1 parity and automated institutional settlement via Circle.</p>
-          </div>
-          <div class="feature-card">
-            <div class="card-title-tag">YIELD ENGINE</div>
-            <h3>Earn Yield Protocol</h3>
-            <p>Automated liquidity buffer keeping project treasury working until the exact moment of payment release.</p>
-          </div>
-          <div class="feature-card">
-            <div class="card-title-tag">ENTERPRISE GOVERNANCE</div>
-            <h3>Immutable Ledger</h3>
-            <p>Enterprise data store recording workspaces, role-based credentials, milestones, and audit records.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- Final Call to Action -->
-      <section class="cta-section">
-        <div class="cta-content">
-          <h2>Upgrade your treasury to proof-gated releases today.</h2>
-          <p>Launch your business workspace in seconds, activate your Circle Treasury Vault, and start settling on Arc.</p>
-        </div>
-        <div class="cta-buttons">
-          <a href="/app.html" class="btn btn-primary" style="padding: 13px 26px;">Launch Treasury Dashboard <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
-          <a href="/onboard.html" class="btn btn-ghost" style="padding: 13px 22px;">Create Workspace</a>
-        </div>
-      </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="landing-footer">
-      <div class="footer-left">
-        <div class="logo-symbol" style="width: 26px; height: 26px;" aria-hidden="true">
-          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 18px; height: 18px;">
-            <polygon points="6.5,5.5 22.5,5.5 26.5,9.5 10.5,9.5" fill="#FFFFFF"/>
-            <polygon points="26.5,6.5 26.5,22.5 22.5,26.5 22.5,10.5" fill="#00D182"/>
-            <polygon points="25.5,26.5 9.5,26.5 5.5,22.5 21.5,22.5" fill="#FFFFFF"/>
-            <polygon points="5.5,25.5 5.5,9.5 9.5,5.5 9.5,21.5" fill="#00D182"/>
-            <polygon points="16,11.5 20.5,16 16,20.5 11.5,16" fill="#FFFFFF"/>
-            <circle cx="16" cy="16" r="1.6" fill="#00D182"/>
-          </svg>
-        </div>
-        <span>iPay Protocol · Arc Settlement</span>
+        <dl class="hero-facts reveal" style="--d:.24s">
+          <div><dt>Settles in</dt><dd>USDC on Arc</dd></div>
+          <div><dt>Idle budget</dt><dd>Earn Kit vault</dd></div>
+          <div><dt>Treasury balance</dt><dd class="mono" id="hero-balance">reading Arc…</dd></div>
+        </dl>
       </div>
-      <div class="footer-links">
-        <a href="/app.html">Treasury</a>
-        <a href="/onboard.html">Onboarding</a>
-        <a href="https://docs.arc.io" target="_blank" rel="noopener">Arc Docs</a>
-        <a href="https://www.circle.com" target="_blank" rel="noopener">Circle</a>
-        <a href="https://github.com/Datwebguy/iPayworld" target="_blank" rel="noopener">GitHub</a>
-      </div>
-    </footer>
-  </div>
 
-  <script src="/landing.js"></script>
+      <!-- The release slip: a live walk through one milestone payout -->
+      <div class="slip-wrap reveal" style="--d:.15s">
+        <article class="slip" id="slip" data-verdict="LOW" aria-label="Example milestone release">
+          <header class="slip-head">
+            <div>
+              <p class="slip-ref mono">Release 0041</p>
+              <h2 class="slip-title">Checkout redesign, phase 2</h2>
+            </div>
+            <p class="slip-amount mono">1,250.00<span>USDC</span></p>
+          </header>
+          <dl class="slip-meta">
+            <div><dt>To</dt><dd class="mono">Maya Okafor · 0x6747…e60c</dd></div>
+            <div><dt>From</dt><dd class="mono">Studio treasury</dd></div>
+          </dl>
+          <ol class="slip-steps">
+            <li data-step="0"><span class="tick" aria-hidden="true"></span><span class="s-label">Owner approved the work</span><span class="s-val mono">notes logged</span></li>
+            <li data-step="1"><span class="tick" aria-hidden="true"></span><span class="s-label">CompliR screened the wallet</span><span class="s-val mono" id="slip-verdict">LOW</span></li>
+            <li data-step="2"><span class="tick" aria-hidden="true"></span><span class="s-label">Drawn from Earn vault</span><span class="s-val mono" id="slip-draw">410.00</span></li>
+            <li data-step="3"><span class="tick" aria-hidden="true"></span><span class="s-label">Sent on Arc</span><span class="s-val mono" id="slip-tx">0x9f2c…41ab</span></li>
+          </ol>
+          <div class="stamp" id="slip-stamp" aria-live="polite">Released</div>
+          <footer class="slip-foot">
+            <span class="slip-foot-label">Try a verdict</span>
+            <div class="seg" role="radiogroup" aria-label="CompliR verdict">
+              <button role="radio" aria-checked="true" data-verdict="LOW">Low</button>
+              <button role="radio" aria-checked="false" data-verdict="MEDIUM">Medium</button>
+              <button role="radio" aria-checked="false" data-verdict="HIGH">High</button>
+            </div>
+          </footer>
+        </article>
+        <p class="slip-caption">Example data. The steps and rules are the real ones.</p>
+      </div>
+    </section>
+
+    <!-- Ticker tape -->
+    <section class="tape" aria-label="Release rules">
+      <div class="tape-track" id="tape-track">
+        <div class="tape-group">
+          <span><b>Low risk</b> pays out on its own</span>
+          <span><b>Medium risk</b> waits for you</span>
+          <span><b>High risk</b> is blocked and logged</span>
+          <span>Idle USDC earns until the moment it's needed</span>
+          <span>Every decision keeps its signed verdict</span>
+          <span>One wallet per workspace, never pooled</span>
+          <span class="tape-live">Arc Testnet block <b class="mono" id="tape-block">…</b></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works: sticky rail on desktop, stacked on mobile -->
+    <section class="how" id="how">
+      <div class="how-rail">
+        <p class="eyebrow reveal">How a release works</p>
+        <h2 class="section-title reveal">Four steps between a budget and a paid contractor.</h2>
+        <div class="how-progress" aria-hidden="true"><span id="how-bar"></span></div>
+        <p class="how-count mono" aria-hidden="true"><span id="how-current">01</span> / 04</p>
+      </div>
+      <ol class="how-steps">
+        <li class="how-step" data-i="01">
+          <span class="how-num mono">01</span>
+          <h3>Fund the workspace</h3>
+          <p>Each workspace gets its own Circle developer-controlled wallet on Arc. You send the project budget there in USDC. No shared balances between clients.</p>
+          <div class="how-detail mono"><span>wallet</span> 0xb3cc…ba17 <span>balance</span> USDC</div>
+        </li>
+        <li class="how-step" data-i="02">
+          <span class="how-num mono">02</span>
+          <h3>Park what you don't need yet</h3>
+          <p>The part of the budget that isn't due soon goes into an Earn Kit USDC vault. It stays there while the work happens and is withdrawn only for the exact amount a release needs.</p>
+          <div class="how-detail mono"><span>vault</span> Earn Kit · USDC <span>withdraw</span> on release</div>
+        </li>
+        <li class="how-step" data-i="03">
+          <span class="how-num mono">03</span>
+          <h3>Approve the work</h3>
+          <p>When a milestone is delivered, you write down what you checked. That note is stored with the payment, so anyone reviewing the books later sees why it was paid.</p>
+          <div class="how-detail mono"><span>status</span> in progress → approved</div>
+        </li>
+        <li class="how-step" data-i="04">
+          <span class="how-num mono">04</span>
+          <h3>Screen, then pay</h3>
+          <p>iPay asks CompliR about the contractor's wallet and checks the signed answer. A low verdict pays out on Arc straight away. Anything else stops and tells you why.</p>
+          <div class="how-detail mono"><span>verdict</span> LOW <span>tx</span> confirmed on Arc</div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- Policy ledger -->
+    <section class="policy" id="policy">
+      <div class="section-head">
+        <p class="eyebrow reveal">The policy</p>
+        <h2 class="section-title reveal">Three verdicts. Each one does exactly one thing.</h2>
+      </div>
+      <div class="ledger reveal">
+        <div class="ledger-row head">
+          <span>Verdict</span><span>What happens</span><span>What you do</span>
+        </div>
+        <div class="ledger-row">
+          <span class="v v-low">Low</span>
+          <span>USDC is drawn from the vault if needed and sent to the contractor on Arc. The receipt is checked against the verdict's validity window.</span>
+          <span class="muted">Nothing.</span>
+        </div>
+        <div class="ledger-row">
+          <span class="v v-med">Medium</span>
+          <span>The milestone is held with status <i>needs review</i>. No money moves.</span>
+          <span class="muted">Look at the reasons and decide.</span>
+        </div>
+        <div class="ledger-row">
+          <span class="v v-high">High</span>
+          <span>The release is blocked and the reason codes are written to the audit trail.</span>
+          <span class="muted">Find another way to pay, or don't.</span>
+        </div>
+      </div>
+      <div class="records reveal">
+        <p class="records-title">Every release record keeps</p>
+        <ul>
+          <li>the milestone, amount and recipient</li>
+          <li>your approval notes</li>
+          <li>the CompliR verdict, reasons and signature</li>
+          <li>the vault withdrawal and payment transactions</li>
+          <li>the yield earned at the moment of release</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Stack -->
+    <section class="stack" id="stack">
+      <div class="section-head">
+        <p class="eyebrow reveal">What it's built on</p>
+        <h2 class="section-title reveal">Off-the-shelf rails, wired together carefully.</h2>
+      </div>
+      <div class="stack-grid">
+        <article class="stack-item reveal">
+          <p class="stack-name">Arc</p>
+          <p>Settlement chain. USDC is the native gas token, so a payment needs nothing else in the wallet.</p>
+        </article>
+        <article class="stack-item reveal" style="--d:.06s">
+          <p class="stack-name">Circle Wallets</p>
+          <p>One developer-controlled wallet per workspace, created when you set the workspace up.</p>
+        </article>
+        <article class="stack-item reveal" style="--d:.12s">
+          <p class="stack-name">Earn Kit</p>
+          <p>Holds idle USDC in a vault and returns it on withdrawal, with yield tracked per position.</p>
+        </article>
+        <article class="stack-item reveal" style="--d:.18s">
+          <p class="stack-name">CompliR</p>
+          <p>Screens the recipient and returns a signed EIP-712 verdict that iPay verifies before sending.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- Closing call -->
+    <section class="closer">
+      <h2 class="closer-title reveal">Put the next milestone<br>through it.</h2>
+      <div class="closer-cta reveal" style="--d:.08s">
+        <a href="/onboard.html" class="btn btn-accent btn-lg">Set up a workspace <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a href="/app.html" class="btn btn-lg">Open the treasury</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="floor">
+    <div class="floor-top">
+      <div class="floor-brand">
+        <a href="/" class="wordmark">
+          <svg class="emblem" viewBox="0 0 32 32" aria-hidden="true"><polygon class="e-ink" points="6.5,5.5 22.5,5.5 26.5,9.5 10.5,9.5"/><polygon class="e-acc" points="26.5,6.5 26.5,22.5 22.5,26.5 22.5,10.5"/><polygon class="e-ink" points="25.5,26.5 9.5,26.5 5.5,22.5 21.5,22.5"/><polygon class="e-acc" points="5.5,25.5 5.5,9.5 9.5,5.5 9.5,21.5"/><polygon class="e-ink" points="16,11.5 20.5,16 16,20.5 11.5,16"/><circle class="e-acc" cx="16" cy="16" r="1.6"/></svg>
+          <span>iPay</span>
+        </a>
+        <p>Milestone payments for small teams and freelancers who pay contractors in USDC.</p>
+      </div>
+      <nav class="floor-cols" aria-label="Footer">
+        <div>
+          <p class="floor-head">Product</p>
+          <a href="/app.html">Treasury</a>
+          <a href="/onboard.html">Set up a workspace</a>
+          <a href="#policy">Release policy</a>
+        </div>
+        <div>
+          <p class="floor-head">Built on</p>
+          <a href="https://docs.arc.io" target="_blank" rel="noopener">Arc</a>
+          <a href="https://developers.circle.com" target="_blank" rel="noopener">Circle</a>
+          <a href="https://trycomplir.xyz" target="_blank" rel="noopener">CompliR</a>
+        </div>
+        <div>
+          <p class="floor-head">Source</p>
+          <a href="https://github.com/Datwebguy/iPayworld" target="_blank" rel="noopener">GitHub</a>
+        </div>
+      </nav>
+    </div>
+    <p class="floor-mark serif" aria-hidden="true">iPay</p>
+    <div class="floor-bottom">
+      <span class="chip" id="net-chip"><span class="dot" id="net-dot"></span><span id="net-text">Checking Arc Testnet</span></span>
+      <span class="muted">Testnet build. Not financial advice, not a bank.</span>
+    </div>
+  </footer>
+
+  <script src="/landing.js" defer></script>
 </body>
 </html>
