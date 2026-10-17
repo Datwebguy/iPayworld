@@ -69,16 +69,26 @@
   });
 })();
 
-// Navbar subtle border on scroll
-window.addEventListener('scroll', () => {
-  const nav = document.querySelector('.landing-nav');
-  if (nav) {
-    if (window.scrollY > 20) {
-      nav.style.background = 'rgba(0, 0, 0, 0.95)';
-      nav.style.borderColor = '#2d2d2d';
-    } else {
-      nav.style.background = 'rgba(0, 0, 0, 0.85)';
-      nav.style.borderColor = '#222222';
+// Live Onchain Arc Balance for Showcase
+(async function initLiveLandingStats() {
+  const balanceElem = document.getElementById('landing-hero-balance');
+  if (!balanceElem) return;
+  try {
+    const res = await fetch('https://rpc.testnet.arc.io', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'eth_call',
+        params: [{ to: '0x3600000000000000000000000000000000000000', data: '0x70a08231000000000000000000000000b3ccbf94b1965844e062bd9ad22df72b9a45ba17' }, 'latest']
+      })
+    });
+    const json = await res.json();
+    if (json.result && json.result !== '0x') {
+      const usdc = Number(BigInt(json.result)) / 1e6;
+      balanceElem.innerHTML = `$${usdc.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span>USDC</span>`;
     }
-  }
-});
+  } catch {}
+})();
+

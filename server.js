@@ -30,16 +30,14 @@ const addressPattern = /^0x[a-fA-F0-9]{40}$/;
 const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.ico': 'image/x-icon' };
 
 function initialState() {
-  const now = new Date().toISOString();
-  if (mode === 'live') return { chain: clients.config.chain, vaultAddress: clients.config.vaultAddress, wallet: { address: clients.config.walletAddress, liquid: 0, vault: 0, yieldEarned: 0, startingBudget: 0 }, milestones: [], audit: [] };
+  const defaultWallet = clients?.config?.walletAddress || '0xb3ccbf94b1965844e062bd9ad22df72b9a45ba17';
+  const defaultVault = clients?.config?.vaultAddress || '0xaabbef1d3971c710276ed41ec791bbe14cdb8e88';
   return {
-    wallet: { address: null, liquid: 8400, vault: 4100, yieldEarned: 35.65, startingBudget: 12500 },
-    milestones: [
-      { id: randomUUID(), title: 'Brand identity system', contractor: 'Studio North', address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e', amount: 2400, status: 'awaiting_verification', description: 'Logo system, colors and brand guidelines', createdAt: now, evidence: null },
-      { id: randomUUID(), title: 'Landing page development', contractor: 'Marcus Chen', address: '0x8ba1f109551bD432803012645Ac136ddd64DBA72', amount: 1850, status: 'in_progress', description: 'Responsive marketing website', createdAt: now, evidence: null },
-      { id: randomUUID(), title: 'Product copy and content', contractor: 'Ava Morgan', address: '0x4E83362442B8d1beC281594cEa3050c8EB01311C', amount: 950, status: 'in_progress', description: 'Homepage and onboarding copy', createdAt: now, evidence: null }
-    ],
-    audit: [{ id: randomUUID(), type: 'budget_funded', title: 'Project budget funded', detail: 'Demo wallet allocated 12,500 USDC', at: now, simulated: true }]
+    chain: clients?.config?.chain || 'Arc_Testnet',
+    vaultAddress: defaultVault,
+    wallet: { address: defaultWallet, liquid: 0, vault: 0, yieldEarned: 0, startingBudget: 0 },
+    milestones: [],
+    audit: []
   };
 }
 
