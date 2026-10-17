@@ -3,24 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#07090e">
+  <meta name="theme-color" content="#000000">
   <meta name="description" content="iPay — Proof-gated contractor treasury on Arc. Dedicated Circle Agent Wallets, automatic Earn Kit yield, and pre-flight CompliR risk checks.">
   <title>iPay — Proof-Gated Contractor Treasury on Arc</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/landing.css">
 </head>
 <body>
-  <!-- Ambient Atmosphere -->
-  <div class="ambient-glow">
-    <div class="glow-orb-1"></div>
-    <div class="glow-orb-2"></div>
-    <div class="glow-grid"></div>
-  </div>
-
-  <canvas id="bg-canvas"></canvas>
-
   <div class="page-container">
     <!-- Navigation -->
     <header class="landing-nav">
@@ -53,7 +44,7 @@
           </div>
 
           <h1 class="hero-title">
-            Pay for <span class="gradient-text">verified proof</span>, not promises.
+            Pay for <span class="highlight-text">verified proof</span>, not promises.
           </h1>
 
           <p class="hero-subtitle">
@@ -138,7 +129,7 @@
               <div class="risk-interactive-controls">
                 <div class="risk-controls-title">
                   <span>Interactive Test: Switch CompliR Verdict</span>
-                  <span style="color: var(--accent-indigo);">Try Clicking ↓</span>
+                  <span style="color: var(--okx-green);">Try Clicking ↓</span>
                 </div>
                 <div class="risk-btn-group">
                   <button class="risk-toggle-btn active" data-verdict="LOW">LOW</button>
@@ -229,25 +220,25 @@
 
         <div class="flow-grid">
           <div class="flow-step-card">
-            <span class="flow-step-num">STEP 01</span>
+            <span class="flow-step-num">01</span>
             <h3>Fund Once</h3>
             <p>Deposit project budget into your business's dedicated Circle Agent Wallet on Arc Testnet with isolated owner credentials.</p>
           </div>
 
           <div class="flow-step-card">
-            <span class="flow-step-num">STEP 02</span>
+            <span class="flow-step-num">02</span>
             <h3>Keep It Earning</h3>
             <p>Idle USDC rests inside the Earn Kit vault, generating continuous yield while contractors work on milestones.</p>
           </div>
 
           <div class="flow-step-card">
-            <span class="flow-step-num">STEP 03</span>
+            <span class="flow-step-num">03</span>
             <h3>Verify Deliverable</h3>
             <p>Review work, attach completion evidence, and trigger the pre-flight cryptographic CompliR screening pipeline.</p>
           </div>
 
           <div class="flow-step-card">
-            <span class="flow-step-num">STEP 04</span>
+            <span class="flow-step-num">04</span>
             <h3>Instant Settlement</h3>
             <p>iPay pulls only the exact required amount from the Earn vault and settles natively in USDC on Arc with an immutable receipt.</p>
           </div>
@@ -272,9 +263,9 @@
           <div class="proof-terminal">
             <div class="terminal-topbar">
               <div class="terminal-dots">
-                <span class="terminal-dot dot-red"></span>
-                <span class="terminal-dot dot-amber"></span>
-                <span class="terminal-dot dot-green"></span>
+                <span class="terminal-dot"></span>
+                <span class="terminal-dot"></span>
+                <span class="terminal-dot"></span>
               </div>
               <span class="terminal-title">complir-signed-attestation.json</span>
             </div>
@@ -334,8 +325,8 @@
           <p>Launch your business workspace in seconds, connect your Circle Agent Wallet, and start settling on Arc.</p>
         </div>
         <div class="cta-buttons">
-          <a href="/app.html" class="btn btn-primary" style="padding: 14px 28px; font-size: 15px;">Launch Treasury Dashboard <span>→</span></a>
-          <a href="/onboard.html" class="btn btn-ghost" style="padding: 14px 24px; font-size: 15px;">Create Workspace</a>
+          <a href="/app.html" class="btn btn-primary" style="padding: 13px 26px;">Launch Treasury Dashboard <span>→</span></a>
+          <a href="/onboard.html" class="btn btn-ghost" style="padding: 13px 22px;">Create Workspace</a>
         </div>
       </section>
     </main>
