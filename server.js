@@ -375,15 +375,19 @@ async function api(req, res, path) {
     const tenantState = await workspaceDataStore.read(workspace);
     if (req.method === 'GET' && resource === 'state') {
       if (mode === 'live' && workspace.walletAddress && workspace.vaultAddress) {
-        const tenantClients = liveClients({ ...process.env, CIRCLE_WALLET_ADDRESS: workspace.walletAddress, EARN_VAULT_ADDRESS: workspace.vaultAddress });
-        const balances = await liveBalances(tenantClients);
-        tenantState.wallet = {
-          address: workspace.walletAddress,
-          vaultAddress: workspace.vaultAddress,
-          liquid: Number(balances.liquidUsdc),
-          vault: Number(balances.vaultUsdc),
-          yieldEarned: balances.yieldEarned === null ? null : Number(balances.yieldEarned),
-        };
+        try {
+          const tenantClients = liveClients({ ...process.env, CIRCLE_WALLET_ADDRESS: workspace.walletAddress, EARN_VAULT_ADDRESS: workspace.vaultAddress });
+          const balances = await liveBalances(tenantClients);
+          tenantState.wallet = {
+            address: workspace.walletAddress,
+            vaultAddress: workspace.vaultAddress,
+            liquid: Number(balances.liquidUsdc),
+            vault: Number(balances.vaultUsdc),
+            yieldEarned: balances.yieldEarned === null ? null : Number(balances.yieldEarned),
+          };
+        } catch (err) {
+          console.warn('Could not refresh tenant live balances:', err.message);
+        }
       }
       return respond(res, 200, { ...tenantState, mode, screeningMode });
     }
@@ -504,7 +508,13 @@ async function api(req, res, path) {
   }
   if (req.method === 'GET' && path === '/api/config') return respond(res, 200, { mode, chain: clients?.config.chain || null });
   if (req.method === 'GET' && path === '/api/state') {
-    if (mode === 'live') await refreshLiveWallet();
+    if (mode === 'live') {
+      try {
+        await refreshLiveWallet();
+      } catch (err) {
+        console.warn('Could not refresh live wallet:', err.message);
+      }
+    }
     return respond(res, 200, snapshot());
   }
   if (req.method === 'GET' && path === '/api/arc-wallet') return respond(res, 200, await readArcWallet());

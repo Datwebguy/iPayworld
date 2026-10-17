@@ -182,49 +182,117 @@
             </div>
 
             <div class="right-stack">
-              <div class="panel policy-panel">
+              <!-- Quick Operations -->
+              <div class="panel quick-actions-panel">
                 <div class="panel-head">
                   <div>
-                    <div class="section-kicker">RELEASE POLICY</div>
-                    <h2>Every dollar earns trust</h2>
+                    <div class="section-kicker">TREASURY ACTIONS</div>
+                    <h2>Quick Operations</h2>
                   </div>
-                  <span class="policy-live">LIVE</span>
                 </div>
-                <div class="policy-step">
-                  <span>01</span>
-                  <div>
-                    <strong>Verify the work</strong>
-                    <small>Owner evidence is attached to the milestone.</small>
-                  </div>
-                  <i>-></i>
-                </div>
-                <div class="policy-step">
-                  <span>02</span>
-                  <div>
-                    <strong>Screen the recipient</strong>
-                    <small>CompliR returns a signed verdict.</small>
-                  </div>
-                  <i>-></i>
-                </div>
-                <div class="policy-step last">
-                  <span>03</span>
-                  <div>
-                    <strong>Release on Arc</strong>
-                    <small>LOW pays. Every receipt is recorded.</small>
-                  </div>
-                  <i>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                  </i>
+                <div class="quick-actions-body">
+                  <button id="quick-create-btn" class="quick-action-primary" type="button">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span>New Payment Milestone</span>
+                  </button>
+                  <button id="quick-deposit-btn" class="quick-action-row" type="button">
+                    <div class="action-icon">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    </div>
+                    <div class="action-meta">
+                      <strong>Deposit into Earn Vault</strong>
+                      <small>Accrue +4.8% APY on idle balance</small>
+                    </div>
+                    <span class="action-badge">+4.8% APY</span>
+                  </button>
+                  <button id="quick-copy-address-btn" class="quick-action-row" type="button">
+                    <div class="action-icon">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </div>
+                    <div class="action-meta">
+                      <strong>Copy Vault Address</strong>
+                      <small id="quick-address-preview">Loading address…</small>
+                    </div>
+                    <span class="action-pill">COPY</span>
+                  </button>
                 </div>
               </div>
 
-              <div class="signal-card">
-                <div class="signal-icon">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <!-- Capital Allocation Breakdown -->
+              <div class="panel distribution-panel">
+                <div class="panel-head">
+                  <div>
+                    <div class="section-kicker">PORTFOLIO HEALTH</div>
+                    <h2>Capital Allocation</h2>
+                  </div>
+                  <span class="health-badge">OPTIMAL</span>
                 </div>
-                <div>
-                  <strong>Idle capital has a job.</strong>
-                  <p>Earn Kit keeps available USDC productive until the next verified release on Arc.</p>
+                <div class="distribution-body">
+                  <div class="allocation-bar-track">
+                    <div id="alloc-bar-liquid" class="alloc-segment liquid" style="width: 67%;"></div>
+                    <div id="alloc-bar-vault" class="alloc-segment vault" style="width: 33%;"></div>
+                    <div id="alloc-bar-escrow" class="alloc-segment escrow" style="width: 0%;"></div>
+                  </div>
+                  <div class="allocation-legend">
+                    <div class="legend-item">
+                      <span class="legend-dot liquid"></span>
+                      <div class="legend-info">
+                        <span>Liquid Reserves</span>
+                        <strong id="legend-liquid-val">—</strong>
+                      </div>
+                    </div>
+                    <div class="legend-item">
+                      <span class="legend-dot vault"></span>
+                      <div class="legend-info">
+                        <span>Earn Vault (+4.8%)</span>
+                        <strong id="legend-vault-val">—</strong>
+                      </div>
+                    </div>
+                    <div class="legend-item">
+                      <span class="legend-dot escrow"></span>
+                      <div class="legend-info">
+                        <span>Committed Milestones</span>
+                        <strong id="legend-escrow-val">—</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Protocol Security Telemetry -->
+              <div class="panel telemetry-panel">
+                <div class="panel-head">
+                  <div>
+                    <div class="section-kicker">SECURITY TELEMETRY</div>
+                    <h2>Protocol Enclave</h2>
+                  </div>
+                  <span class="pulse-indicator"></span>
+                </div>
+                <div class="telemetry-list">
+                  <div class="telemetry-item">
+                    <div class="telemetry-status active"></div>
+                    <div class="telemetry-info">
+                      <strong>Arc Settlement Protocol</strong>
+                      <small>Sub-second block finality · EVM deterministic</small>
+                    </div>
+                    <span class="telemetry-tag">ACTIVE</span>
+                  </div>
+                  <div class="telemetry-item">
+                    <div class="telemetry-status active"></div>
+                    <div class="telemetry-info">
+                      <strong>Circle Smart Vault</strong>
+                      <small>Dedicated organizational custody enclave</small>
+                    </div>
+                    <span class="telemetry-tag">SECURED</span>
+                  </div>
+                  <div class="telemetry-item">
+                    <div class="telemetry-status active"></div>
+                    <div class="telemetry-info">
+                      <strong>CompliR Policy Screening</strong>
+                      <small>Pre-flight automated compliance clearing</small>
+                    </div>
+                    <span class="telemetry-tag">CLEAR</span>
+                  </div>
                 </div>
               </div>
             </div>
